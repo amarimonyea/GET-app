@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import altair as alt
@@ -8,7 +9,7 @@ import textwrap
 # ---------------------------
 # 0) PAGE CONFIG MUST BE FIRST
 # ---------------------------
-st.set_page_config(page_title="Monitor: Gender Equality Tracker", layout="wide")
+st.set_page_config(page_title="Gender Equality Monitor", layout="wide")
 
 # ---------------------------
 # 1) THEME / CSS (inject once)
@@ -16,60 +17,176 @@ st.set_page_config(page_title="Monitor: Gender Equality Tracker", layout="wide")
 COLOR_DISRUPTION = "#cf5442"   # New Lines red
 COLOR_PROGRESSION = "#3b668c"  # New Lines blue
 COLOR_NEUTRAL = "#1b1725"      # dark
+NL_GOLD = "#bfa359"
+NL_CREAM = "#f1f0ec"
+st.markdown(
+    f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+
+/* ---------- GLOBAL FONT ---------- */
+html, body, [class*="css"] {{
+  font-family: 'Roboto', sans-serif;
+}}
+
+/* ---------- MAIN APP BACKGROUND ---------- */
+.stApp {{
+  background-color: {NL_CREAM};
+}}
+</style>
+""",
+    unsafe_allow_html=True
+)
 
 st.markdown(
     """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
-
-/* Global font */
-html, body, [class*="css"] {
-  font-family: 'Roboto', sans-serif;
+/* Sidebar background */
+section[data-testid="stSidebar"]{
+  background-color:#1b1725;
 }
 
-/* App background (cream) */
-.stApp {
-  background-color: #f1f0ec;
+/* --- Keep sidebar NAV / page titles readable (white) --- */
+section[data-testid="stSidebar"] a,
+section[data-testid="stSidebar"] .stPageLink,
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] *{
+  color:#ffffff !important;
+  opacity:1 !important;
 }
 
-/* Sidebar (NL navy) */
-section[data-testid="stSidebar"] {
-  background-color: #1b1725;
-  color: white;
+/* --- Filters header + labels (white) --- */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] .stCaption{
+  color:#ffffff !important;
+  opacity:1 !important;
 }
-section[data-testid="stSidebar"] * {
-  color: white;
+
+/* --- Selectbox input: WHITE BOX + BLACK TEXT --- */
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div{
+  background:#ffffff !important;
+  border-radius:8px !important;
+}
+
+/* Selected value + placeholder */
+section[data-testid="stSidebar"] div[data-baseweb="select"] *{
+  color:#000000 !important;
+}
+
+/* Dropdown menu background */
+div[data-baseweb="popover"] div[role="listbox"]{
+  background:#ffffff !important;
+}
+
+/* Dropdown option text */
+div[data-baseweb="popover"] div[role="option"] *{
+  color:#000000 !important;
+}
+
+/* Hover */
+div[data-baseweb="popover"] div[role="option"]:hover{
+  background:rgba(0,0,0,0.08) !important;
+}
+
+/* Reset button (optional) */
+section[data-testid="stSidebar"] button{
+  background:#ffffff !important;
+  color:#000000 !important;
+  border-radius:8px !important;
 }
 </style>
 """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
-# ---------------------------
-# 2) HEADER
-# ---------------------------
-st.title("🌍 Monitor: Gender Equality Tracker")
-st.write(
-    "Tracking the U.S. gender policy landscape"
-)
-
-# ---------------------------
-# 3) FORECAST CARDS (static copy) - defined here, displayed after quadrant
-# ---------------------------
-FORECAST_CARDS = [
-    {"name": "Political",  "probability": "Medium–High", "direction": "Disruption",
-     "summary": "Executive consolidation and judicial pressure are accelerating institutional rollback."},
-    {"name": "Social",     "probability": "Medium–High", "direction": "Disruption",
-     "summary": "Service withdrawal and policy compliance pressures are reshaping access and social norms."},
-    {"name": "Economic",   "probability": "Low–Medium",  "direction": "Disruption",
-     "summary": "Funding cuts and privatization pressures are weakening gender-responsive infrastructure."},
-    {"name": "Diplomatic", "probability": "Low–Medium",  "direction": "Disruption",
-     "summary": "U.S. credibility erosion is contributing to global rollback and norm diffusion."},
-    {"name": "Hybrid",     "probability": "Medium",      "direction": "Disruption",
-     "summary": "Cross-domain reinforcement is amplifying political, social, and security impacts."},
-]
 
 # Sort cards by probability
 PROB_RANK = {"Low": 1, "Low–Medium": 2, "Medium": 3, "Medium–High": 4, "High": 5}
+
+# ---------------------------
+# 3) FORECAST SCENARIOS (initialize empty)
+# ---------------------------
+FORECAST_CARDS = [
+    {
+        "name": "Political",
+        "direction": "Progression",
+        "probability": "Low/Medium",
+        "summary": "Come back and write real scenarios later"
+    },
+    {
+        "name": "Political", 
+        "direction": "Disruption",
+        "probability": "Medium/High",
+        "summary": "Come back and write real scenarios later"
+    },
+    {
+        "name": "Diplomatic", 
+        "direction": "Disruption",
+        "probability": "Low/Medium",
+        "summary": "Come back and write real scenarios later"
+    },
+    {
+        "name": "Diplomatic", 
+        "direction": "Progression",
+        "probability": "Low",
+        "summary": "Come back and write real scenarios later"
+    },
+     {
+        "name": "Economic", 
+        "direction": "Progression",
+        "probability": "Low",
+        "summary": "Come back and write real scenarios later"
+    },
+     {
+        "name": "Economic", 
+        "direction": "Disruption",
+        "probability": "Low/Medium",
+        "summary": "Come back and write real scenarios later"
+    },
+     {
+        "name": "Social", 
+        "direction": "Disruption",
+        "probability": "Medium/High",
+        "summary": "Come back and write real scenarios later"
+    },
+      {
+        "name": "Social", 
+        "direction": "Progression",
+        "probability": "Low",
+        "summary": "Come back and write real scenarios later"
+    },
+          {
+        "name": "Security", 
+        "direction": "Progression",
+        "probability": "Low",
+        "summary": "Come back and write real scenarios later"
+    },
+        {
+        "name": "Security", 
+        "direction": "Disruption",
+        "probability": "Medium",
+        "summary": "Come back and write real scenarios later"
+    },
+     {
+        "name": "Hybrid Political/Security", 
+        "direction": "Disruption",
+        "probability": "Medium",
+        "summary": "Come back and write real scenarios later"
+    },
+      {
+        "name": "Hybrid Political/Social", 
+        "direction": "Disruption",
+        "probability": "Medium",
+        "summary": "Come back and write real scenarios later"
+    },
+      {
+        "name": "Status Quo", 
+        "direction": "Status Quo",
+        "probability": "",
+        "summary": "Come back and write real scenarios later"
+    },
+]
 
 # ---------------------------
 # 4) LOAD + CLEAN DATA
@@ -86,7 +203,12 @@ DOMAIN_COL = "Domains of Assessment"
 SECTOR_COL = "Sector Impacted"
 
 # ---------------------------
-# 5) TOP METRICS
+# 5) PAGE TITLE
+# ---------------------------
+st.title("🌍 Gender Equality Monitor")
+
+# ---------------------------
+# 6) TOP METRICS
 # ---------------------------
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -97,7 +219,7 @@ with col3:
     st.metric("Columns Tracked", len(df.columns))
 
 # ---------------------------
-# 6) SIDEBAR FILTERS (clean + reset works)
+# 7) SIDEBAR FILTERS (clean + reset works)
 # ---------------------------
 st.sidebar.header("🔍 Filters")
 
@@ -133,7 +255,7 @@ st.sidebar.caption(f"Showing {len(df_filtered)} of {len(df)} events")
 st.divider()
 
 # ---------------------------
-# 7) TRAJECTORY QUADRANT (cleaner)
+# 8) TRAJECTORY QUADRANT (cleaner)
 # ---------------------------
 st.subheader("Trajectory Quadrant")
 st.caption("Cumulative intensity (emerging → accelerating) vs net direction (progression ↓ | disruption ↑).")
@@ -245,188 +367,317 @@ import textwrap
 import re
 
 # ---------------------------
-# 8) FORECAST SCENARIOS CARDS (STACKED DECK + PROBABILITY)
+# 9) FORECAST SCENARIOS CARDS (STACKED DECK + PROBABILITY)
 # ---------------------------
-st.subheader("📊 Forecast Scenarios")
+st.subheader("Forecast Scenarios")
 
 NL_BLUE = "#3b668c"
 NL_RED  = "#cf5442"
-NL_NAVY = "#1b1725"
 NL_GOLD = "#bfa359"
-
-st.markdown(
-    f"""
+CARD_CSS = f"""
 <style>
-/* ONE COLUMN "DECK" */
+/* =========================
+   GRID (3 columns)
+   ========================= */
 .deck {{
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.15rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
   margin-top: .5rem;
-  max-width: 980px;   /* keeps it feeling like a deck */
+  align-items: start;
 }}
 
-/* Card wrapper creates the stack effect */
-.deck-item {{
-  position: relative;
-  padding-left: 18px;  /* room for the back layers */
-  padding-top: 10px;
+@media (max-width: 1100px) {{
+  .deck {{
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }}
 }}
 
-/* Back layers (the "stack") */
+.deck-pile {{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}}
+
+/* Hide column headers entirely (if present) */
+.deck-pile-header {{
+  display: none !important;
+}}
+
+/* Kill any leftover stacked layers from older versions */
 .deck-item::before,
 .deck-item::after {{
-  content:"";
-  position:absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  border-radius: 16px;
-  z-index: 0;
+  content: none !important;
+  display: none !important;
 }}
 
-.deck-item::before {{
-  transform: translate(10px, 10px);
-  background: rgba(59,102,140,0.90); /* NL blue shadow sheet */
-  filter: blur(.2px);
+/* =========================
+   CARD BASE (Structured Briefing)
+   ========================= */
+:root {{
+  --nl-navy: #1b1725;
+  --nl-cream: #f1f0ec;
+  --nl-red:   #cf5442;
+  --nl-blue:  #3b668c;
+  --nl-gold:  #bfa359;
+  --nl-slate: #93b5c3;  /* muted */
 }}
 
-.deck-item::after {{
-  transform: translate(18px, 18px);
-  background: rgba(207,84,66,0.85);  /* NL red deeper sheet */
-  filter: blur(.2px);
-}}
-
-/* Front card */
 .deck-card {{
   position: relative;
-  z-index: 1;
-  border-radius: 16px;
-  padding: 1.25rem 1.35rem 1.1rem 1.35rem;
-  background: {NL_BLUE};
-  color: #fff;
-  border: 3px solid rgba(255,255,255,.10);
-  box-shadow: 0 18px 46px rgba(0,0,0,.22);
+  border-radius: 14px;
+  padding: 1.0rem 1.1rem;
+  background: var(--nl-cream) !important;     /* cream card */
+  color: var(--nl-navy) !important;          /* navy text */
+  border: 1px solid rgba(27, 23, 37, 0.10);   /* subtle outline */
+  border-top: 4px solid rgba(27, 23, 37, 0.25); /* default top rule */
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}}
+
+.deck-card:hover {{
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.08);
+}}
+
+/* Collapse behavior */
+.deck-card.collapsed .deck-body,
+.deck-card.collapsed .prob-wrap {{
+  display: none;
 }}
 
 .deck-title {{
-  font-size: 1.35rem;
+  font-size: 1.05rem;
   font-weight: 900;
   margin: 0 0 .55rem 0;
+  color: var(--nl-navy) !important;
 }}
 
-.deck-badge {{
-  position:absolute;
-  top: 14px;
-  right: 16px;
-  font-weight: 900;
-  font-size: 2.2rem;
-  opacity: .22;
+/* small accent dot (optional but nice) */
+.deck-title::before {{
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  margin-right: .55rem;
+  background: rgba(27, 23, 37, 0.35);
+  transform: translateY(-1px);
 }}
 
 .deck-meta {{
-  margin: .25rem 0 .55rem 0;
-  opacity: .95;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+  margin: 0 0 .35rem 0;
 }}
 
 .deck-chip {{
-  display:inline-block;
-  padding:.22rem .60rem;
-  border-radius:999px;
-  font-size:.78rem;
-  font-weight:800;
-  margin-right:.45rem;
-  border:1px solid rgba(255,255,255,.18);
-  background: rgba(255,255,255,.10);
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .20rem .55rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 800;
+  border: 1px solid rgba(27, 23, 37, 0.14);
+  background: rgba(27, 23, 37, 0.03);
+  color: var(--nl-navy) !important;
 }}
 
+/* Body text */
 .deck-body {{
-  margin-top:.65rem;
-  font-size:.98rem;
-  opacity:.93;
-  line-height:1.35;
-  max-width: 70ch;
+  margin-top: .65rem;
+  font-size: .95rem;
+  line-height: 1.35;
+  color: rgba(27, 23, 37, 0.92) !important;
+  max-width: 72ch;
 }}
 
 /* Probability bar */
-.prob-wrap {{ margin-top:.55rem; }}
+.prob-wrap {{ margin-top: .55rem; }}
 .prob-label {{
-  font-size:.72rem;
-  letter-spacing:.2px;
-  opacity:.88;
-  margin-bottom:.25rem;
+  font-size: .72rem;
+  letter-spacing: .2px;
+  color: rgba(27, 23, 37, 0.75) !important;
+  margin-bottom: .25rem;
 }}
+
 .prob-bar {{
-  height:10px;
-  border-radius:999px;
-  background: rgba(255,255,255,.18);
-  overflow:hidden;
-  border: 1px solid rgba(255,255,255,.18);
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(27, 23, 37, 0.10);
+  overflow: hidden;
+  border: 1px solid rgba(27, 23, 37, 0.12);
 }}
+
 .prob-fill {{
-  height:100%;
-  border-radius:999px;
-  background: {NL_GOLD};
+  height: 100%;
+  border-radius: 999px;
+  background: var(--nl-gold); /* default fill */
+}}
+
+/* =========================
+   ACCENTS (minimal use)
+   ========================= */
+
+/* Disruption = red accent */
+.deck-card.disruption {{
+  border-top-color: var(--nl-red) !important;
+}}
+.deck-card.disruption .deck-title::before {{
+  background: var(--nl-red) !important;
+}}
+.deck-card.disruption .prob-fill {{
+  background: var(--nl-red) !important;
+}}
+
+/* Progression = blue accent */
+.deck-card.progression {{
+  border-top-color: var(--nl-blue) !important;
+}}
+.deck-card.progression .deck-title::before {{
+  background: var(--nl-blue) !important;
+}}
+.deck-card.progression .prob-fill {{
+  background: var(--nl-blue) !important;
+}}
+
+/* Status quo = muted slate */
+.deck-card.statusquo {{
+  border-top-color: var(--nl-slate) !important;
+}}
+.deck-card.statusquo .deck-title::before {{
+  background: var(--nl-slate) !important;
+}}
+.deck-card.statusquo .prob-fill {{
+  background: var(--nl-slate) !important;
+}}
+
+/* Hybrid = gold */
+.deck-card.hybrid {{
+  border-top-color: var(--nl-gold) !important;
+}}
+.deck-card.hybrid .deck-title::before {{
+  background: var(--nl-gold) !important;
+}}
+.deck-card.hybrid .prob-fill {{
+  background: var(--nl-gold) !important;
 }}
 </style>
-""",
-    unsafe_allow_html=True,
-)
+"""
 
-# --- probability helpers ---
 def normalize_prob(p: str) -> str:
     p = (p or "").strip()
     p = p.replace("–", "-").replace("/", "-").replace(" to ", "-")
-    p = p.replace(" ", "").lower()
+    p = re.sub(r"\s+", "", p).lower()
     return p
 
-PROB_RANK = {"low": 1, "low-medium": 2, "medium": 3, "medium-high": 4, "high": 5}
+def direction_class(direction: str) -> str:
+    d = (direction or "").strip().lower()
+    if "disruption" in d:
+        return "disruption"
+    if "progression" in d:
+        return "progression"
+    if "status" in d:
+        return "statusquo"
+    if "hybrid" in d:
+        return "hybrid"
+    return "statusquo"
+
+PROB_RANK  = {"low": 1, "low-medium": 2, "medium": 3, "medium-high": 4, "high": 5}
 PROB_WIDTH = {"low": "20%", "low-medium": "40%", "medium": "60%", "medium-high": "80%", "high": "100%"}
 
-# Sort by probability (high first)
 cards_sorted = sorted(
     FORECAST_CARDS,
     key=lambda c: PROB_RANK.get(normalize_prob(str(c.get("probability", ""))), 0),
     reverse=True,
 )
 
-cards_html = '<div class="deck">'
-for i, c in enumerate(cards_sorted, start=1):
-    name = html.escape(str(c.get("name", "")))
-    direction = html.escape(str(c.get("direction", "")))
-    prob_raw = str(c.get("probability", ""))
-    prob_key = normalize_prob(prob_raw)
-    prob_display = html.escape(prob_raw)
-    summary = html.escape(str(c.get("summary", "")))
+# Group cards by direction
+cards_by_direction = {"Disruption": [], "Status Quo": [], "Progression": []}
+for c in cards_sorted:
+    direction = c.get("direction", "Status Quo")
+    if direction not in cards_by_direction:
+        cards_by_direction[direction] = []
+    cards_by_direction[direction].append(c)
 
-    bar_width = PROB_WIDTH.get(prob_key, "0%")
+cards_html = CARD_CSS + '<div class="deck">'
 
-    cards_html += f"""
-      <div class="deck-item">
-        <div class="deck-card">
-          <div class="deck-badge">{i:02d}</div>
-          <div class="deck-title">{name}</div>
+# Create three piles
+card_counter = 0
+for pile_direction in ["Disruption", "Status Quo", "Progression"]:
+    direction_lower = pile_direction.lower().replace(" ", "")
+    cards_html += f'<div class="deck-pile deck-pile-{direction_lower}">'
+    cards_html += f'<div class="deck-pile-header">{pile_direction}</div>'
+    
+    for c in cards_by_direction.get(pile_direction, []):
+        card_counter += 1
+        name = html.escape(str(c.get("name", "")))
+        direction = html.escape(str(c.get("direction", "")))
+        prob_raw = str(c.get("probability", ""))
+        prob_key = normalize_prob(prob_raw)
+        prob_display = html.escape(prob_raw)
+        summary = html.escape(str(c.get("summary", "")))
 
-          <div class="deck-meta">
-            <span class="deck-chip">Direction: {direction}</span>
-            <span class="deck-chip">Probability: {prob_display}</span>
-          </div>
+        bar_width = PROB_WIDTH.get(prob_key, "0%")
+        card_class = direction_class(c.get("direction", ""))
 
-          <div class="prob-wrap">
-            <div class="prob-label">Scenario Materialization Probability</div>
-            <div class="prob-bar">
-              <div class="prob-fill" style="width:{bar_width};"></div>
-            </div>
-          </div>
+        cards_html += f"""
+  <div class="deck-item">
+    <div class="deck-card {card_class}" data-card-id="card-{card_counter}">
+      <div class="deck-title">{name}</div>
 
-          <div class="deck-body">{summary}</div>
+      <div class="deck-meta">
+        <span class="deck-chip">Direction: {direction}</span>
+        <span class="deck-chip">Probability: {prob_display}</span>
+      </div>
+
+      <div class="prob-wrap">
+        <div class="prob-label">Scenario Materialization Probability</div>
+        <div class="prob-bar">
+          <div class="prob-fill" style="width:{bar_width};"></div>
         </div>
       </div>
-    """
+
+      <div class="deck-body">{summary}</div>
+    </div>
+  </div>
+"""
+    
+    cards_html += '</div>'
 
 cards_html += "</div>"
-st.markdown(cards_html, unsafe_allow_html=True)
+
+# Add JavaScript for interactivity
+DECK_JS = """
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const cards = document.querySelectorAll('.deck-card');
+
+  // Add click handlers
+  cards.forEach((card) => {
+    card.addEventListener('click', function(e) {
+      e.stopPropagation();
+      // Simply toggle the clicked card
+      card.classList.toggle('collapsed');
+    });
+  });
+
+  // Collapse all cards initially
+  cards.forEach((card) => {
+    card.classList.add('collapsed');
+  });
+});
+</script>
+"""
+
+cards_html_final = cards_html + DECK_JS
+
+# Render with Streamlit's HTML component
+components.html(cards_html_final, height=850)
 
 st.divider()
 # ---------------------------
