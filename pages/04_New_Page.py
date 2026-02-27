@@ -12,7 +12,7 @@ st.set_page_config(
 # ---------------------------
 # DATA
 # ---------------------------
-DATA_PATH = "/workspaces/GET-app/data/Monitor - Gender Equality - Core Indicator Outputs 2025.csv"
+DATA_PATH = "data/Monitor - Gender Equality - Core Indicator Outputs 2025.csv"
 
 df = pd.read_csv(DATA_PATH)
 
