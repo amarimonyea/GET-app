@@ -391,6 +391,30 @@ else:
 
     st.altair_chart(chart, use_container_width=True)
 
+    # Extract key statistics for the explanation
+    max_disr_idx = forecast_points["Disr"].idxmax()
+    max_disr_name = forecast_points.loc[max_disr_idx, FORECAST_COL]
+    max_disr_score = forecast_points.loc[max_disr_idx, "Disr"]
+    
+    max_prog_idx = forecast_points["Prog"].idxmax()
+    max_prog_name = forecast_points.loc[max_prog_idx, FORECAST_COL]
+    max_prog_score = forecast_points.loc[max_prog_idx, "Prog"]
+    
+    latest_date = df_filtered["Date"].max()
+    date_str = latest_date.strftime("%B %d, %Y")
+    
+    st.markdown(f"""
+**Momentum Graph Explanation**
+
+The Disruption and Progression Momentum graph plots cumulative forecast intensity against net directional movement. Cumulative intensity reflects the volume and concentration of forecasted developments within a domain (emerging → accelerating), while vertical positioning distinguishes between disruptive and progressive trajectories. The quadrant framework highlights which issue areas are early-stage signals versus accelerating structural shifts.
+
+**Highest cumulative disruption observed to date:** {max_disr_name} (cumulative disruption score: {max_disr_score:.1f})
+
+**Highest cumulative progression observed to date:** {max_prog_name} (cumulative progression score: {max_prog_score:.1f})
+
+**Data current as of:** {date_str}
+""")
+
 st.divider()
 
 import textwrap
