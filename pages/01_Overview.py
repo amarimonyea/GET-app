@@ -421,10 +421,11 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
           div[data-testid="stVegaLiteChart"] {
             border: 2px solid #fade82 !important;
             border-radius: 14px !important;
-            padding: 18px !important;
+            padding: 12px !important;
             background: #ffffff !important;
             margin-top: 10px !important;
             box-sizing: border-box !important;
+            width: 100% !important;
           }
         </style>
         """,
