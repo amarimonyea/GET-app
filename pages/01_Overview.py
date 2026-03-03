@@ -299,6 +299,21 @@ forecast_points = quad.groupby(FORECAST_COL, as_index=False)[["Prog", "Disr"]].s
 forecast_points["Cumulative Intensity"] = forecast_points["Prog"] + forecast_points["Disr"]
 forecast_points["Net Direction"] = forecast_points["Disr"] - forecast_points["Prog"]
 
+# Get latest event per forecast from filtered data
+if not df_filtered.empty:
+    latest_by_forecast = df_filtered.sort_values("Date", ascending=False).groupby(FORECAST_COL, as_index=False).first()
+    latest_by_forecast = latest_by_forecast[[FORECAST_COL, "Date", "Slider Score", DOMAIN_COL, SECTOR_COL]].rename(
+        columns={"Date": "Latest Date", "Slider Score": "Latest Slider Score", DOMAIN_COL: "Latest Domain", SECTOR_COL: "Latest Sector"}
+    )
+    forecast_points = forecast_points.merge(latest_by_forecast, left_on=FORECAST_COL, right_on=FORECAST_COL, how="left")
+    forecast_points["Latest Date Str"] = forecast_points["Latest Date"].dt.strftime("%b %d, %Y")
+else:
+    forecast_points["Latest Date"] = None
+    forecast_points["Latest Date Str"] = "No data"
+    forecast_points["Latest Slider Score"] = None
+    forecast_points["Latest Domain"] = None
+    forecast_points["Latest Sector"] = None
+
 if forecast_points.empty:
     st.info("No data available for the current filters.")
 else:
@@ -341,6 +356,10 @@ else:
     alt.Tooltip("Disr:Q", title="Cumulative Disruption", format=".1f"),
     alt.Tooltip("Cumulative Intensity:Q", title="Cumulative Intensity", format=".1f"),
     alt.Tooltip("Net Direction:Q", title="Net Direction", format=".1f"),
+    alt.Tooltip("Latest Date Str:N", title="Latest Event Date"),
+    alt.Tooltip("Latest Domain:N", title="Latest Domain"),
+    alt.Tooltip("Latest Sector:N", title="Latest Sector"),
+    alt.Tooltip("Latest Slider Score:Q", title="Latest Event Score", format=".1f"),
 ] 
 ).add_params(hover)
 
@@ -415,6 +434,33 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
 
 **Data current as of:** {date_str}
 """)
+
+    # Latest Event by Forecast panel
+    st.subheader("Latest Event by Forecast")
+    
+    if not df_filtered.empty:
+        latest_events_display = forecast_points[[FORECAST_COL, "Latest Date Str", "Latest Domain", "Latest Sector", "Latest Slider Score"]].copy()
+        latest_events_display = latest_events_display[latest_events_display["Latest Date Str"] != "No data"]
+        
+        if not latest_events_display.empty:
+            latest_events_display = latest_events_display.rename(columns={
+                FORECAST_COL: "Forecast",
+                "Latest Date Str": "Date",
+                "Latest Domain": "Domain",
+                "Latest Sector": "Sector",
+                "Latest Slider Score": "Score"
+            })
+            # Sort by date descending (most recent first)
+            latest_events_display["Date"] = pd.to_datetime(latest_events_display["Date"], format="%b %d, %Y", errors="coerce")
+            latest_events_display = latest_events_display.sort_values("Date", ascending=False)
+            latest_events_display["Date"] = latest_events_display["Date"].dt.strftime("%b %d, %Y")
+            latest_events_display = latest_events_display[[c for c in ["Forecast", "Date", "Domain", "Sector", "Score"] if c in latest_events_display.columns]]
+            
+            st.dataframe(latest_events_display, use_container_width=True, hide_index=True)
+        else:
+            st.info("No events available for selected forecasts in current filters.")
+    else:
+        st.info("No events in current filters.")
 
     st.markdown(
         """
