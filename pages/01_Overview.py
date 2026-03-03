@@ -145,7 +145,7 @@ FORECAST_CARDS = [
         "name": "Political", 
         "direction": "Disruption",
         "probability": "Medium/High",
-        "summary": "Come back and write real scenarios later"
+        "summary": "This forecast illustrates how concentrated executive authority and heightened political polarization can drive accelerated disruption within the gender policy landscape. As institutional checks erode, policy volatility and rights fragmentation become more likely."
     },
     {
         "name": "Diplomatic", 
