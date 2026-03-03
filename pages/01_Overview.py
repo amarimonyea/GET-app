@@ -801,7 +801,7 @@ else:
     # zero line
     zero_line = alt.Chart(pd.DataFrame({"x": [0]})).mark_rule(strokeDash=[6, 4]).encode(x="x:Q")
 
-    st.altair_chart((domain_chart + zero_line).properties(padding={"left": 40, "right": 40, "top": 20, "bottom": 20}), use_container_width=True)
+    st.altair_chart((domain_chart + zero_line).properties(padding={"left": 120, "right": 40, "top": 20, "bottom": 20}), use_container_width=True)
 
     # optional: quick table for export/readability
     with st.expander("See domain totals"):
