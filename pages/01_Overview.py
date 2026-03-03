@@ -31,7 +31,7 @@ html, body, [class*="css"] {{
 
 /* ---------- MAIN APP BACKGROUND ---------- */
 .stApp {{
-  background-color: {NL_CREAM};
+  background-color: #f1f0ec;
 }}
 </style>
 """,
@@ -95,6 +95,33 @@ section[data-testid="stSidebar"] button{
   background:#ffffff !important;
   color:#000000 !important;
   border-radius:8px !important;
+}
+
+/* Header bar background */
+header[data-testid="stHeader"]{
+  background-color: rgba(191, 163, 89, 0.55) !important;
+}
+
+/* Fixed logo position at bottom of sidebar */
+section[data-testid="stSidebar"] {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+section[data-testid="stSidebar"] > div:nth-child(n+2) {
+  flex: 1;
+  overflow-y: auto;
+}
+
+section[data-testid="stSidebar"] img {
+  position: fixed;
+  bottom: 80px;
+  left: 10px;
+  right: 10px;
+  width: calc(100% - 20px);
+  max-width: 280px;
+  z-index: 999;
 }
 </style>
 """,
@@ -205,18 +232,17 @@ SECTOR_COL = "Sector Impacted"
 # ---------------------------
 # 5) PAGE TITLE
 # ---------------------------
-st.title("🌍 Gender Equality Monitor")
+st.title("🌍 Gender Equality Tracker")
+st.caption("Tracking directional shifts in the U.S. gender policy landscape")
 
 # ---------------------------
 # 6) TOP METRICS
 # ---------------------------
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 with col1:
     st.metric("Total Events", len(df))
 with col2:
     st.metric("Slider Score Range", f"{df['Slider Score'].min()} to {df['Slider Score'].max()}")
-with col3:
-    st.metric("Columns Tracked", len(df.columns))
 
 # ---------------------------
 # 7) SIDEBAR FILTERS (clean + reset works)
@@ -252,6 +278,10 @@ if selected_sector != "All":
 
 st.sidebar.caption(f"Showing {len(df_filtered)} of {len(df)} events")
 
+# Logo at bottom of sidebar
+st.sidebar.divider()
+st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
+
 st.divider()
 
 # ---------------------------
@@ -260,7 +290,7 @@ st.divider()
 st.subheader("Trajectory Quadrant")
 st.caption("Cumulative intensity (emerging → accelerating) vs net direction (progression ↓ | disruption ↑).")
 
-quad = df_filtered.copy()
+quad = df.copy()
 quad["Prog"] = np.where(quad["Slider Score"] < 0, -quad["Slider Score"], 0)
 quad["Disr"] = np.where(quad["Slider Score"] > 0,  quad["Slider Score"], 0)
 
@@ -724,7 +754,7 @@ else:
         alt.Chart(dom_top)
         .mark_bar()
         .encode(
-            y=alt.Y(f"{DOMAIN_COL}:N", sort=None, title="Domain of Assessment"),
+            y=alt.Y(f"{DOMAIN_COL}:N", sort=None, title="Domain of Assessment", axis=alt.Axis(labelLimit=300)),
             x=alt.X("Net Direction:Q", title="Net Direction (Progression ⟵ 0 ⟶ Disruption)"),
             color=alt.Color(
                 "Direction Label:N",
@@ -747,7 +777,7 @@ else:
     # zero line
     zero_line = alt.Chart(pd.DataFrame({"x": [0]})).mark_rule(strokeDash=[6, 4]).encode(x="x:Q")
 
-    st.altair_chart((domain_chart + zero_line), use_container_width=True)
+    st.altair_chart((domain_chart + zero_line).properties(padding={"left": 40, "right": 40, "top": 20, "bottom": 20}), use_container_width=True)
 
     # optional: quick table for export/readability
     with st.expander("See domain totals"):
@@ -760,7 +790,7 @@ else:
 # ---------------------------
 # 9) FORECAST COMPOSITION (monthly, interactive legend)
 # ---------------------------
-st.subheader("📋 Forecast Composition Over Time (Monthly)")
+st.subheader("Forecast Composition Over Time")
 
 df_filtered["Month"] = df_filtered["Date"].dt.to_period("M").dt.to_timestamp(how="start")
 monthly_forecast_counts = (
@@ -769,10 +799,19 @@ monthly_forecast_counts = (
 
 forecast_click = alt.selection_point(fields=[FORECAST_COL], bind="legend")
 
+# Extended color palette for forecast categories
+SECONDARY_COLORS = ["#1b1725", "#bfa359", "#f1f0ec", "#3b668c", "#cf5442", "#773344", "#e1bb4b", "#fade82", "#93b5c3", "#dca465", "#62af44"]
+
+# Get unique forecast values from data to map colors consistently
+forecast_categories = sorted(monthly_forecast_counts[FORECAST_COL].unique().tolist())
+# Create a color mapping for each forecast category
+color_range = SECONDARY_COLORS[:len(forecast_categories)]
+color_scale = alt.Scale(domain=forecast_categories, range=color_range)
+
 composition_chart = alt.Chart(monthly_forecast_counts).mark_bar().encode(
     x=alt.X("Month:T", title="Month"),
     y=alt.Y("Count:Q", title="Number of events"),
-    color=alt.Color(f"{FORECAST_COL}:N", legend=alt.Legend(title="Forecast")),
+    color=alt.Color(f"{FORECAST_COL}:N", scale=color_scale, legend=alt.Legend(title="Forecast")),
     opacity=alt.condition(forecast_click, alt.value(1.0), alt.value(0.2)),
     tooltip=[
         alt.Tooltip("yearmonth(Month):T", title="Month"),
