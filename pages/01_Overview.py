@@ -721,6 +721,11 @@ for pile_direction in ["Disruption", "Status Quo", "Progression"]:
       </div>
 
       <div class="deck-body">{summary}</div>
+
+      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(27, 23, 37, 0.15);">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--nl-navy); margin-bottom: 0.5rem;">Selected Monitoring Indicators</div>
+        <div style="font-size: 0.90rem; color: rgba(27, 23, 37, 0.75);">Coming soon</div>
+      </div>
     </div>
   </div>
 """
