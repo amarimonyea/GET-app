@@ -568,7 +568,7 @@ CARD_CSS = f"""
 /* Body text */
 .deck-body {{
   margin-top: .5rem;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   line-height: 1.5;
   color: rgba(27, 23, 37, 0.92) !important;
   max-width: 72ch;
@@ -755,7 +755,7 @@ document.addEventListener('DOMContentLoaded', function() {
 cards_html_final = cards_html + DECK_JS
 
 # Render with Streamlit's HTML component
-components.html(cards_html_final, height=850)
+components.html(cards_html_final, height=1100)
 
 st.divider()
 # ---------------------------
