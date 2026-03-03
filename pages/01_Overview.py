@@ -370,8 +370,6 @@ else:
     alt.Tooltip("Net Direction:Q", title="Net Direction", format=".1f"),
     alt.Tooltip("Latest Date Str:N", title="Latest Event Date"),
     alt.Tooltip("Latest Development:N", title="Latest Event"),
-    alt.Tooltip("Latest Domain:N", title="Latest Domain"),
-    alt.Tooltip("Latest Sector:N", title="Latest Sector"),
     alt.Tooltip("Latest Slider Score:Q", title="Latest Event Score", format=".1f"),
 ] 
 ).add_params(hover)
