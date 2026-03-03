@@ -468,7 +468,7 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
             latest_events_display["Date"] = pd.to_datetime(latest_events_display["Date"], format="%b %d, %Y", errors="coerce")
             latest_events_display = latest_events_display.sort_values("Date", ascending=False)
             latest_events_display["Date"] = latest_events_display["Date"].dt.strftime("%b %d, %Y")
-            latest_events_display = latest_events_display[[c for c in ["Forecast", "Date", "Event Title", "Domain", "Sector", "Score"] if c in latest_events_display.columns]]
+            latest_events_display = latest_events_display[[c for c in ["Forecast", "Date", "Event Title", "Score"] if c in latest_events_display.columns]]
             
             st.dataframe(latest_events_display, use_container_width=True, hide_index=True)
         else:
