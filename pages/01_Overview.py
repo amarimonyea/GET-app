@@ -324,7 +324,7 @@ else:
     POINT_COLOR = "#1b1725"  # NL dark (neutral)
     points = alt.Chart(forecast_points).mark_circle(
     size=260,
-    stroke="white",
+    stroke="#fade82",
     strokeWidth=1.5
 ).encode(
     x=alt.X("Cumulative Intensity:Q", title="Cumulative Intensity"),
