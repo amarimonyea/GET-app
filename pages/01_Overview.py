@@ -405,9 +405,7 @@ else:
     )
 
     st.altair_chart(chart, use_container_width=True)
-
-st.markdown("</div>", unsafe_allow_html=True)
-
+    
     # Extract key statistics for the explanation
     max_disr_idx = forecast_points["Disr"].idxmax()
     max_disr_name = forecast_points.loc[max_disr_idx, FORECAST_COL]
@@ -431,6 +429,8 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
 
 **Data current as of:** {date_str}
 """)
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 st.divider()
 
