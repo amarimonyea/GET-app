@@ -383,7 +383,7 @@ else:
     chart = (
         (vline + hline + points + hover_labels + quad_text)
         .properties(height=420)
-        .configure_view(fill="white")
+        .configure_view(fill="white", stroke="#1b1725", strokeWidth=2)
         .configure_axis(labelFont="Roboto", titleFont="Roboto")
         .configure_title(font="Roboto")
     )
