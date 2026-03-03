@@ -287,25 +287,8 @@ st.divider()
 # ---------------------------
 # 8) DISRUPTION AND PROGRESSION MOMENTUM (cleaner)
 # ---------------------------
-st.markdown("""
-<style>
-.momentum-container {
-    border: 2px solid #1b1725;   /* NL Navy */
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem 1.5rem 1.5rem;
-    background-color: #ffffff;
-    margin-top: 1rem;
-    margin-bottom: 1.5rem;
-}
-</style>
-""", unsafe_allow_html=True)
-
-with st.container():
-    st.markdown('<div class="momentum-container">', unsafe_allow_html=True)
-    
-    st.subheader("Disruption and Progression Momentum")
-    st.caption("Cumulative intensity (emerging → accelerating) vs net direction (progression ↓ | disruption ↑).")
-
+st.subheader("Disruption and Progression Momentum")
+st.caption("Cumulative intensity (emerging → accelerating) vs net direction (progression ↓ | disruption ↑).")
 quad = df.copy()
 quad["Prog"] = np.where(quad["Slider Score"] < 0, -quad["Slider Score"], 0)
 quad["Disr"] = np.where(quad["Slider Score"] > 0,  quad["Slider Score"], 0)
@@ -430,8 +413,6 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
 
 **Data current as of:** {date_str}
 """)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
 
 st.divider()
 
