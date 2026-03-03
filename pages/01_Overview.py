@@ -566,9 +566,9 @@ CARD_CSS = f"""
 
 /* Body text */
 .deck-body {{
-  margin-top: .65rem;
-  font-size: .95rem;
-  line-height: 1.35;
+  margin-top: .5rem;
+  font-size: .80rem;
+  line-height: 1.2;
   color: rgba(27, 23, 37, 0.92) !important;
   max-width: 72ch;
 }}
