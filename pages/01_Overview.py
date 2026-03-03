@@ -145,7 +145,8 @@ FORECAST_CARDS = [
         "name": "Political", 
         "direction": "Disruption",
         "probability": "Medium/High",
-        "summary": "This forecast illustrates how concentrated executive authority and heightened political polarization can drive accelerated disruption within the gender policy landscape. As institutional checks erode, policy volatility and rights fragmentation become more likely."
+        "summary": "This forecast illustrates how concentrated executive authority and heightened political polarization can drive accelerated disruption within the gender policy landscape. As institutional checks erode, policy volatility and rights fragmentation become more likely.",
+        "monitoring_indicators": ["Legislative or executive actions restricting reproductive, gender, or workplace rights", "Politicization or repurposing of protective institutions for political objectives"]
     },
     {
         "name": "Diplomatic", 
@@ -700,6 +701,16 @@ for pile_direction in ["Disruption", "Status Quo", "Progression"]:
         prob_display = html.escape(prob_raw)
         summary = str(c.get("summary", ""))  # Don't escape to allow HTML links
 
+        # Build monitoring indicators HTML
+        monitoring_indicators = c.get("monitoring_indicators", [])
+        if monitoring_indicators:
+            indicators_html = '<ul style="margin: 0; padding-left: 20px; font-size: 0.90rem; color: rgba(27, 23, 37, 0.75);">'
+            for indicator in monitoring_indicators:
+                indicators_html += f'<li>{html.escape(str(indicator))}</li>'
+            indicators_html += '</ul>'
+        else:
+            indicators_html = '<div style="font-size: 0.90rem; color: rgba(27, 23, 37, 0.75);">Coming soon</div>'
+
         bar_width = PROB_WIDTH.get(prob_key, "0%")
         card_class = direction_class(c.get("direction", ""))
 
@@ -724,7 +735,7 @@ for pile_direction in ["Disruption", "Status Quo", "Progression"]:
 
       <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(27, 23, 37, 0.15);">
         <div style="font-size: 0.85rem; font-weight: 700; color: var(--nl-navy); margin-bottom: 0.5rem;">Selected Monitoring Indicators</div>
-        <div style="font-size: 0.90rem; color: rgba(27, 23, 37, 0.75);">Coming soon</div>
+        {indicators_html}
       </div>
     </div>
   </div>
