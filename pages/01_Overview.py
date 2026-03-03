@@ -714,6 +714,16 @@ for pile_direction in ["Disruption", "Status Quo", "Progression"]:
         bar_width = PROB_WIDTH.get(prob_key, "0%")
         card_class = direction_class(c.get("direction", ""))
 
+        # Build indicators section only for non-Status Quo cards
+        indicators_section = ""
+        if c.get("direction") != "Status Quo":
+            indicators_section = f"""
+      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(27, 23, 37, 0.15);">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--nl-navy); margin-bottom: 0.5rem;">Selected Monitoring Indicators</div>
+        {indicators_html}
+      </div>
+"""
+
         cards_html += f"""
   <div class="deck-item">
     <div class="deck-card {card_class}" data-card-id="card-{card_counter}">
@@ -732,12 +742,7 @@ for pile_direction in ["Disruption", "Status Quo", "Progression"]:
       </div>
 
       <div class="deck-body">{summary}</div>
-
-      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(27, 23, 37, 0.15);">
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--nl-navy); margin-bottom: 0.5rem;">Selected Monitoring Indicators</div>
-        {indicators_html}
-      </div>
-    </div>
+{indicators_section}    </div>
   </div>
 """
     
