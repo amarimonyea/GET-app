@@ -388,13 +388,6 @@ else:
         .configure_title(font="Roboto")
     )
 
-    st.markdown(
-        """
-        <div class="momentum-box">
-        """,
-        unsafe_allow_html=True,
-    )
-
     st.altair_chart(chart, use_container_width=True)
     
     # Extract key statistics for the explanation
@@ -423,24 +416,14 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
 
     st.markdown(
         """
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        """
         <style>
-          .momentum-box{
-            border: 2px solid #bfa359;      /* NL Gold */
-            border-radius: 14px;
-            padding: 18px;
-            background: #ffffff;
-            margin-top: 10px;
-          }
-
-          /* Optional: make the chart itself blend into the box nicely */
-          .momentum-box div[data-testid="stVegaLiteChart"]{
-            background: transparent !important;
+          /* Wrap the chart container with gold border */
+          div[data-testid="stVegaLiteChart"]{
+            border: 2px solid #bfa359 !important;
+            border-radius: 14px !important;
+            padding: 18px !important;
+            background: #ffffff !important;
+            margin-top: 10px !important;
           }
         </style>
         """,
