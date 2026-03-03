@@ -111,7 +111,7 @@ section[data-testid="stSidebar"] > div:nth-child(n+2) {
 
 section[data-testid="stSidebar"] img {
   position: fixed;
-  bottom: 80px;
+  bottom: 60px;
   left: 10px;
   right: 10px;
   width: calc(100% - 20px);
