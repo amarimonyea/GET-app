@@ -280,11 +280,7 @@ st.sidebar.caption(f"Showing {len(df_filtered)} of {len(df)} events")
 
 # Logo at bottom of sidebar
 st.sidebar.divider()
-try:
-    st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
-except Exception:
-    # Logo file not found - skip on cloud deployment
-    pass
+st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 
 st.divider()
 
