@@ -324,7 +324,7 @@ else:
     POINT_COLOR = "#1b1725"  # NL dark (neutral)
     points = alt.Chart(forecast_points).mark_circle(
     size=260,
-    stroke="#fade82",
+    stroke="white",
     strokeWidth=1.5
 ).encode(
     x=alt.X("Cumulative Intensity:Q", title="Cumulative Intensity"),
@@ -384,7 +384,7 @@ else:
     chart = (
         (vline + hline + points + hover_labels + quad_text)
         .properties(height=420)
-        .configure_view(fill="white")  # chart background
+        .configure_view(fill="white", stroke="#fade82", strokeWidth=2)  # chart background with outline
         .configure_axis(labelFont="Roboto", titleFont="Roboto")
         .configure_title(font="Roboto")
     )
