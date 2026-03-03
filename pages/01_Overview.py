@@ -285,9 +285,9 @@ st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 st.divider()
 
 # ---------------------------
-# 8) TRAJECTORY QUADRANT (cleaner)
+# 8) DISRUPTION AND PROGRESSION MOMENTUM (cleaner)
 # ---------------------------
-st.subheader("Trajectory Quadrant")
+st.subheader("Disruption and Progression Momentum")
 st.caption("Cumulative intensity (emerging → accelerating) vs net direction (progression ↓ | disruption ↑).")
 
 quad = df.copy()
