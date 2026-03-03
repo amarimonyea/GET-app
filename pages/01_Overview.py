@@ -352,7 +352,7 @@ else:
             fontSize=12,
             font="Roboto",
             fontWeight="bold",
-            color="#d4af37"   # ← NL gold
+            color="#000000"   # ← Black text
         )
     .encode(
         x="Cumulative Intensity:Q",
