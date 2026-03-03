@@ -227,6 +227,17 @@ df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
 df = df.dropna(subset=["Date", "Slider Score"]).copy()
 
+# Create short display version of development text
+def shorten_text(text, max_chars=120):
+    if pd.isna(text):
+        return ""
+    text = str(text).strip().replace("\n", " ")
+    if len(text) <= max_chars:
+        return text
+    return text[:max_chars].rsplit(" ", 1)[0] + "…"
+
+df["Development Short"] = df["Development"].apply(shorten_text)
+
 FORECAST_COL = "Forecast"
 DOMAIN_COL = "Domains of Assessment"
 SECTOR_COL = "Sector Impacted"
@@ -302,8 +313,8 @@ forecast_points["Net Direction"] = forecast_points["Disr"] - forecast_points["Pr
 # Get latest event per forecast from filtered data
 if not df_filtered.empty:
     latest_by_forecast = df_filtered.sort_values("Date", ascending=False).groupby(FORECAST_COL, as_index=False).first()
-    latest_by_forecast = latest_by_forecast[[FORECAST_COL, "Date", "Development", "Slider Score", DOMAIN_COL, SECTOR_COL]].rename(
-        columns={"Date": "Latest Date", "Development": "Latest Development", "Slider Score": "Latest Slider Score", DOMAIN_COL: "Latest Domain", SECTOR_COL: "Latest Sector"}
+    latest_by_forecast = latest_by_forecast[[FORECAST_COL, "Date", "Development Short", "Slider Score", DOMAIN_COL, SECTOR_COL]].rename(
+        columns={"Date": "Latest Date", "Development Short": "Latest Development", "Slider Score": "Latest Slider Score", DOMAIN_COL: "Latest Domain", SECTOR_COL: "Latest Sector"}
     )
     forecast_points = forecast_points.merge(latest_by_forecast, left_on=FORECAST_COL, right_on=FORECAST_COL, how="left")
     forecast_points["Latest Date Str"] = forecast_points["Latest Date"].dt.strftime("%b %d, %Y")
