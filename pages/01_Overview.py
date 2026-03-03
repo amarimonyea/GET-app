@@ -384,12 +384,19 @@ else:
     chart = (
         (vline + hline + points + hover_labels + quad_text)
         .properties(height=420)
-        .configure_view(fill="white", stroke="#fade82", strokeWidth=2)  # chart background with outline
+        .configure_view(fill="white")  # chart background
         .configure_axis(labelFont="Roboto", titleFont="Roboto")
         .configure_title(font="Roboto")
     )
 
-    st.altair_chart(chart, use_container_width=True)
+    # Display chart in a bordered container with #fade82 border
+    col = st.columns([1])[0]
+    with col:
+        st.markdown('<div style="border: 2px solid #fade82; padding: 12px; border-radius: 4px;">', unsafe_allow_html=True)
+        st.altair_chart(chart, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="momentum-chart-container"></div>', unsafe_allow_html=True)
 
     # Extract key statistics for the explanation
     max_disr_idx = forecast_points["Disr"].idxmax()
