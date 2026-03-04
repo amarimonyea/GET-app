@@ -211,9 +211,7 @@ FORECAST_CARDS = [
       {
         "name": "Status Quo", 
         "direction": "Status Quo",
-        "probability": "",
-        "summary": "<ul style='margin: 0; padding-left: 20px;'><li><strong>Net Assessment:</strong> The US experienced the <a href='https://ourpublicservice.org/blog/the-government-shutdown-is-now-the-longest-ever-the-public-is-paying-the-price/' target='_blank' style='color: #1b1725; text-decoration: underline;'>longest government shutdown</a> in history, significantly undermining economic stability. SNAP and WIC programs were highly stressed, prompting <a href='https://www.dpscs.state.md.us/newsroom/press_releases/gov_Key_programs.shtml' target='_blank' style='color: #1b1725; text-decoration: underline;'>several states</a> to draw on emergency funding. The gender wage gap has <a href='https://www.census.gov/newsroom/press-releases/2025/income-poverty-health-insurance-coverage.html' target='_blank' style='color: #1b1725; text-decoration: underline;'>widened</a> for the second consecutive year, compounding inequality for female-headed households and women of color.</li><li><strong>Political:</strong> President Trump targeted political adversaries, including high-profile black women in legal/institutional roles, reinforcing gendered and racialized pressure. A Young Republicans group chat revealed extreme racist and misogynistic rhetoric with Hitler references; while no formal legal action followed, public outrage led to resignations, highlighting mainstreaming of manosphere rhetoric within US politics.</li><li><strong>Corporate:</strong> Major corporations aligned with the Trump Administration, removing gender identity and diversity programs, leading to large-scale layoffs and workforce instability. October announcement of IVF expansion through trumprx.gov not expected to launch until 2026.</li><li><strong>Healthcare:</strong> Access to gender-affirming care heavily restricted nationwide, with penalties for practitioners. Mass deportation caused mistreatment of women, queer, and trans individuals in detention, with claims of sexual assault, medical neglect, and forced labor.</li><li><strong>Social:</strong> Social freedoms continued to erode throughout 2025 amid volatile political environment and normalized exclusionary discourse. Key legal precedents weakened, including same-sex marriage protections and Voting Rights Act elements. Trump Administration faced 249 active lawsuits by Q4.</li></ul>"
-    },
+        "probability": "",    },
 ]
 
 
@@ -464,7 +462,7 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
             })
             # Sort by date descending (most recent first)
             latest_events_display["Date"] = pd.to_datetime(latest_events_display["Date"], format="%b %d, %Y", errors="coerce")
-            latest_events_display = latest_events_display.sort_values("Date", ascending=False)
+            latest_events_display = latest_events_display.sort_values("Date", ascending=False).head(3)
             latest_events_display["Date"] = latest_events_display["Date"].dt.strftime("%b %d, %Y")
             latest_events_display = latest_events_display[[c for c in ["Forecast", "Date", "Event Title", "Score"] if c in latest_events_display.columns]]
             
