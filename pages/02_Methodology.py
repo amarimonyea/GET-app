@@ -179,6 +179,42 @@ Each policy development is assigned a **Slider Score** ranging from **-4 to +4**
 
 st.divider()
 
+st.subheader("Score Aggregation: Computing Key Indicators")
+
+st.markdown("""
+The dashboard aggregates individual slider scores across forecasts to compute four key indicators:
+
+#### **Cumulative Disruption**
+Sum of all **positive slider scores** for a given forecast:
+- Represents the total magnitude of restrictive or disruptive policy developments
+- Higher values indicate more severe or numerous disruptions targeting gender equality or LGBTQ+ rights
+
+#### **Cumulative Progression**
+Sum of the absolute values of all **negative slider scores** for a given forecast:
+- Represents the total magnitude of protective or progressive policy developments  
+- Higher values indicate more substantial expansions of gender equality or LGBTQ+ protections
+
+#### **Cumulative Intensity**
+Sum of the absolute values of **all slider scores** (disruptive + progressive):
+- Measures the overall volume and concentration of policy developments
+- Indicates how active or dynamic a particular forecast trend is—regardless of direction
+- Higher values show more intense or frequent policy activity
+
+#### **Net Direction**
+Calculated as **Cumulative Disruption − Cumulative Progression**:
+- Ranges from negative (more progression) to positive (more disruption)
+- Provides a directional indicator of whether developments lean toward expanding or restricting gender equality
+- Shown on the y-axis of the Disruption and Progression Momentum chart
+
+These aggregations are computed at multiple levels:
+- By individual **Forecast** (showing trajectory within a specific policy scenario)
+- By **Domain of Assessment** (showing directional trends across institutional types)
+- By **Sector** (showing which industries or institutions are experiencing the most activity)
+
+""")
+
+st.divider()
+
 st.subheader("Development Classifications")
 
 st.markdown("""

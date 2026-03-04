@@ -4,7 +4,9 @@ import pandas as pd
 import numpy as np
 import altair as alt
 import html
-import textwrap 
+import textwrap
+import base64
+import os 
 
 # ---------------------------
 # 0) PAGE CONFIG MUST BE FIRST
@@ -138,82 +140,151 @@ FORECAST_CARDS = [
     {
         "name": "Political",
         "direction": "Progression",
-        "probability": "Low/Medium",
-        "summary": "Come back and write real scenarios later"
+        "probability": "Low/Medium (25-40%)",
+        "summary": "Come back and write real scenarios later",
+        "monitoring_indicators": ["State or federal policy actions that establish, reinstate, or expand gender, reproductive, or LGBTQ+ protections", "Judicial rulings or injunctions that reinforce, expand, or affirm gender, reproductive, or LGBTQ+ rights"],
+        "implications": ["Strengthened social equity and inclusion outcomes for marginalized groups", "Partial restoration of US credibility on gender and human rights issues"]
     },
     {
         "name": "Political", 
         "direction": "Disruption",
-        "probability": "Medium/High",
+        "probability": "Medium/High (60-75%)",
         "summary": "This forecast illustrates how concentrated executive authority and heightened political polarization can drive accelerated disruption within the gender policy landscape. As institutional checks erode, policy volatility and rights fragmentation become more likely.",
-        "monitoring_indicators": ["Legislative or executive actions restricting reproductive, gender, or workplace rights", "Politicization or repurposing of protective institutions for political objectives"]
+        "monitoring_indicators": ["Legislative or executive actions restricting reproductive, gender, or workplace rights", "Politicization or repurposing of protective institutions for political objectives"],
+        "implications": ["Normalization of executive unilateralism in policymaking", "Federal-state fragmentation in rights protection"]
     },
     {
         "name": "Diplomatic", 
         "direction": "Disruption",
-        "probability": "Low/Medium",
-        "summary": "Come back and write real scenarios later"
+        "probability": "Low/Medium (25-40%)",
+        "summary": "Come back and write real scenarios later",
+        "monitoring_indicators": ["Adoption of US aligned conservative gender policies by foreign governments", "US withdrawal from or defunding of international organizations advancing gender, LGBTQ+, or reproductive rights"],
+        "implications": ["Reduction of US credibility in multilateral institutions", "Decreased global access to reproductive, gender-based, and LGBTQ+ health and protection programs"]
     },
     {
         "name": "Diplomatic", 
         "direction": "Progression",
-        "probability": "Low",
-        "summary": "Come back and write real scenarios later"
+        "probability": "Low (5-25%)",
+        "summary": "Come back and write real scenarios later",
+        "implications": ["Implications coming soon"]
     },
      {
         "name": "Economic", 
         "direction": "Progression",
-        "probability": "Low",
-        "summary": "Come back and write real scenarios later"
+        "probability": "Low (5-25%)",
+        "summary": "Come back and write real scenarios later",
+        "implications": ["Implications coming soon"]
     },
      {
         "name": "Economic", 
         "direction": "Disruption",
-        "probability": "Low/Medium",
-        "summary": "Come back and write real scenarios later"
+        "probability": "Low/Medium (25-40%)",
+        "summary": "Come back and write real scenarios later",
+        "monitoring_indicators": ["Cuts or divestments in federal scientific, evidence-based research, or mass media related to equity, gender, or social policy", "Decreased funding for public universities focused on social science research"],
+        "implications": ["Reduced economic opportunities for marginalized communities", "Disruption of workforce diversity and inclusion initiatives"]
     },
      {
         "name": "Social", 
         "direction": "Disruption",
-        "probability": "Medium/High",
-        "summary": "Come back and write real scenarios later"
+        "probability": "Medium/High (60-75%)",
+        "summary": "Come back and write real scenarios later",
+        "monitoring_indicators": ["Medical and ethical crises emerging from restrictive abortion policies", "Service withdrawal or denial driven by anticipated legal, financial, or political retaliation"],
+        "implications": ["Increasing discrimination towards trans and gender-diverse individuals", "Global impact on diplomacy and human rights"]
     },
       {
         "name": "Social", 
         "direction": "Progression",
-        "probability": "Low",
-        "summary": "Come back and write real scenarios later"
+        "probability": "Low (5-25%)",
+        "summary": "Come back and write real scenarios later",
+        "implications": ["Implications coming soon"]
     },
           {
         "name": "Security", 
         "direction": "Progression",
-        "probability": "Low",
-        "summary": "Come back and write real scenarios later"
+        "probability": "Low (5-25%)",
+        "summary": "Come back and write real scenarios later",
+        "implications": ["Implications coming soon"]
     },
         {
         "name": "Security", 
         "direction": "Disruption",
-        "probability": "Medium",
-        "summary": "Come back and write real scenarios later"
+        "probability": "Medium (40-60%)",
+        "summary": "Come back and write real scenarios later",
+        "monitoring_indicators": ["Removal of gender diverse and trans individuals from law enforcement, military, and intelligence roles", "Targeting of healthcare officials and personnel providing gender affirming services and care"],
+        "implications": ["Implications coming soon"]
     },
      {
         "name": "Hybrid Political/Security", 
         "direction": "Disruption",
-        "probability": "Medium",
-        "summary": "Come back and write real scenarios later"
+        "probability": "Medium (40-60%)",
+        "summary": "Come back and write real scenarios later",
+        "implications": ["Implications coming soon"]
     },
       {
         "name": "Hybrid Political/Social", 
         "direction": "Disruption",
-        "probability": "Medium",
-        "summary": "Come back and write real scenarios later"
+        "probability": "Medium (40-60%)",
+        "summary": "Come back and write real scenarios later",
+        "implications": ["Implications coming soon"]
     },
       {
         "name": "Status Quo", 
         "direction": "Status Quo",
-        "probability": "",    },
+        "probability": "",
+        "summary": "Current policy and institutional landscape continues without major directional shifts. Existing protections and disruptions remain relatively stable.",
+        "implications": []
+    },
 ]
 
+# ---------------------------
+# 3B) FEATURED DEEP DIVES (quarterly highlights)
+# ---------------------------
+FEATURED_DEEP_DIVES = [
+    {
+        "headline": "Senate Advances Comprehensive Paid Leave Legislation",
+        "date": "March 15, 2025",
+        "forecast": "Political Progression",
+        "direction": "progression",
+        "analysis": "The FAMILY Act reintroduction signals sustained momentum on economic security for caregivers. Key sponsors include Finance Committee members, indicating broader coalition support. The bill targets six weeks of paid leave, a significant compromise from earlier proposals. Success depends on reconciliation mechanics and mid-year legislative window.",
+        "source_url": "https://www.congress.gov",
+        "articles": [
+            {
+                "title": "Paid Leave Bill Gains Bipartisan Momentum in Senate",
+                "source": "The Hill",
+                "image_url": "assets/senate-placeholder.jpg",
+                "link_url": "https://thehill.com"
+            },
+            {
+                "title": "Economic Inequality: New Framework for Caregiving Support",
+                "source": "Politico",
+                "image_url": "assets/un-women-placeholder.jpg",
+                "link_url": "https://politico.com"
+            }
+        ]
+    },
+    {
+        "headline": "Corporate Diversity Programs Under Increased Legal Scrutiny",
+        "date": "March 10, 2025",
+        "forecast": "Political Disruption",
+        "direction": "disruption",
+        "analysis": "Multiple lawsuits targeting DEI initiatives and affirmative action programs suggest sustained legal challenges to gender equity mechanisms. The Supreme Court's recent standing decisions lower barriers for plaintiffs. Legal uncertainty may prompt corporations to pause or restructure programs, creating short-term disruption in institutional commitments to gender parity.",
+        "source_url": "https://www.scotus.gov",
+        "articles": [
+            {
+                "title": "Corporate DEI Programs Face Wave of Legal Challenges",
+                "source": "Wall Street Journal",
+                "image_url": "assets/senate-placeholder.jpg",
+                "link_url": "https://wsj.com"
+            },
+            {
+                "title": "Affirmative Action Ban Forces Corporate Strategy Reassessment",
+                "source": "Reuters",
+                "image_url": "assets/un-women-placeholder.jpg",
+                "link_url": "https://reuters.com"
+            }
+        ]
+    }
+]
 
 # ---------------------------
 # 4) LOAD + CLEAN DATA
@@ -235,6 +306,47 @@ def shorten_text(text, max_chars=120):
     return text[:max_chars].rsplit(" ", 1)[0] + "…"
 
 df["Development Short"] = df["Development"].apply(shorten_text)
+
+def get_key_insights(forecast_points_df, forecast_col):
+    """Generate 3 key insights from forecast_points dataframe."""
+    if forecast_points_df.empty:
+        return ["No insights available for the selected filters."]
+    
+    insights = []
+    
+    # Insight 1: Highest cumulative disruption
+    max_disr_idx = forecast_points_df["Disr"].idxmax()
+    max_disr_name = forecast_points_df.loc[max_disr_idx, forecast_col]
+    max_disr_score = forecast_points_df.loc[max_disr_idx, "Disr"]
+    insights.append(f"<strong>Highest cumulative disruption:</strong> {max_disr_name} ({max_disr_score:.1f})")
+    
+    # Insight 2: Highest cumulative progression
+    max_prog_idx = forecast_points_df["Prog"].idxmax()
+    max_prog_name = forecast_points_df.loc[max_prog_idx, forecast_col]
+    max_prog_score = forecast_points_df.loc[max_prog_idx, "Prog"]
+    insights.append(f"<strong>Highest cumulative progression:</strong> {max_prog_name} ({max_prog_score:.1f})")
+    
+    # Insight 3: Most concentrated forecast intensity
+    max_intensity_idx = forecast_points_df["Cumulative Intensity"].idxmax()
+    max_intensity_name = forecast_points_df.loc[max_intensity_idx, forecast_col]
+    max_intensity_score = forecast_points_df.loc[max_intensity_idx, "Cumulative Intensity"]
+    insights.append(f"<strong>Most concentrated forecast intensity:</strong> {max_intensity_name} ({max_intensity_score:.1f})")
+    
+    return insights
+
+def image_to_base64(image_path):
+    """Convert image file to base64 data URI."""
+    if not os.path.exists(image_path):
+        return None
+    try:
+        with open(image_path, "rb") as img_file:
+            img_data = base64.b64encode(img_file.read()).decode()
+            ext = os.path.splitext(image_path)[1].lower().replace(".", "")
+            mime_type = f"image/{ext}"
+            return f"data:{mime_type};base64,{img_data}"
+    except Exception as e:
+        st.warning(f"Could not load image {image_path}: {e}")
+        return None
 
 FORECAST_COL = "Forecast"
 DOMAIN_COL = "Domains of Assessment"
@@ -289,6 +401,22 @@ if selected_sector != "All":
 
 st.sidebar.caption(f"Showing {len(df_filtered)} of {len(df)} events")
 
+# Forecast Direction
+st.sidebar.divider()
+st.sidebar.subheader("📊 Forecast Direction")
+st.sidebar.markdown("""
+<div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
+  <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <div style="width: 20px; height: 20px; background-color: #cf5442; border-radius: 3px;"></div>
+    <span style="color: #ffffff;"><strong>Disruption</strong> — Challenges to gender equity</span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <div style="width: 20px; height: 20px; background-color: #3b668c; border-radius: 3px;"></div>
+    <span style="color: #ffffff;"><strong>Progression</strong> — Advances in gender equity</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
 # Logo at bottom of sidebar
 st.sidebar.divider()
 st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
@@ -299,7 +427,7 @@ st.divider()
 # 8) DISRUPTION AND PROGRESSION MOMENTUM (cleaner)
 # ---------------------------
 st.subheader("Disruption and Progression Momentum")
-st.caption("Cumulative intensity (emerging → accelerating) vs net direction (progression ↓ | disruption ↑).")
+st.markdown("**Cumulative intensity (emerging → accelerating) vs net direction (progression ↓ | disruption ↑).**")
 quad = df.copy()
 quad["Prog"] = np.where(quad["Slider Score"] < 0, -quad["Slider Score"], 0)
 quad["Disr"] = np.where(quad["Slider Score"] > 0,  quad["Slider Score"], 0)
@@ -327,6 +455,19 @@ else:
 if forecast_points.empty:
     st.info("No data available for the current filters.")
 else:
+    # Key Insights Strip
+    insights_list = get_key_insights(forecast_points, FORECAST_COL)
+    insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725;'>{insight}</li>" for insight in insights_list])
+    
+    st.markdown(f"""
+    <div style="background-color: #f1f0ec; border-left: 4px solid #bfa359; padding: 1rem; margin: 1.5rem 0; border-radius: 2px; box-shadow: 0 1px 3px rgba(27, 23, 37, 0.08);">
+      <div style="font-size: 0.75rem; font-weight: 700; color: #1b1725; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">Key Insights</div>
+      <ul style="margin: 0; padding-left: 1.5rem; list-style: disc;">
+        {insights_html}
+      </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
     # Quadrant thresholds
     x0 = float(forecast_points["Cumulative Intensity"].median())
     y0 = 0.0
@@ -354,7 +495,7 @@ else:
     strokeWidth=1.5
 ).encode(
     x=alt.X("Cumulative Intensity:Q", title="Cumulative Intensity"),
-    y=alt.Y("Net Direction:Q", title="Net Direction"),
+    y=alt.Y("Net Direction:Q", title="Net Direction", scale=alt.Scale(padding=20)),
     color=alt.condition(
         "datum['Net Direction'] > 0",
         alt.value("#cf5442"),
@@ -418,6 +559,19 @@ else:
         .configure_title(font="Roboto")
     )
 
+    # Add legend for colors
+    st.markdown("""
+    <div style="display: flex; gap: 20px; margin-bottom: 15px; font-size: 0.9rem;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="width: 16px; height: 16px; background-color: #cf5442; border-radius: 2px;"></div>
+        <span>Disruption</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="width: 16px; height: 16px; background-color: #3b668c; border-radius: 2px;"></div>
+        <span>Progression</span>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
     st.altair_chart(chart, use_container_width=True)
     
     # Extract key statistics for the explanation
@@ -445,7 +599,7 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
 """)
 
     # Latest Event by Forecast panel
-    st.subheader("Latest Event by Forecast")
+    st.subheader("Latest Events by Forecast")
     
     if not df_filtered.empty:
         latest_events_display = forecast_points[[FORECAST_COL, "Latest Date Str", "Latest Development", "Latest Domain", "Latest Sector", "Latest Slider Score"]].copy()
@@ -466,6 +620,29 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
             latest_events_display["Date"] = latest_events_display["Date"].dt.strftime("%b %d, %Y")
             latest_events_display = latest_events_display[[c for c in ["Forecast", "Date", "Event Title", "Score"] if c in latest_events_display.columns]]
             
+            # Cap Event Title at 100 characters without breaking words
+            def truncate_at_word_boundary(text, max_length=100):
+                if len(text) <= max_length:
+                    return text
+                truncated = text[:max_length]
+                last_space = truncated.rfind(' ')
+                if last_space > 0:
+                    return truncated[:last_space] + "..."
+                return truncated + "..."
+            
+            latest_events_display["Event Title"] = latest_events_display["Event Title"].apply(truncate_at_word_boundary)
+            
+            st.markdown(
+                """
+                <style>
+                [data-testid="stDataFrame"] [data-testid="stDataFrameContainer"] div {
+                    word-wrap: break-word;
+                    white-space: normal;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True,
+            )
             st.dataframe(latest_events_display, use_container_width=True, hide_index=True)
         else:
             st.info("No events available for selected forecasts in current filters.")
@@ -502,9 +679,9 @@ import textwrap
 import re
 
 # ---------------------------
-# 9) FORECAST SCENARIOS CARDS (STACKED DECK + PROBABILITY)
+# 9) GENDER CURRENTLY (Status Quo + Developments)
 # ---------------------------
-st.subheader("Forecast Scenarios")
+st.subheader("Current Environment")
 
 NL_BLUE = "#3b668c"
 NL_RED  = "#cf5442"
@@ -512,13 +689,37 @@ NL_GOLD = "#bfa359"
 CARD_CSS = f"""
 <style>
 /* =========================
-   GRID (3 columns)
+   GRID (4 columns)
    ========================= */
+.scenario-cards-container {{
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 8px;
+}}
+
+.scenario-cards-container::-webkit-scrollbar {{
+  width: 10px;
+}}
+
+.scenario-cards-container::-webkit-scrollbar-track {{
+  background: rgba(27, 23, 37, 0.05);
+  border-radius: 5px;
+}}
+
+.scenario-cards-container::-webkit-scrollbar-thumb {{
+  background: rgba(27, 23, 37, 0.25);
+  border-radius: 5px;
+}}
+
+.scenario-cards-container::-webkit-scrollbar-thumb:hover {{
+  background: rgba(27, 23, 37, 0.4);
+}}
+
 .deck {{
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
-  margin-top: .5rem;
+  min-height: 0;
   align-items: start;
 }}
 
@@ -529,10 +730,41 @@ CARD_CSS = f"""
   }}
 }}
 
+.status-quo-section {{
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid rgba(27, 23, 37, 0.15);
+}}
+
+.status-quo-label {{
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(27, 23, 37, 0.6);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}}
+
+.status-quo-container {{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}}
+
+.status-quo-container .deck-item {{
+  max-width: 400px;
+  width: 100%;
+}}
+
+.status-quo-container .deck-card {{
+  padding: 1rem;
+}}
+
 .deck-pile {{
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-height: 0;
 }}
 
 /* Hide column headers entirely (if present) */
@@ -570,6 +802,8 @@ CARD_CSS = f"""
   box-shadow: 0 10px 24px rgba(0,0,0,0.06);
   cursor: pointer;
   transition: transform .15s ease, box-shadow .15s ease;
+  height: auto;
+  overflow: visible;
 }}
 
 .deck-card:hover {{
@@ -701,11 +935,189 @@ CARD_CSS = f"""
 .deck-card.hybrid .prob-fill {{
   background: var(--nl-gold) !important;
 }}
+
+/* =========================
+   NET ASSESSMENT SPOTLIGHT
+   ========================= */
+.spotlight-section {{
+  background-color: #f1f0ec;
+  margin: 2rem 0;
+  padding: 2rem;
+  border-radius: 4px;
+  border-top: 1px solid rgba(27, 23, 37, 0.1);
+}}
+
+.spotlight-title {{
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1b1725;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.02em;
+}}
+
+.spotlight-container {{
+  display: flex;
+  gap: 2rem;
+}}
+
+.spotlight-main {{
+  flex: 0 0 50%;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(27, 23, 37, 0.06);
+  border-top: 4px solid #3b668c;
+}}
+
+.spotlight-main.disruption {{
+  border-top-color: #cf5442;
+}}
+
+.spotlight-main.progression {{
+  border-top-color: #3b668c;
+}}
+
+.spotlight-main.hybrid {{
+  border-top-color: #bfa359;
+}}
+
+.spotlight-headline {{
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1b1725;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}}
+
+.spotlight-meta {{
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: rgba(27, 23, 37, 0.6);
+}}
+
+.spotlight-meta-item {{
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}}
+
+.spotlight-badge {{
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}}
+
+.spotlight-badge.disruption {{
+  background-color: rgba(207, 84, 66, 0.1);
+  color: #cf5442;
+}}
+
+.spotlight-badge.progression {{
+  background-color: rgba(59, 102, 140, 0.1);
+  color: #3b668c;
+}}
+
+.spotlight-analysis {{
+  font-size: 0.95rem;
+  color: #1b1725;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}}
+
+.spotlight-source {{
+  font-size: 0.85rem;
+  color: #bfa359;
+  text-decoration: none;
+  font-weight: 600;
+}}
+
+.spotlight-source:hover {{
+  text-decoration: underline;
+}}
+
+.spotlight-articles {{
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}}
+
+.article-tile {{
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(27, 23, 37, 0.06);
+  transition: box-shadow 0.2s ease;
+}}
+
+.article-tile:hover {{
+  box-shadow: 0 2px 4px rgba(27, 23, 37, 0.12);
+}}
+
+.article-image {{
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}}
+
+.article-content {{
+  padding: 1rem;
+}}
+
+.article-title {{
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1b1725;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}}
+
+.article-source {{
+  font-size: 0.8rem;
+  color: rgba(27, 23, 37, 0.6);
+  margin-bottom: 0.75rem;
+}}
+
+.article-link {{
+  display: inline-block;
+  color: #bfa359;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+}}
+
+.article-link:hover {{
+  text-decoration: underline;
+}}
+
+@media(max-width: 768px) {{
+  .spotlight-container {{
+    flex-direction: column;
+  }}
+  
+  .spotlight-main {{
+    flex: 0 0 100%;
+  }}
+  
+  .spotlight-articles {{
+    flex: 0 0 100%;
+  }}
+}}
 </style>
 """
 
 def normalize_prob(p: str) -> str:
     p = (p or "").strip()
+    # Remove percentage ranges like (5-25%) or (25-40%)
+    p = re.sub(r"\s*\([^)]*%[^)]*\)\s*", "", p)
     p = p.replace("–", "-").replace("/", "-").replace(" to ", "-")
     p = re.sub(r"\s+", "", p).lower()
     return p
@@ -731,19 +1143,104 @@ cards_sorted = sorted(
     reverse=True,
 )
 
-# Group cards by direction
-cards_by_direction = {"Disruption": [], "Status Quo": [], "Progression": []}
+# Group cards by direction (excluding Status Quo)
+cards_by_direction = {"Disruption": [], "Hybrid Disruption": [], "Progression": []}
+status_quo_card = None
+
 for c in cards_sorted:
     direction = c.get("direction", "Status Quo")
-    if direction not in cards_by_direction:
+    # Separate Status Quo for its own section
+    if direction == "Status Quo":
+        status_quo_card = c
+    # Separate hybrid disruption cards into their own column
+    elif direction == "Disruption" and "Hybrid" in c.get("name", ""):
+        cards_by_direction["Hybrid Disruption"].append(c)
+    elif direction not in cards_by_direction:
         cards_by_direction[direction] = []
-    cards_by_direction[direction].append(c)
+        cards_by_direction[direction].append(c)
+    else:
+        cards_by_direction[direction].append(c)
 
-cards_html = CARD_CSS + '<div class="deck">'
+# Sort cards within each direction by probability (highest to lowest)
+for direction in cards_by_direction:
+    cards_by_direction[direction] = sorted(
+        cards_by_direction[direction],
+        key=lambda c: PROB_RANK.get(normalize_prob(str(c.get("probability", ""))), 0),
+        reverse=True,
+    )
+
+cards_html = CARD_CSS
+
+card_counter = 0
+
+# Add Status Quo section at the top (simplified, no card formatting)
+status_quo_card_html = ""
+if status_quo_card:
+    summary = str(status_quo_card.get("summary", ""))
+    
+    status_quo_card_html += '<div class="status-quo-section">'
+    status_quo_card_html += '<div class="status-quo-label">Baseline Scenario</div>'
+    status_quo_card_html += f'<div style="color: #1b1725; font-size: 0.95rem; line-height: 1.5;">{html.escape(summary)}</div>'
+    status_quo_card_html += '</div>'
+
+cards_html += status_quo_card_html
+
+# Render Net Assessment Spotlight section
+if FEATURED_DEEP_DIVES:
+    spotlight_dive = FEATURED_DEEP_DIVES[0]  # Use first deep dive for now
+    direction_class_spotlight = spotlight_dive["direction"].lower()
+    headline_escaped = html.escape(spotlight_dive["headline"])
+    forecast_escaped = html.escape(spotlight_dive["forecast"])
+    date_escaped = html.escape(spotlight_dive["date"])
+    analysis_escaped = html.escape(spotlight_dive["analysis"])
+    source_url = html.escape(spotlight_dive["source_url"])
+    
+    spotlight_html = '<div class="spotlight-section">'
+    spotlight_html += '<div class="spotlight-title">Developments Shaping the Current Assessment</div>'
+    spotlight_html += '<div class="spotlight-container">'
+    
+    # Main content (60%)
+    spotlight_html += f'<div class="spotlight-main {direction_class_spotlight}">'
+    spotlight_html += f'<div class="spotlight-headline">{headline_escaped}</div>'
+    spotlight_html += '<div class="spotlight-meta">'
+    spotlight_html += f'<div class="spotlight-meta-item">📅 {date_escaped}</div>'
+    spotlight_html += f'<span class="spotlight-badge {direction_class_spotlight}">{forecast_escaped}</span>'
+    spotlight_html += '</div>'
+    spotlight_html += f'<div class="spotlight-analysis">{analysis_escaped}</div>'
+    spotlight_html += f'<a href="{source_url}" target="_blank" class="spotlight-source">Read more →</a>'
+    spotlight_html += '</div>'
+    
+    # Articles section (40%)
+    spotlight_html += '<div class="spotlight-articles">'
+    for article in spotlight_dive.get("articles", []):
+        article_title = html.escape(article["title"])
+        article_source = html.escape(article["source"])
+        article_image_path = article["image_url"]
+        article_link = html.escape(article["link_url"])
+        
+        # Convert image to base64 data URI
+        article_image_data = image_to_base64(article_image_path)
+        if article_image_data is None:
+            # Fallback if image can't be loaded
+            article_image_data = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='140'%3E%3Crect fill='%23ddd' width='300' height='140'/%3E%3C/svg%3E"
+        
+        spotlight_html += '<a href="' + article_link + '" target="_blank" style="text-decoration: none;">'
+        spotlight_html += '<div class="article-tile">'
+        spotlight_html += f'<img src="{article_image_data}" alt="Article" class="article-image">'
+        spotlight_html += '<div class="article-content">'
+        spotlight_html += f'<div class="article-title">{article_title}</div>'
+        spotlight_html += f'<div class="article-source">{article_source}</div>'
+        spotlight_html += '<div class="article-link">Read article →</div>'
+        spotlight_html += '</div></div></a>'
+    spotlight_html += '</div>'
+    
+    spotlight_html += '</div></div>'
+    cards_html += spotlight_html
+
+cards_html += '<div class="scenario-cards-container"><div class="deck">'
 
 # Create three piles
-card_counter = 0
-for pile_direction in ["Disruption", "Status Quo", "Progression"]:
+for pile_direction in ["Disruption", "Hybrid Disruption", "Progression"]:
     direction_lower = pile_direction.lower().replace(" ", "")
     cards_html += f'<div class="deck-pile deck-pile-{direction_lower}">'
     cards_html += f'<div class="deck-pile-header">{pile_direction}</div>'
@@ -772,11 +1269,30 @@ for pile_direction in ["Disruption", "Status Quo", "Progression"]:
 
         # Build indicators section only for non-Status Quo cards
         indicators_section = ""
+        implications_section = ""
+        
         if c.get("direction") != "Status Quo":
             indicators_section = f"""
       <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(27, 23, 37, 0.15);">
         <div style="font-size: 0.85rem; font-weight: 700; color: var(--nl-navy); margin-bottom: 0.5rem;">Selected Monitoring Indicators</div>
         {indicators_html}
+      </div>
+"""
+            
+            # Build implications HTML
+            implications = c.get("implications", [])
+            if implications:
+                implications_html = '<ul style="margin: 0; padding-left: 20px; font-size: 0.90rem; color: rgba(27, 23, 37, 0.75);">'
+                for implication in implications:
+                    implications_html += f'<li>{html.escape(str(implication))}</li>'
+                implications_html += '</ul>'
+            else:
+                implications_html = '<div style="font-size: 0.90rem; color: rgba(27, 23, 37, 0.75);">Implications coming soon</div>'
+            
+            implications_section = f"""
+      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(27, 23, 37, 0.15);">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--nl-navy); margin-bottom: 0.5rem;">Potential Implications</div>
+        {implications_html}
       </div>
 """
 
@@ -797,14 +1313,18 @@ for pile_direction in ["Disruption", "Status Quo", "Progression"]:
         </div>
       </div>
 
-      <div class="deck-body">{summary}</div>
-{indicators_section}    </div>
+      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(27, 23, 37, 0.15);">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--nl-navy); margin-bottom: 0.5rem;">Scenario Overview</div>
+        <div class="deck-body">{summary}</div>
+      </div>
+{indicators_section}{implications_section}    </div>
   </div>
 """
     
     cards_html += '</div>'
 
-cards_html += "</div>"
+cards_html += '</div>'  # Close scenario-cards-container
+cards_html += '</div>'  # Close deck (no longer needed but keep for consistency)
 
 # Add JavaScript for interactivity
 DECK_JS = """
@@ -829,10 +1349,15 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 """
 
-cards_html_final = cards_html + DECK_JS
+# Split rendering: Gender Currently section (Status Quo + Developments)
+cards_html_current = cards_html.split('<div class="scenario-cards-container">')[0]
+cards_html_current_final = cards_html_current + DECK_JS
+components.html(cards_html_current_final, height=750)
 
-# Render with Streamlit's HTML component
-components.html(cards_html_final, height=1100)
+# Forecast Scenarios section
+st.subheader("Forecast Scenarios")
+cards_html_forecast = CARD_CSS + '<div class="scenario-cards-container">' + cards_html.split('<div class="scenario-cards-container">')[1] + DECK_JS
+components.html(cards_html_forecast, height=1100)
 
 st.divider()
 # ---------------------------
@@ -903,6 +1428,12 @@ else:
     zero_line = alt.Chart(pd.DataFrame({"x": [0]})).mark_rule(strokeDash=[6, 4]).encode(x="x:Q")
 
     st.altair_chart((domain_chart + zero_line).properties(padding={"left": 40, "right": 40, "top": 20, "bottom": 20}), use_container_width=True)
+
+    st.markdown("""
+**Explanation**
+
+Net direction reflects the balance between disruptive and progressive developments across each domain of assessment. Values are calculated by subtracting cumulative progression scores from cumulative disruption scores (equivalent to the sum of slider scores in the filtered view). Higher values indicate domains where disruptive developments are more concentrated, while values closer to zero reflect a more balanced mix of progression and disruption.
+""")
 
     # optional: quick table for export/readability
     with st.expander("See domain totals"):
