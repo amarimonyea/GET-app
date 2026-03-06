@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamlit iframe Test - No Sandbox</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f1f0ec;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #1b1725;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .info {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b668c;
+            color: #1b1725;
+        }
+        
+        .info p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+        
+        .debug-steps {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+            color: #1565c0;
+        }
+        
+        .debug-steps p {
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+        
+        .debug-steps code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .iframe-wrapper {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 100vh;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        @media (max-width: 768px) {
+            .iframe-wrapper {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Streamlit iframe Test (No Sandbox)</h1>
+        
+        <div class="info">
+            <p><strong>Configuration:</strong> This version removes sandbox restrictions</p>
+            <p><strong>Source URL:</strong> http://localhost:8501</p>
+        </div>
+        
+        <div class="debug-steps">
+            <p><strong>Troubleshooting if iframe doesn't load:</strong></p>
+            <ol style="margin-left: 20px;">
+                <li>Open <code>http://localhost:8501</code> directly in a new tab - does the app load?</li>
+                <li>If yes, then the issue is iframe-specific. Try the regular test_iframe.html and refresh.</li>
+                <li>If no, then Streamlit isn't responding. Check terminal: <code>streamlit run streamlit_app.py</code></li>
+                <li>Open browser console (F12) and look for any error messages</li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="iframe-wrapper">
+        <iframe 
+            src="http://localhost:8501" 
+            title="GET-app Streamlit Dashboard"
+            allow="camera; microphone; geolocation">
+        </iframe>
+    </div>
+</body>
+</html>

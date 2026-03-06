@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamlit iframe Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f1f0ec;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #1b1725;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .info {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b668c;
+            color: #1b1725;
+        }
+        
+        .info p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+        
+        .error-check {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+        
+        .iframe-wrapper {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 100vh;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            color: #2e7d32;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .iframe-wrapper {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Streamlit iframe Embedding Test</h1>
+        
+        <div class="info">
+            <p><strong>Test Purpose:</strong> Verify if the GET-app Streamlit application can be embedded in an iframe</p>
+            <p><strong>Source URL:</strong> http://localhost:8501</p>
+            <p><strong>Status:</strong> <span id="status">Testing...</span></p>
+        </div>
+        
+        <div class="error-check">
+            <p><strong>⚠️ Before testing:</strong></p>
+            <p>1. Make sure the Streamlit app is running: <code>streamlit run streamlit_app.py</code></p>
+            <p>2. Open your browser console (F12 → Console tab) to check for any embedding errors</p>
+            <p>3. If the iframe shows an error, check the console for details</p>
+        </div>
+    </div>
+    
+    <div class="iframe-wrapper">
+        <iframe 
+            src="https://fluffy-trout-4jpq67xj6x5w2q4j5-8501.app.github.dev/?embed=true" 
+            title="GET-app Dashboard">
+        </iframe>
+    </div>
+    
+    <script>
+        // Check if iframe loaded successfully
+        const iframe = document.querySelector('iframe');
+        const statusElement = document.getElementById('status');
+        
+        iframe.addEventListener('load', function() {
+            statusElement.textContent = '✅ iframe loaded successfully';
+            statusElement.parentElement.style.backgroundColor = '#e8f5e9';
+            statusElement.parentElement.style.color = '#2e7d32';
+        });
+        
+        iframe.addEventListener('error', function() {
+            statusElement.textContent = '❌ Failed to load iframe - check console (F12)';
+            statusElement.parentElement.style.backgroundColor = '#ffebee';
+            statusElement.parentElement.style.color = '#c62828';
+        });
+        
+        // Timeout check
+        setTimeout(function() {
+            if (statusElement.textContent === 'Testing...') {
+                statusElement.textContent = '⏱️ Still loading... (make sure Streamlit is running)';
+                statusElement.parentElement.style.backgroundColor = '#fff3cd';
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

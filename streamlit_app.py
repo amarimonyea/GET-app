@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 # ---------------------------
 # 0) PAGE CONFIG MUST BE FIRST
@@ -123,8 +124,104 @@ section[data-testid="stSidebar"] img {
 )
 
 # Logo at bottom of sidebar
-st.sidebar.divider()
 st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 
-st.title("🌍 Gender Equality Monitor")
-st.write("Use the sidebar to navigate between different views and analyses.")
+st.title("🌍 Gender Equality Tracker")
+st.write("**How to use the tracker:** Use the sidebar to explore sector impacts, human impacts, and the indicators shaping the forecast.")
+st.write("The Gender Equality Tracker (GET) is an early-warning system that tracks gender-related policies and forecasts their broader political, social, and security impacts.")
+
+# Video placeholder
+st.markdown("---")
+st.markdown("""
+<div style="display: flex; justify-content: center; align-items: center; height: 400px; background-color: #e8e8e8; border-radius: 8px; border: 2px solid #ccc;">
+    <div style="text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 10px;">🎬</div>
+        <p style="font-size: 18px; color: #666;">Video coming soon...</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Forecasts Section
+st.markdown("---")
+st.subheader("Current Risk Outlook")
+st.write("Overview of principal forecasts and risk trajectories:")
+st.caption("Updated: March 2026")
+
+# Create columns for forecast cards
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown("""
+    <div style="background-color: #cf5442; padding: 20px; border-radius: 8px; text-align: center; height: 100%;">
+        <p style="color: #ffffff; font-size: 16px; margin: 0 0 10px 0; font-weight: 400;">Political Disruption Risk</p>
+        <p style="color: #ffffff; font-size: 32px; margin: 10px 0; font-weight: 700;">Elevated</p>
+        <p style="color: #ffffff; font-size: 16px; margin: 10px 0 0 0; opacity: 0.9;">Based on policy and discourse trends</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div style="background-color: #bfa359; padding: 20px; border-radius: 8px; text-align: center; height: 100%;">
+        <p style="color: #1b1725; font-size: 16px; margin: 0 0 10px 0; font-weight: 400;">Economic Impact Forecast</p>
+        <p style="color: #1b1725; font-size: 32px; margin: 10px 0; font-weight: 700;">Moderate</p>
+        <p style="color: #1b1725; font-size: 16px; margin: 10px 0 0 0; opacity: 0.85;">Gender-related economic trajectories</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown("""
+    <div style="background-color: #3b668c; padding: 20px; border-radius: 8px; text-align: center; height: 100%;">
+        <p style="color: #ffffff; font-size: 16px; margin: 0 0 10px 0; font-weight: 400;">Security Considerations</p>
+        <p style="color: #ffffff; font-size: 32px; margin: 10px 0; font-weight: 700;">Emerging</p>
+        <p style="color: #ffffff; font-size: 16px; margin: 10px 0 0 0; opacity: 0.9;">Emerging security implications</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Most Affected Groups and Systems
+st.markdown("---")
+st.subheader("Most Affected Sectors & Groups")
+
+# Load data
+@st.cache_data
+def load_data():
+    df = pd.read_csv("data/Monitor_Gender_Equality_sample_data.csv", skiprows=1)
+    return df
+
+df = load_data()
+
+# Get top 3 sectors and groups
+top_sectors = df["Sector Impacted"].value_counts().head(3)
+top_groups = df["Who is impacted?"].value_counts().head(3)
+
+affected_col1, affected_col2, affected_col3 = st.columns(3)
+
+# Display top 3 sectors
+with affected_col1:
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #cf5442 0%, #a83c2f 100%); padding: 25px; border-radius: 8px; height: 100%; text-align: center;">
+        <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Affected Sectors</p>
+    </div>
+    """, unsafe_allow_html=True)
+    for i, (sector, count) in enumerate(top_sectors.items(), 1):
+        st.markdown(f"<p style='margin: 12px 0; font-size: 16px;'>{sector}<br><span style='font-size: 14px; color: #666; font-weight: 500;'>{count} incident{'s' if count > 1 else ''}</span></p>", unsafe_allow_html=True)
+
+# Display top 3 groups
+with affected_col2:
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #bfa359 0%, #9d8247 100%); padding: 25px; border-radius: 8px; height: 100%; text-align: center;">
+        <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Affected Groups</p>
+    </div>
+    """, unsafe_allow_html=True)
+    for i, (group, count) in enumerate(top_groups.items(), 1):
+        st.markdown(f"<p style='margin: 12px 0; font-size: 16px;'>{group}<br><span style='font-size: 14px; color: #666; font-weight: 500;'>{count} incident{'s' if count > 1 else ''}</span></p>", unsafe_allow_html=True)
+
+# Display total entries
+with affected_col3:
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #3b668c 0%, #2d4a66 100%); padding: 25px; border-radius: 8px; text-align: center; height: 100%;">
+        <p style="color: #ffffff; font-size: 13px; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Scope of Impact</p>
+        <p style="color: #ffffff; font-size: 42px; margin: 15px 0; font-weight: 700;">{len(df)}</p>
+        <p style="color: #ffffff; font-size: 12px; margin: 0; opacity: 0.95;">total developments<br>tracked</p>
+    </div>
+    """
+    , unsafe_allow_html=True)

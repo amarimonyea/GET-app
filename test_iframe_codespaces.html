@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamlit iframe Test - Codespaces</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f1f0ec;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #1b1725;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .info {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b668c;
+            color: #1b1725;
+        }
+        
+        .info p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+        
+        .success {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4caf50;
+            color: #2e7d32;
+        }
+        
+        .iframe-wrapper {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 100vh;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        @media (max-width: 768px) {
+            .iframe-wrapper {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Streamlit iframe Test - Codespaces</h1>
+        
+        <div class="info">
+            <p><strong>Configuration:</strong> Using GitHub Codespaces public URL</p>
+            <p><strong>Source URL:</strong> https://fluffy-trout-4jpq67xj6x5w2q4j5-8501.app.github.dev</p>
+        </div>
+        
+        <div class="success">
+            <p>✅ This URL can be embedded on any website to pull your live dashboard!</p>
+        </div>
+    </div>
+    
+    <div class="iframe-wrapper">
+        <iframe
+            src="https://fluffy-trout-4jpq67xj6x5w2q4j5-8501.app.github.dev"
+            title="GET-app Dashboard"
+            width="100%"
+            height="900"
+            style="border:none;">
+        </iframe>
+    </div>
+</body>
+</html>
