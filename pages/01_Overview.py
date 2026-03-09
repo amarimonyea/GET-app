@@ -9,11 +9,6 @@ import base64
 import os 
 
 # ---------------------------
-# 0) PAGE CONFIG MUST BE FIRST
-# ---------------------------
-st.set_page_config(page_title="Gender Equality Monitor", layout="wide")
-
-# ---------------------------
 # 1) THEME / CSS (inject once)
 # ---------------------------
 COLOR_DISRUPTION = "#cf5442"   # New Lines red

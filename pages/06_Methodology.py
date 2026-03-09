@@ -2,11 +2,6 @@ import streamlit as st
 import pandas as pd
 
 # ---------------------------
-# 0) PAGE CONFIG MUST BE FIRST
-# ---------------------------
-st.set_page_config(page_title="Methodology", layout="wide")
-
-# ---------------------------
 # 1) THEME / CSS (inject once)
 # ---------------------------
 COLOR_DISRUPTION = "#cf5442"   # New Lines red

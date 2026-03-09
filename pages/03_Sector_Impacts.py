@@ -4,11 +4,6 @@ import numpy as np
 import altair as alt
 
 # ---------------------------
-# 0) PAGE CONFIG MUST BE FIRST
-# ---------------------------
-st.set_page_config(page_title="Sector Impacts", layout="wide")
-
-# ---------------------------
 # 1) THEME / CSS (inject once)
 # ---------------------------
 COLOR_DISRUPTION = "#cf5442"   # New Lines red
