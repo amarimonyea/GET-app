@@ -126,7 +126,7 @@ section[data-testid="stSidebar"] img {
 # Logo at bottom of sidebar
 st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 
-st.title("🌍 Gender Equality Tracker")
+st.title("🌎 Gender Equality Tracker")
 st.write("**How to use the tracker:** Use the sidebar to explore sector impacts, human impacts, and the indicators shaping the forecast.")
 st.write("The Gender Equality Tracker (GET) is an early-warning system that tracks gender-related policies and forecasts their broader political, social, and security impacts.")
 

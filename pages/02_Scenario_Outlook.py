@@ -316,7 +316,7 @@ CARD_CSS = f"""
    GRID (4 columns)
    ========================= */
 .scenario-cards-container {{
-  max-height: 600px;
+  max-height: 1000px;
   overflow-y: auto;
   padding-right: 8px;
 }}
@@ -457,7 +457,15 @@ CARD_CSS = f"""
 
 /* Hide column headers entirely (if present) */
 .deck-pile-header {{
-  display: none !important;
+  display: block !important;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1b1725;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid #bfa359;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }}
 
 /* Kill any leftover stacked layers from older versions */
@@ -615,24 +623,26 @@ CARD_CSS = f"""
 
 /* Hybrid = gold */
 .deck-card.hybrid {{
-  border-top-color: var(--nl-gold) !important;
+  border-top-color: #773344 !important;
 }}
 .deck-card.hybrid .deck-title::before {{
-  background: var(--nl-gold) !important;
+  background: #773344 !important;
 }}
 .deck-card.hybrid .prob-fill {{
-  background: var(--nl-gold) !important;
+  background: #773344 !important;
 }}
 
 /* =========================
    NET ASSESSMENT SPOTLIGHT
    ========================= */
+/* PARENT WRAPPER */
 .spotlight-section {{
   background-color: #f1f0ec;
   margin: 2rem 0;
   padding: 2rem;
   border-radius: 4px;
   border-top: 1px solid rgba(27, 23, 37, 0.1);
+  overflow: visible;
 }}
 
 .spotlight-title {{
@@ -643,16 +653,25 @@ CARD_CSS = f"""
   letter-spacing: 0.02em;
 }}
 
+/* TWO-COLUMN LAYOUT */
 .spotlight-container {{
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
+  align-items: stretch;
 }}
 
+/* LEFT COLUMN */
 .spotlight-main {{
-  flex: 0 0 50%;
   background: white;
-  padding: 1.5rem;
   border-radius: 4px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;  /* pushes source link down nicely */
+  overflow: visible;
+  min-height: 100%;
+  box-sizing: border-box;
   box-shadow: 0 1px 2px rgba(27, 23, 37, 0.06);
   border-top: 4px solid #3b668c;
 }}
@@ -730,19 +749,34 @@ CARD_CSS = f"""
   text-decoration: underline;
 }}
 
+/* RIGHT COLUMN: two stacked equal tiles */
 .spotlight-articles {{
-  flex: 0 0 50%;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
   gap: 1.5rem;
+  height: 100%;
+  width: 100%;
 }}
 
+/* article links are grid items */
+.spotlight-articles > a {{
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}}
+
+/* article tile fills the link and row */
 .article-tile {{
   background: white;
   border-radius: 4px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 1px 2px rgba(27, 23, 37, 0.06);
   transition: box-shadow 0.2s ease;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  box-sizing: border-box;
 }}
 
 .article-tile:hover {{
@@ -754,10 +788,15 @@ CARD_CSS = f"""
   height: 140px;
   object-fit: cover;
   display: block;
+  flex-shrink: 0;
 }}
 
 .article-content {{
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }}
 
 .article-title {{
@@ -786,17 +825,22 @@ CARD_CSS = f"""
   text-decoration: underline;
 }}
 
-@media(max-width: 768px) {{
+/* MOBILE */
+@media (max-width: 768px) {{
   .spotlight-container {{
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }}
-  
-  .spotlight-main {{
-    flex: 0 0 100%;
-  }}
-  
+
   .spotlight-articles {{
-    flex: 0 0 100%;
+    grid-template-rows: auto;
+  }}
+
+  .spotlight-articles > a {{
+    height: auto;
+  }}
+
+  .article-tile {{
+    height: auto;
   }}
 }}
 </style>
@@ -810,16 +854,17 @@ def normalize_prob(p: str) -> str:
     p = re.sub(r"\s+", "", p).lower()
     return p
 
-def direction_class(direction: str) -> str:
+def direction_class(direction: str, name: str = "") -> str:
+    n = (name or "").strip().lower()
     d = (direction or "").strip().lower()
+    if "hybrid" in n or "hybrid" in d:
+        return "hybrid"
     if "disruption" in d:
         return "disruption"
     if "progression" in d:
         return "progression"
     if "status" in d:
         return "statusquo"
-    if "hybrid" in d:
-        return "hybrid"
     return "statusquo"
 
 PROB_WIDTH = {"low": "20%", "low-medium": "40%", "medium": "60%", "medium-high": "80%", "high": "100%"}
@@ -966,7 +1011,7 @@ for pile_direction in ["Disruption", "Hybrid Disruption", "Progression"]:
             indicators_html = '<div style="font-size: 0.90rem; color: rgba(27, 23, 37, 0.75);">Coming soon</div>'
 
         bar_width = PROB_WIDTH.get(prob_key, "0%")
-        card_class = direction_class(c.get("direction", ""))
+        card_class = direction_class(c.get("direction", ""), c.get("name", ""))
 
         # Build indicators section only for non-Status Quo cards
         indicators_section = ""
@@ -1053,7 +1098,7 @@ document.addEventListener('DOMContentLoaded', function() {
 # Split rendering: Gender Currently section (Status Quo + Developments)
 cards_html_current = cards_html.split('<div class="scenario-cards-container">')[0]
 cards_html_current_final = cards_html_current + DECK_JS
-components.html(cards_html_current_final, height=750)
+components.html(cards_html_current_final, height=825)
 
 # Forecast Scenarios section
 st.subheader("Forecast Scenarios")

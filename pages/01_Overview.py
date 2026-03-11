@@ -288,6 +288,16 @@ df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
 df = df.dropna(subset=["Date", "Slider Score"]).copy()
 
+# Data cleaning: standardize forecast naming and filter corrupted values
+# Standardize spacing: normalize "Forecast-" variations to "Forecast - "
+df["Forecast"] = df["Forecast"].str.replace(r'Forecast\s*-\s*', 'Forecast - ', regex=True)
+# Remove corrupted forecast values (e.g., "Forecast- 13")
+df = df[~df["Forecast"].str.contains(r'Forecast\s*-\s*\d+$', regex=True, na=False)].copy()
+# Strip trailing/leading whitespace from forecast
+df["Forecast"] = df["Forecast"].str.strip()
+# Remove "Forecast - " prefix to display cleaner names
+df["Forecast"] = df["Forecast"].str.replace(r'^Forecast\s*-\s*', '', regex=True).str.strip()
+
 # Create short display version of development text
 def shorten_text(text, max_chars=120):
     if pd.isna(text):
@@ -300,7 +310,7 @@ def shorten_text(text, max_chars=120):
 df["Development Short"] = df["Development"].apply(shorten_text)
 
 def get_key_insights(forecast_points_df, forecast_col):
-    """Generate 3 key insights from forecast_points dataframe."""
+    """Generate key insights from forecast_points dataframe including Status Quo."""
     if forecast_points_df.empty:
         return ["No insights available for the selected filters."]
     
@@ -318,7 +328,12 @@ def get_key_insights(forecast_points_df, forecast_col):
     max_prog_score = forecast_points_df.loc[max_prog_idx, "Prog"]
     insights.append(f"<strong>Highest cumulative progression:</strong> {max_prog_name} ({max_prog_score:.1f})")
     
-    # Insight 3: Most concentrated forecast intensity
+    # Insight 3: Status Quo forecasts count
+    status_quo_count = len(forecast_points_df[forecast_points_df["Color Category"] == "Status Quo"])
+    status_quo_pct = (status_quo_count / len(forecast_points_df) * 100) if len(forecast_points_df) > 0 else 0
+    insights.append(f"<strong>Status Quo forecasts:</strong> {status_quo_count} forecast(s) ({status_quo_pct:.0f}% of total)")
+    
+    # Insight 4: Most concentrated forecast intensity
     max_intensity_idx = forecast_points_df["Cumulative Intensity"].idxmax()
     max_intensity_name = forecast_points_df.loc[max_intensity_idx, forecast_col]
     max_intensity_score = forecast_points_df.loc[max_intensity_idx, "Cumulative Intensity"]
@@ -347,7 +362,7 @@ SECTOR_COL = "Sector Impacted"
 # ---------------------------
 # 5) PAGE TITLE
 # ---------------------------
-st.title("🌍 Gender Equality Tracker")
+st.title("🌎 Gender Equality Tracker")
 st.markdown("<p style='font-size: 1.3rem; color: rgba(27, 23, 37, 0.85); margin-top: -20px;'>Tracking directional shifts in the U.S. gender policy landscape</p>", unsafe_allow_html=True)
 
 # ---------------------------
@@ -355,43 +370,44 @@ st.markdown("<p style='font-size: 1.3rem; color: rgba(27, 23, 37, 0.85); margin-
 # ---------------------------
 col1, col2 = st.columns(2)
 with col1:
-    st.metric("Total Events", len(df))
+    st.metric("Total Developments", len(df))
 with col2:
     st.metric("Slider Score Range", f"{df['Slider Score'].min()} to {df['Slider Score'].max()}")
 
 # ---------------------------
 # 7) SIDEBAR FILTERS (clean + reset works)
 # ---------------------------
-st.sidebar.header("🔍 Filters")
+st.sidebar.header("Filters")
 
 def options_with_all(series: pd.Series) -> list[str]:
     vals = sorted(series.dropna().astype(str).unique().tolist())
-    return ["All"] + vals
+    return vals
 
-# reset: delete keys then rerun
-if st.sidebar.button("🔄 Reset Filters"):
-    for k in ["forecast_filter", "domain_filter", "sector_filter"]:
-        if k in st.session_state:
-            del st.session_state[k]
-    st.rerun()
+# Reset filters callback
+def reset_filters():
+    st.session_state["forecast_filter"] = []
+    st.session_state["domain_filter"] = []
+    st.session_state["sector_filter"] = []
+
+st.sidebar.button("Reset Filters", on_click=reset_filters)
 
 forecast_options = options_with_all(df[FORECAST_COL])
 domain_options = options_with_all(df[DOMAIN_COL])
 sector_options = options_with_all(df[SECTOR_COL])
 
-selected_forecast = st.sidebar.selectbox("Forecast", forecast_options, key="forecast_filter")
-selected_domain = st.sidebar.selectbox("Domain of Assessment", domain_options, key="domain_filter")
-selected_sector = st.sidebar.selectbox("Sector Impacted", sector_options, key="sector_filter")
+selected_forecast = st.sidebar.multiselect("Forecast", forecast_options, key="forecast_filter")
+selected_domain = st.sidebar.multiselect("Domain of Assessment", domain_options, key="domain_filter")
+selected_sector = st.sidebar.multiselect("Sector Impacted", sector_options, key="sector_filter")
 
 df_filtered = df.copy()
-if selected_forecast != "All":
-    df_filtered = df_filtered[df_filtered[FORECAST_COL].astype(str) == selected_forecast]
-if selected_domain != "All":
-    df_filtered = df_filtered[df_filtered[DOMAIN_COL].astype(str) == selected_domain]
-if selected_sector != "All":
-    df_filtered = df_filtered[df_filtered[SECTOR_COL].astype(str) == selected_sector]
+if selected_forecast:
+    df_filtered = df_filtered[df_filtered[FORECAST_COL].astype(str).isin(selected_forecast)]
+if selected_domain:
+    df_filtered = df_filtered[df_filtered[DOMAIN_COL].astype(str).isin(selected_domain)]
+if selected_sector:
+    df_filtered = df_filtered[df_filtered[SECTOR_COL].astype(str).isin(selected_sector)]
 
-st.sidebar.caption(f"Showing {len(df_filtered)} of {len(df)} events")
+st.sidebar.caption(f"Showing {len(df_filtered)} of {len(df)} developments")
 
 # Forecast Direction
 st.sidebar.subheader("Forecast Direction")
@@ -430,8 +446,8 @@ forecast_points["Net Direction"] = forecast_points["Disr"] - forecast_points["Pr
 # Get latest event per forecast from filtered data
 if not df_filtered.empty:
     latest_by_forecast = df_filtered.sort_values("Date", ascending=False).groupby(FORECAST_COL, as_index=False).first()
-    latest_by_forecast = latest_by_forecast[[FORECAST_COL, "Date", "Development Short", "Slider Score", DOMAIN_COL, SECTOR_COL]].rename(
-        columns={"Date": "Latest Date", "Development Short": "Latest Development", "Slider Score": "Latest Slider Score", DOMAIN_COL: "Latest Domain", SECTOR_COL: "Latest Sector"}
+    latest_by_forecast = latest_by_forecast[[FORECAST_COL, "Date", "Development Short", "Slider Score", DOMAIN_COL, SECTOR_COL, "Link"]].rename(
+        columns={"Date": "Latest Date", "Development Short": "Latest Development", "Slider Score": "Latest Slider Score", DOMAIN_COL: "Latest Domain", SECTOR_COL: "Latest Sector", "Link": "Latest Link"}
     )
     forecast_points = forecast_points.merge(latest_by_forecast, left_on=FORECAST_COL, right_on=FORECAST_COL, how="left")
     forecast_points["Latest Date Str"] = forecast_points["Latest Date"].dt.strftime("%b %d, %Y")
@@ -442,6 +458,7 @@ else:
     forecast_points["Latest Slider Score"] = None
     forecast_points["Latest Domain"] = None
     forecast_points["Latest Sector"] = None
+    forecast_points["Latest Link"] = None
 
 if forecast_points.empty:
     st.info("No data available for the current filters.")
@@ -456,14 +473,7 @@ else:
     max_prog_score = forecast_points.loc[max_prog_idx, "Prog"]
     
     latest_date = df_filtered["Date"].max()
-    date_str = latest_date.strftime("%B %d, %Y")
-    
-    # Momentum Graph Explanation (displayed before chart)
-    st.markdown(f"""
-**Momentum Graph Explanation**
-
-The Disruption and Progression Momentum graph plots cumulative forecast intensity against net directional movement. Cumulative intensity reflects the volume and concentration of forecasted developments within a domain (emerging → accelerating), while vertical positioning distinguishes between disruptive and progressive trajectories. The quadrant framework highlights which issue areas are early-stage signals versus accelerating structural shifts.
-""")
+    date_str = latest_date.strftime("%B %d, %Y") if pd.notna(latest_date) else "No data"
     
     # Quadrant thresholds
     x0 = float(forecast_points["Cumulative Intensity"].median())
@@ -484,8 +494,18 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
         .encode(y="y:Q")
     )
 
-    # Points (pick ONE point color)
-    POINT_COLOR = "#1b1725"  # NL dark (neutral)
+    # Add color category based on forecast type and direction
+    def get_color_category(row):
+        if "Status Quo" in str(row[FORECAST_COL]):
+            return "Status Quo"
+        elif row["Net Direction"] > 0:
+            return "Disruption"
+        else:
+            return "Progression"
+    
+    forecast_points["Color Category"] = forecast_points.apply(get_color_category, axis=1)
+
+    # Points with color mapped to category
     points = alt.Chart(forecast_points).mark_circle(
     size=260,
     stroke="white",
@@ -493,10 +513,13 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
 ).encode(
     x=alt.X("Cumulative Intensity:Q", title="Cumulative Intensity"),
     y=alt.Y("Net Direction:Q", title="Net Direction", scale=alt.Scale(padding=20)),
-    color=alt.condition(
-        "datum['Net Direction'] > 0",
-        alt.value("#cf5442"),
-        alt.value("#3b668c")
+    color=alt.Color(
+        "Color Category:N",
+        scale=alt.Scale(
+            domain=["Status Quo", "Disruption", "Progression"],
+            range=["#62af44", "#cf5442", "#3b668c"]
+        ),
+        legend=None
     ),
     tooltip=[
     alt.Tooltip(f"{FORECAST_COL}:N", title="Forecast"),
@@ -567,9 +590,19 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
         <div style="width: 16px; height: 16px; background-color: #3b668c; border-radius: 2px;"></div>
         <span>Progression</span>
       </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="width: 16px; height: 16px; background-color: #62af44; border-radius: 2px;"></div>
+        <span>Status Quo</span>
+      </div>
     </div>
     """, unsafe_allow_html=True)
     st.altair_chart(chart, use_container_width=True)
+    
+    # How to Interpret This Chart section (directly after chart)
+    with st.expander("How to Interpret This Chart", expanded=False):
+        st.markdown("""
+The Disruption and Progression Momentum graph plots cumulative forecast intensity against net directional movement. Cumulative intensity reflects the volume and concentration of forecasted developments within a domain (emerging → accelerating), while vertical positioning distinguishes between disruptive and progressive trajectories. The quadrant framework highlights which issue areas are early-stage signals versus accelerating structural shifts.
+""")
     
     # Statistics below chart
     st.markdown(f"""
@@ -582,67 +615,133 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
     
     # Key Insights Strip
     insights_list = get_key_insights(forecast_points, FORECAST_COL)
-    insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725;'>{insight}</li>" for insight in insights_list])
+    insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in insights_list])
     
     st.markdown(f"""
     <div style="background-color: #f1f0ec; border-left: 4px solid #bfa359; padding: 1rem; margin: 1.5rem 0; border-radius: 2px; box-shadow: 0 1px 3px rgba(27, 23, 37, 0.08);">
-      <div style="font-size: 0.75rem; font-weight: 700; color: #1b1725; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">Key Insights</div>
+      <div style="font-size: 1.1rem; font-weight: 700; color: #1b1725; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">Key Insights</div>
       <ul style="margin: 0; padding-left: 1.5rem; list-style: disc;">
         {insights_html}
       </ul>
     </div>
     """, unsafe_allow_html=True)
 
-    # Latest Event by Forecast panel
-    st.subheader("Latest Events by Forecast")
-    
-    if not df_filtered.empty:
-        latest_events_display = forecast_points[[FORECAST_COL, "Latest Date Str", "Latest Development", "Latest Domain", "Latest Sector", "Latest Slider Score"]].copy()
-        latest_events_display = latest_events_display[latest_events_display["Latest Date Str"] != "No data"]
-        
-        if not latest_events_display.empty:
-            latest_events_display = latest_events_display.rename(columns={
-                FORECAST_COL: "Forecast",
-                "Latest Date Str": "Date",
-                "Latest Development": "Event Title",
-                "Latest Domain": "Domain",
-                "Latest Sector": "Sector",
-                "Latest Slider Score": "Score"
-            })
-            # Sort by date descending (most recent first)
-            latest_events_display["Date"] = pd.to_datetime(latest_events_display["Date"], format="%b %d, %Y", errors="coerce")
-            latest_events_display = latest_events_display.sort_values("Date", ascending=False).head(3)
-            latest_events_display["Date"] = latest_events_display["Date"].dt.strftime("%b %d, %Y")
-            latest_events_display = latest_events_display[[c for c in ["Forecast", "Date", "Event Title", "Score"] if c in latest_events_display.columns]]
+    # Latest Development by Forecast panel
+    with st.expander("Latest Developments by Forecast", expanded=False):
+        if not df_filtered.empty:
+            latest_events_display = forecast_points[[FORECAST_COL, "Latest Date Str", "Latest Development", "Latest Domain", "Latest Sector", "Latest Slider Score", "Latest Link"]].copy()
+            latest_events_display = latest_events_display[latest_events_display["Latest Date Str"] != "No data"]
+            # Remove rows with NaN values in critical columns
+            latest_events_display = latest_events_display.dropna(subset=["Latest Development", "Latest Date Str"])
             
-            # Cap Event Title at 100 characters without breaking words
-            def truncate_at_word_boundary(text, max_length=100):
-                if len(text) <= max_length:
-                    return text
-                truncated = text[:max_length]
-                last_space = truncated.rfind(' ')
-                if last_space > 0:
-                    return truncated[:last_space] + "..."
-                return truncated + "..."
-            
-            latest_events_display["Event Title"] = latest_events_display["Event Title"].apply(truncate_at_word_boundary)
-            
-            st.markdown(
-                """
-                <style>
-                [data-testid="stDataFrame"] [data-testid="stDataFrameContainer"] div {
-                    word-wrap: break-word;
-                    white-space: normal;
-                }
-                </style>
-                """,
-                unsafe_allow_html=True,
-            )
-            st.dataframe(latest_events_display, use_container_width=True, hide_index=True)
+            if not latest_events_display.empty:
+                latest_events_display = latest_events_display.rename(columns={
+                    FORECAST_COL: "Forecast",
+                    "Latest Date Str": "Date",
+                    "Latest Development": "Development Title",
+                    "Latest Domain": "Domain",
+                    "Latest Sector": "Sector",
+                    "Latest Slider Score": "Score",
+                    "Latest Link": "Source"
+                })
+                # Sort by date descending (most recent first)
+                latest_events_display["Date"] = pd.to_datetime(latest_events_display["Date"], format="%b %d, %Y", errors="coerce")
+                latest_events_display = latest_events_display.sort_values("Date", ascending=False).head(5)
+                latest_events_display["Date"] = latest_events_display["Date"].dt.strftime("%b %d, %Y")
+                latest_events_display = latest_events_display[[c for c in ["Forecast", "Date", "Development Title", "Score", "Source"] if c in latest_events_display.columns]]
+                
+                # Cap Development Title at 100 characters without breaking words
+                def truncate_at_word_boundary(text, max_length=100):
+                    if pd.isna(text) or not isinstance(text, str):
+                        return ""
+                    if len(text) <= max_length:
+                        return text
+                    truncated = text[:max_length]
+                    last_space = truncated.rfind(' ')
+                    if last_space > 0:
+                        return truncated[:last_space] + "..."
+                    return truncated + "..."
+                
+                # Extract domain from URL and format as readable source name
+                def extract_source_name(url):
+                    if pd.isna(url) or not url:
+                        return "Unknown"
+                    
+                    # Mapping of domain names to proper publication names
+                    source_mapping = {
+                        "usatoday": "USA Today",
+                        "nytimes": "New York Times",
+                        "wsj": "Wall Street Journal",
+                        "politico": "Politico",
+                        "thehill": "The Hill",
+                        "reuters": "Reuters",
+                        "bbc": "BBC",
+                        "cnn": "CNN",
+                        "foxnews": "Fox News",
+                        "sltrib": "Salt Lake Tribune",
+                        "congress": "Congress.gov",
+                        "scotus": "SCOTUS",
+                        "whitehouse": "White House",
+                        "npr": "NPR",
+                        "theguardian": "The Guardian",
+                        "bloomberg": "Bloomberg",
+                        "bgov": "Bloomberg Government",
+                        "cnbc": "CNBC",
+                        "axios": "Axios",
+                        "vox": "Vox",
+                        "cpr": "Colorado Public Radio",
+                    }
+                    
+                    try:
+                        from urllib.parse import urlparse
+                        parsed = urlparse(str(url))
+                        domain = parsed.netloc.replace("www.", "").lower()
+                        
+                        # Split by dots to get domain parts
+                        domain_parts = domain.split(".")
+                        
+                        # Try to find the main domain (second-to-last part before TLD)
+                        # For news.bgov.com, we want "bgov"
+                        # For usatoday.com, we want "usatoday"
+                        if len(domain_parts) >= 2:
+                            # Try the second-to-last part first (handles news.bgov.com, etc.)
+                            main_domain = domain_parts[-2]
+                        else:
+                            main_domain = domain_parts[0]
+                        
+                        # Check if we have a mapping for this domain
+                        if main_domain in source_mapping:
+                            return source_mapping[main_domain]
+                        
+                        # If not found, try the first part (for simple domains)
+                        if len(domain_parts) > 1 and domain_parts[0] in source_mapping:
+                            return source_mapping[domain_parts[0]]
+                        
+                        # Otherwise, format the main domain name
+                        main_domain = main_domain.replace("-", " ").replace("_", " ")
+                        return main_domain.title()
+                    except:
+                        return "Unknown"
+                
+                latest_events_display["Development Title"] = latest_events_display["Development Title"].apply(truncate_at_word_boundary)
+                latest_events_display["Source"] = latest_events_display["Source"].apply(extract_source_name)
+                
+                st.markdown(
+                    """
+                    <style>
+                    [data-testid="stDataFrame"] [data-testid="stDataFrameContainer"] div {
+                        word-wrap: break-word;
+                        white-space: normal;
+                    }
+                    </style>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                st.dataframe(latest_events_display, use_container_width=True, hide_index=True)
+            else:
+                st.info("No events available for selected forecasts in current filters.")
         else:
-            st.info("No events available for selected forecasts in current filters.")
-    else:
-        st.info("No events in current filters.")
+            st.info("No events in current filters.")
 
     st.markdown(
         """
@@ -679,15 +778,15 @@ import re
 st.subheader("Net Direction by Domain of Assessment")
 
 st.caption(
-    "Net Direction is computed as cumulative disruption minus cumulative progression "
-    "(equivalent to the sum of Slider Scores in the current filtered view)."
+    "Net direction reflects the balance between disruptive and progressive developments across domains of assessment based on the currently selected filters. Values represent cumulative disruption minus cumulative progression."
 )
 
 # guardrails
 if DOMAIN_COL not in df_filtered.columns:
     st.warning(f"Missing expected column: {DOMAIN_COL}")
 else:
-    top_n = st.slider("Show top N domains", min_value=3, max_value=20, value=10, step=1)
+    # Fixed top N domains to display
+    top_n = 10
 
     # compute components + net
     dom = df_filtered.copy()
@@ -718,7 +817,7 @@ else:
         .mark_bar()
         .encode(
             y=alt.Y(f"{DOMAIN_COL}:N", sort=None, title="Domain of Assessment", axis=alt.Axis(labelLimit=300, labelPadding=15)),
-            x=alt.X("Net Direction:Q", title="Net Direction (Progression ⟵ 0 ⟶ Disruption)"),
+            x=alt.X("Net Direction:Q", title="Net Direction Score (Progression ← 0 → Disruption)"),
             color=alt.Color(
                 "Direction Label:N",
                 scale=alt.Scale(
@@ -742,54 +841,290 @@ else:
 
     st.altair_chart((domain_chart + zero_line).properties(padding={"left": 40, "right": 40, "top": 20, "bottom": 20}), use_container_width=True)
 
-    st.markdown("""
-**Explanation**
-
-Net direction reflects the balance between disruptive and progressive developments across each domain of assessment. Values are calculated by subtracting cumulative progression scores from cumulative disruption scores (equivalent to the sum of slider scores in the filtered view). Higher values indicate domains where disruptive developments are more concentrated, while values closer to zero reflect a more balanced mix of progression and disruption.
+    with st.expander("How to Interpret This Chart", expanded=False):
+        st.markdown("""
+Net direction indicates whether developments within each domain are trending towards disruption or progression. The value reflects the difference between cumulative disruption and progression based on the currently selected forecast type, sector, and group filters. Higher values indicate domains where disruptive developments trend higher, while values closer to zero indicate a more balanced mix of disruption and progression.
 """)
 
-    # optional: quick table for export/readability
-    with st.expander("See domain totals"):
-        st.dataframe(
-            dom_top[[DOMAIN_COL, "Disr", "Prog", "Net Direction"]]
-                .sort_values("Net Direction", ascending=False),
-            use_container_width=True
-        )
+    # Key Insights for Domain Assessment (only if data exists)
+    if not dom_top.empty:
+        dom_sorted = dom_top.sort_values("Net Direction", ascending=False)
+        max_disruption_domain = dom_sorted.iloc[0][DOMAIN_COL]
+        max_disruption_value = dom_sorted.iloc[0]["Net Direction"]
+        
+        min_disruption_domain = dom_sorted.iloc[-1][DOMAIN_COL]
+        min_disruption_value = dom_sorted.iloc[-1]["Net Direction"]
+        
+        # Find most balanced (closest to zero)
+        dom_balance = dom_top.copy()
+        dom_balance["Balance"] = abs(dom_balance["Net Direction"])
+        most_balanced_domain = dom_balance.loc[dom_balance["Balance"].idxmin(), DOMAIN_COL]
+        most_balanced_value = dom_balance.loc[dom_balance["Balance"].idxmin(), "Net Direction"]
+        
+        domain_insights_list = [
+            f"<strong>Most disruption-oriented domain:</strong> {max_disruption_domain} (net direction: {max_disruption_value:.1f})",
+            f"<strong>Most progression-oriented domain:</strong> {min_disruption_domain} (net direction: {min_disruption_value:.1f})",
+            f"<strong>Most balanced domain:</strong> {most_balanced_domain} (net direction: {most_balanced_value:.1f})"
+        ]
+        domain_insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in domain_insights_list])
+        
+        st.markdown(f"""
+        <div style="background-color: #f1f0ec; border-left: 4px solid #bfa359; padding: 1rem; margin: 1.5rem 0; border-radius: 2px; box-shadow: 0 1px 3px rgba(27, 23, 37, 0.08);">
+          <div style="font-size: 1.1rem; font-weight: 700; color: #1b1725; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">Key Insights</div>
+          <ul style="margin: 0; padding-left: 1.5rem; list-style: disc;">
+            {domain_insights_html}
+          </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Domain totals table (interactive)
+        with st.expander("Domain Totals Table", expanded=False):
+            st.dataframe(
+                dom_top[[DOMAIN_COL, "Disr", "Prog", "Net Direction"]]
+                    .sort_values("Net Direction", ascending=False),
+                use_container_width=True,
+                hide_index=True
+            )
+    else:
+        st.info("No domain data available for the current filters.")
 
 # ---------------------------
-# 9) FORECAST COMPOSITION (monthly, interactive legend)
+# 9) FORECAST COMPOSITION (monthly, two-level hierarchy)
 # ---------------------------
 st.subheader("Forecast Composition Over Time")
 
+# Add a Direction column based on forecast name
+def get_direction(forecast_name):
+    if pd.isna(forecast_name):
+        return "Unknown"
+    forecast_name = str(forecast_name).lower()
+    if "status quo" in forecast_name:
+        return "Status Quo"
+    elif any(word in forecast_name for word in ["disruption", "disruption"]):
+        return "Disruption"
+    else:  # Contains "progression" or other
+        return "Progression"
+
+df_filtered["Direction"] = df_filtered[FORECAST_COL].apply(get_direction)
+
+# Aggregate daily data into monthly totals
 df_filtered["Month"] = df_filtered["Date"].dt.to_period("M").dt.to_timestamp(how="start")
+
+# Create month-year label for display (e.g., "Jan 2025")
+df_filtered["MonthLabel"] = df_filtered["Date"].dt.strftime("%b %Y")
+
+# Prepare data for top-level (direction) chart
+monthly_direction_counts = (
+    df_filtered.groupby(["Month", "MonthLabel", "Direction"]).size().reset_index(name="Count")
+).sort_values("Month")
+
+# Prepare data for breakdown chart (by forecast type)
 monthly_forecast_counts = (
-    df_filtered.groupby(["Month", FORECAST_COL]).size().reset_index(name="Count")
+    df_filtered.groupby(["Month", "MonthLabel", "Direction", FORECAST_COL]).size().reset_index(name="Count")
+).sort_values("Month")
+
+# Interactive selection on direction
+direction_click = alt.selection_point(fields=["Direction"], bind="legend")
+
+# Top level chart: Direction (Progression, Status Quo, Disruption)
+direction_colors = alt.Scale(
+    domain=["Progression", "Status Quo", "Disruption"],
+    range=[COLOR_PROGRESSION, "#62af44", COLOR_DISRUPTION]
 )
 
-forecast_click = alt.selection_point(fields=[FORECAST_COL], bind="legend")
+# Calculate monthly totals for display
+monthly_totals = monthly_direction_counts.groupby("MonthLabel")["Count"].sum().reset_index()
+month_label_sort = list(monthly_direction_counts["MonthLabel"].unique())
 
-# Extended color palette for forecast categories
-SECONDARY_COLORS = ["#1b1725", "#bfa359", "#f1f0ec", "#3b668c", "#cf5442", "#773344", "#e1bb4b", "#fade82", "#93b5c3", "#dca465", "#62af44"]
-
-# Get unique forecast values from data to map colors consistently
-forecast_categories = sorted(monthly_forecast_counts[FORECAST_COL].unique().tolist())
-# Create a color mapping for each forecast category
-color_range = SECONDARY_COLORS[:len(forecast_categories)]
-color_scale = alt.Scale(domain=forecast_categories, range=color_range)
-
-composition_chart = alt.Chart(monthly_forecast_counts).mark_bar().encode(
-    x=alt.X("Month:T", title="Month"),
-    y=alt.Y("Count:Q", title="Number of events"),
-    color=alt.Color(f"{FORECAST_COL}:N", scale=color_scale, legend=alt.Legend(title="Forecast")),
-    opacity=alt.condition(forecast_click, alt.value(1.0), alt.value(0.2)),
+direction_chart = alt.Chart(monthly_direction_counts).mark_bar().encode(
+    x=alt.X("MonthLabel:N", title="Month", sort=month_label_sort, axis=alt.Axis(labelAngle=0), scale=alt.Scale(paddingInner=0.3)),
+    y=alt.Y("Count:Q", title="Number of Developments", stack="zero"),
+    color=alt.Color(
+        "Direction:N",
+        scale=direction_colors,
+        legend=alt.Legend(title="Forecast Direction", orient="top", direction="horizontal")
+    ),
+    opacity=alt.condition(direction_click, alt.value(1.0), alt.value(0.2)),
     tooltip=[
-        alt.Tooltip("yearmonth(Month):T", title="Month"),
-        alt.Tooltip(f"{FORECAST_COL}:N", title="Forecast"),
-        alt.Tooltip("Count:Q", title="Events"),
+        alt.Tooltip("MonthLabel:N", title="Month"),
+        alt.Tooltip("Direction:N", title="Direction"),
+        alt.Tooltip("Count:Q", title="Developments"),
     ],
-).add_params(forecast_click).properties(height=350)
+).add_params(direction_click).properties(
+    title=alt.TitleParams(
+        text="Monthly Forecast Composition",
+        anchor="middle",
+        fontSize=14,
+        fontWeight="bold"
+    )
+)
 
-st.altair_chart(composition_chart, use_container_width=True)
+# Add text labels with monthly totals on top of bars
+total_text = alt.Chart(monthly_totals).mark_text(dy=-5, fontSize=11, fontWeight="bold").encode(
+    x=alt.X("MonthLabel:N", sort=month_label_sort),
+    y=alt.Y("Count:Q"),
+    text=alt.Text("Count:Q")
+)
+
+direction_chart_with_totals = (direction_chart + total_text).properties(height=300, width=1000)
+
+# Second chart: Breakdown by forecast type (filtered by clicked direction)
+if not monthly_forecast_counts.empty:
+    st.markdown("**Breakdown by Forecast Type** — Click a direction in the Forecast Direction legend above to highlight only that direction's forecast types")
+    
+    # Extended color palette for forecast categories
+    SECONDARY_COLORS = ["#1b1725", "#bfa359", "#f1f0ec", "#3b668c", "#cf5442", "#773344", "#e1bb4b", "#fade82", "#93b5c3", "#dca465", "#62af44"]
+    
+    # Get unique forecast values from data to map colors consistently
+    forecast_categories = sorted(monthly_forecast_counts[FORECAST_COL].unique().tolist())
+    
+    # Custom color mapping for all forecast types - each with distinct color
+    custom_colors = {
+        "Diplomatic Disruption": "#d97e7a",           # Light red
+        "Diplomatic Progression": "#5081a3",          # Deep blue
+        "Economic Disruption": "#c94b3a",             # Dark red
+        "Economic Progression": "#7fa3c0",            # Light blue
+        "Hybrid Political/Security Disruption": "#8b4453",   # Burgundy
+        "Hybrid Political/Social Disruption": "#6b9d7d",     # Sage green
+        "Political Disruption": "#e85c52",            # Bright red-orange
+        "Political Progression": "#2d5375",           # Navy blue
+        "Social Disruption": "#f4896f",               # Coral
+        "Social Progression": "#4a95d8",              # Sky blue
+        "Status Quo": "#62af44"                       # Green
+    }
+    
+    # Build color range: use custom colors for specified types, fill rest with SECONDARY_COLORS
+    color_range = []
+    used_secondary_colors = []
+    for cat in forecast_categories:
+        if cat in custom_colors:
+            color_range.append(custom_colors[cat])
+        else:
+            # Use remaining colors from SECONDARY_COLORS
+            available_secondary = [c for c in SECONDARY_COLORS if c not in used_secondary_colors and c not in color_range]
+            if available_secondary:
+                color_range.append(available_secondary[0])
+                used_secondary_colors.append(available_secondary[0])
+            else:
+                color_range.append(SECONDARY_COLORS[0])
+    
+    forecast_color_scale = alt.Scale(domain=forecast_categories, range=color_range)
+    
+    # Calculate monthly totals for breakdown chart
+    monthly_breakdown_totals = monthly_forecast_counts.groupby("MonthLabel")["Count"].sum().reset_index()
+    breakdown_month_sort = list(monthly_forecast_counts["MonthLabel"].unique())
+    
+    breakdown_chart = alt.Chart(monthly_forecast_counts).mark_bar().encode(
+        x=alt.X("MonthLabel:N", title="Month", sort=breakdown_month_sort, axis=alt.Axis(labelAngle=0), scale=alt.Scale(paddingInner=0.3)),
+        y=alt.Y("Count:Q", title="Number of Developments", stack="zero"),
+        color=alt.Color(f"{FORECAST_COL}:N", scale=forecast_color_scale, legend=alt.Legend(title="Forecast Type", orient="bottom", direction="horizontal", titleFontSize=12, labelFontSize=10, columns=4)),
+        opacity=alt.condition(
+            direction_click,
+            alt.value(1.0),
+            alt.value(0.15)
+        ),
+        tooltip=[
+            alt.Tooltip("MonthLabel:N", title="Month"),
+            alt.Tooltip("Direction:N", title="Direction"),
+            alt.Tooltip(f"{FORECAST_COL}:N", title="Forecast Type"),
+            alt.Tooltip("Count:Q", title="Developments"),
+        ],
+    ).properties(
+        height=300,
+        width=1000,
+        title=alt.TitleParams(
+            text="Breakdown by Forecast Type — Select a direction above to see which specific forecast types are associated with each direction",
+            anchor="middle",
+            fontSize=14,
+            fontWeight="bold"
+        )
+    )
+    
+    # Combine both charts vertically so interaction works across both
+    # Using alt.vconcat() for vertical stacking with shared interaction
+    combined_chart = alt.vconcat(direction_chart_with_totals, breakdown_chart).properties(
+        spacing=20
+    ).resolve_scale(color='independent')
+    
+    st.altair_chart(combined_chart, use_container_width=True)
+    
+    with st.expander("How to Interpret This Chart", expanded=False):
+        st.markdown("""
+These charts show how forecast developments are distributed over time. The top chart displays the total number of developments grouped by direction (disruption, status quo, and progression). The lower chart breaks those developments down by forecast type. Selecting a direction in the top chart filters the lower chart to highlight the associated forecasts.
+""")
+    
+    # Key Insights for Forecast Composition
+    if not monthly_direction_counts.empty:
+        # Calculate totals by direction
+        direction_totals = monthly_direction_counts.groupby("Direction")["Count"].sum().sort_values(ascending=False)
+        most_represented_direction = direction_totals.idxmax()
+        most_represented_count = direction_totals.max()
+        
+        # Calculate totals by forecast type
+        forecast_totals = monthly_forecast_counts.groupby(FORECAST_COL)["Count"].sum().sort_values(ascending=False)
+        most_represented_forecast = forecast_totals.idxmax()
+        most_represented_forecast_count = forecast_totals.max()
+        
+        # Calculate total developments
+        total_developments = monthly_forecast_counts["Count"].sum()
+        
+        composition_insights_list = [
+            f"<strong>Most represented direction:</strong> {most_represented_direction} ({most_represented_count} developments)",
+            f"<strong>Most represented forecast type:</strong> {most_represented_forecast} ({most_represented_forecast_count} developments)",
+            f"<strong>Total developments tracked:</strong> {total_developments} developments"
+        ]
+        composition_insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in composition_insights_list])
+        
+        st.markdown(f"""
+        <div style="background-color: #f1f0ec; border-left: 4px solid #bfa359; padding: 1rem; margin: 1.5rem 0; border-radius: 2px; box-shadow: 0 1px 3px rgba(27, 23, 37, 0.08);">
+          <div style="font-size: 1.1rem; font-weight: 700; color: #1b1725; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">Key Insights</div>
+          <ul style="margin: 0; padding-left: 1.5rem; list-style: disc;">
+            {composition_insights_html}
+          </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Expandable data table
+    with st.expander("View Monthly Forecast Data"):
+        # Create pivot table by direction using MonthLabel for display, sorted by Month
+        monthly_direction_pivot = (
+            monthly_direction_counts[["Month", "MonthLabel", "Direction", "Count"]]
+            .pivot_table(index="MonthLabel", columns="Direction", values="Count", aggfunc="sum")
+            .fillna(0)
+            .astype(int)
+        )
+        monthly_direction_pivot.index.name = "Month"
+        # Sort by converting back to datetime for proper month ordering
+        month_order = sorted(monthly_direction_counts[["Month", "MonthLabel"]].drop_duplicates()["MonthLabel"].tolist())
+        monthly_direction_pivot = monthly_direction_pivot.reindex(month_order)
+        
+        # Create pivot table by forecast type using MonthLabel for display
+        monthly_forecast_pivot = (
+            monthly_forecast_counts[["Month", "MonthLabel", FORECAST_COL, "Count"]]
+            .pivot_table(index="MonthLabel", columns=FORECAST_COL, values="Count", aggfunc="sum")
+            .fillna(0)
+            .astype(int)
+        )
+        monthly_forecast_pivot.index.name = "Month"
+        # Sort by month ordering
+        monthly_forecast_pivot = monthly_forecast_pivot.reindex(month_order)
+        
+        # Use tabs for the two views
+        tab1, tab2 = st.tabs(["By Direction", "By Forecast Type"])
+        
+        with tab1:
+            st.dataframe(
+                monthly_direction_pivot.iloc[::-1],
+                use_container_width=True,
+                hide_index=False
+            )
+        
+        with tab2:
+            st.dataframe(
+                monthly_forecast_pivot.iloc[::-1],
+                use_container_width=True,
+                hide_index=False
+            )
 
 st.divider()
 
