@@ -23,7 +23,7 @@ st.markdown(
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
 
 /* ---------- GLOBAL FONT ---------- */
-html, body, [class*="css"] {{
+body, [class*="css"] {{
   font-family: 'Roboto', sans-serif;
 }}
 
@@ -140,7 +140,7 @@ FORECAST_CARDS = [
         "name": "Political",
         "direction": "Progression",
         "probability": "Low/Medium (25-40%)",
-        "summary": "Come back and write real scenarios later",
+        "summary": "This forecast envisions a reversal in which policy actions at state and federal levels establish, reinstate, or expand protections for gender, reproductive, and LGBTQ+ rights. Through institutional checks and pragmatic governance, rights fragmentation reverses and equity outcomes strengthen.",
         "monitoring_indicators": ["State or federal policy actions that establish, reinstate, or expand gender, reproductive, or LGBTQ+ protections", "Judicial rulings or injunctions that reinforce, expand, or affirm gender, reproductive, or LGBTQ+ rights"],
         "implications": ["Strengthened social equity and inclusion outcomes for marginalized groups", "Partial restoration of US credibility on gender and human rights issues"]
     },
@@ -156,7 +156,7 @@ FORECAST_CARDS = [
         "name": "Diplomatic", 
         "direction": "Disruption",
         "probability": "Low/Medium (25-40%)",
-        "summary": "Come back and write real scenarios later",
+        "summary": "This forecast illustrates how withdrawal from international gender frameworks and defunding of multilateral organizations undermines the US's ability to shape global gender policy. The resulting loss of soft power diminishes US credibility and accelerates global adoption of restrictive gender policies.",
         "monitoring_indicators": ["Adoption of US aligned conservative gender policies by foreign governments", "US withdrawal from or defunding of international organizations advancing gender, LGBTQ+, or reproductive rights"],
         "implications": ["Reduction of US credibility in multilateral institutions", "Decreased global access to reproductive, gender-based, and LGBTQ+ health and protection programs"]
     },
@@ -164,21 +164,22 @@ FORECAST_CARDS = [
         "name": "Diplomatic", 
         "direction": "Progression",
         "probability": "Low (5-25%)",
-        "summary": "Come back and write real scenarios later",
+        "summary": "This forecast envisions renewed US commitment to international gender equality frameworks and restored funding for organizations advancing reproductive, LGBTQ+, and gender rights. Strengthened multilateral engagement rebuilds US credibility and increases global access to gender-affirming support systems.",
+        "monitoring_indicators": ["Reaffirming support of international organizations supporting gender, LGBTQ+, and reproductive rights"],
         "implications": ["Implications coming soon"]
     },
      {
         "name": "Economic", 
         "direction": "Progression",
         "probability": "Low (5-25%)",
-        "summary": "Come back and write real scenarios later",
+        "summary": "This forecast reflects increased investment in evidence-based research, public universities, and workforce development programs that advance gender equity and economic inclusion. Strengthened institutional commitment to equitable economic participation expands opportunities for marginalized communities and drives broader economic resilience.",
         "implications": ["Implications coming soon"]
     },
      {
         "name": "Economic", 
         "direction": "Disruption",
         "probability": "Low/Medium (25-40%)",
-        "summary": "Come back and write real scenarios later",
+        "summary": "This forecast illustrates how cuts to federal research funding and defunding of equity-focused institutions disrupts workforce diversity initiatives and limits economic opportunities for marginalized communities. Reduced evidence-based policymaking weakens institutional capacity to address gender-driven economic inequities.",
         "monitoring_indicators": ["Cuts or divestments in federal scientific, evidence-based research, or mass media related to equity, gender, or social policy", "Decreased funding for public universities focused on social science research"],
         "implications": ["Reduced economic opportunities for marginalized communities", "Disruption of workforce diversity and inclusion initiatives"]
     },
@@ -186,7 +187,7 @@ FORECAST_CARDS = [
         "name": "Social", 
         "direction": "Disruption",
         "probability": "Medium/High (60-75%)",
-        "summary": "Come back and write real scenarios later",
+        "summary": "This forecast illustrates how restrictive abortion policies create medical and ethical crises while anticipatory fear drives healthcare providers to withdraw services from vulnerable populations. The compounding effects of institutional pauses, discrimination escalation, and global human rights impacts reshape social landscapes.",
         "monitoring_indicators": ["Medical and ethical crises emerging from restrictive abortion policies", "Service withdrawal or denial driven by anticipated legal, financial, or political retaliation"],
         "implications": ["Increasing discrimination towards trans and gender-diverse individuals", "Global impact on diplomacy and human rights"]
     },
@@ -194,36 +195,40 @@ FORECAST_CARDS = [
         "name": "Social", 
         "direction": "Progression",
         "probability": "Low (5-25%)",
-        "summary": "Come back and write real scenarios later",
+        "summary": "This forecast envisions the establishment or reinstatement of gender-conscious protection programs and the restoration of reproductive and gender-affirming services following periods of institutional pause. Strengthened social commitment to equity outcomes reverses discrimination trends and rebuilds community trust.",
+        "monitoring_indicators": ["Establishment or reinstatement of gender-conscious or equity-oriented protection programs", "Restoration of reproductive and gender-affirming services following institutional pause"],
         "implications": ["Implications coming soon"]
     },
           {
         "name": "Security", 
         "direction": "Progression",
         "probability": "Low (5-25%)",
-        "summary": "Come back and write real scenarios later",
+        "summary": "This forecast reflects rollback of national security laws targeting gender identity and increased inclusion of diverse voices in security policymaking. Institutional recognition of intersectional security vulnerabilities strengthens national resilience and protects marginalized communities.",
+        "monitoring_indicators": ["Rollback of national laws targeting gender identity and based on sex", "Inclusion of diverse voices in national security policymaking spaces"],
         "implications": ["Implications coming soon"]
     },
         {
         "name": "Security", 
         "direction": "Disruption",
         "probability": "Medium (40-60%)",
-        "summary": "Come back and write real scenarios later",
-        "monitoring_indicators": ["Removal of gender diverse and trans individuals from law enforcement, military, and intelligence roles", "Targeting of healthcare officials and personnel providing gender affirming services and care"],
+        "summary": "This forecast illustrates how national security laws targeting gender identity and expanded surveillance on women's and LGBTQ+ rights organizations criminalize vulnerable populations and limit civic participation. The weaponization of security frameworks for social control undermines institutional legitimacy and democratic participation.",
+        "monitoring_indicators": ["National security laws targeting gender identity", "Expansion of state surveillance on women's and LGBTQ+ rights organizations"],
         "implications": ["Implications coming soon"]
     },
      {
         "name": "Hybrid Political/Security", 
         "direction": "Disruption",
         "probability": "Medium (40-60%)",
-        "summary": "Come back and write real scenarios later",
+        "summary": "This forecast illustrates how political decisions drive removal of qualified personnel from defense and security sectors based on sexual orientation or gender identity while expanding surveillance of healthcare providers and advocacy organizations. The intersection of political purges and security-based criminalization creates cascading vulnerabilities for LGBTQ+ populations.",
+        "monitoring_indicators": ["Removal of qualified civil servants and service members in national security sectors due to sexual orientation or gender identity", "Increased state surveillance and criminalization of healthcare providers offering gender-affirming services"],
         "implications": ["Implications coming soon"]
     },
       {
         "name": "Hybrid Political/Social", 
         "direction": "Disruption",
         "probability": "Medium (40-60%)",
-        "summary": "Come back and write real scenarios later",
+        "summary": "This forecast illustrates how political decisions reduce legal protections against gender-based violence while simultaneously erasing gender-affirming care and related institutional support systems. The policy convergence around erasure and vulnerability creates compounding harms for women, trans, and gender-diverse populations.",
+        "monitoring_indicators": ["Reduction of protections against gender-based violence", "Political and policy decisions resulting in the erasure of gender-affirming care and related protections"],
         "implications": ["Implications coming soon"]
     },
       {
@@ -238,24 +243,36 @@ FORECAST_CARDS = [
 
 FEATURED_DEEP_DIVES = [
     {
-        "headline": "Senate Advances Comprehensive Paid Leave Legislation",
-        "date": "March 15, 2025",
-        "forecast": "Political Progression",
-        "direction": "progression",
-        "analysis": "The FAMILY Act reintroduction signals sustained momentum on economic security for caregivers. Key sponsors include Finance Committee members, indicating broader coalition support. The bill targets six weeks of paid leave, a significant compromise from earlier proposals. Success depends on reconciliation mechanics and mid-year legislative window.",
-        "source_url": "https://www.congress.gov",
+        "headline": "SAVE Act Implementation: Implications for Gender Equity and Vulnerable Populations",
+        "forecast": "Forecasted Political Disruption",
+        "direction": "disruption",
+        "analysis": "will add later",
+        "analysis_by": "Amari Jones, Associate Analyst",
+        "source_url": "https://www.congress.gov/bill/119th-congress/house-bill/22",
         "articles": [
             {
-                "title": "Paid Leave Bill Gains Bipartisan Momentum in Senate",
-                "source": "The Hill",
+                "title": "Transgender Rights & Gender Recognition",
+                "source": "AP News",
                 "image_url": "assets/senate-placeholder.jpg",
-                "link_url": "https://thehill.com"
+                "link_url": "https://apnews.com/article/transgender-drivers-licenses-kansas-lawsuit-b34d868d7fe93b2946f54c831307b935",
+                "analysis": "A case filed on Feb 26 by two transgender men against the state of Kansas argues that a new state law, which invalidated roughly 1800 transgender people's identification documents, violates rights privacy, autonomy, and due legal process granted by the state's Constitution. This law forces trans individuals in Kansas to carry identification that matches their sex as assigned on their birth certificate.\n\nThe new legislation represents ongoing attempts at the state and national levels to dehumanize, erase, and discriminate against transgender individuals, stripping them of their civil and legal rights and increasing already disproportionate community level vulnerabilities to mental health challenges, body dysphoria, suicide, self-harm, and identity-based targeting and violence.\n\nThe case challenging the law represents mobilized resistance against the escalated dehumanization of and discrimination against trans people—while Kansas is not the first state to enact this kind of policy, it is the first state to retroactively invalidate licenses already given, demonstrating a further regression of gender equality.",
+                "analysis_by": "Riley Sullivan, Student Fellow"
             },
             {
-                "title": "Economic Inequality: New Framework for Caregiving Support",
-                "source": "Politico",
+                "title": "US International Reproductive Health Funding Restrictions",
+                "source": "NPR",
                 "image_url": "assets/un-women-placeholder.jpg",
-                "link_url": "https://politico.com"
+                "link_url": "https://www.npr.org/2026/01/23/nx-s1-5683204/abortion-trump-mexico-city-policy",
+                "analysis": "The federal government announced an expansion of the Mexico City Policy, a policy that initially barred U.S. funds from being used for abortions and reproductive healthcare. The new iteration of the policy earmarks $30 billion in federal aid funding to restrict its use for programs related to \"gender ideology\" and DEI.\n\nForeign- and U.S.-based organizations will be forced to stop lifesaving international programming for women, the LGBTQ+ community, people with HIV/AIDS, and other marginalized communities or risk funding withdrawals and becoming effectively defunct.\n\nOn top of the detriments to human security and organizational functionality, this shift will affect the U.S.'s ability to exert influence over and garner information from global public health networks, making the U.S. more vulnerable to public health threats.\n\nFurther, humanitarian assistance has been a long-established bargaining chip for the U.S. to use in diplomatic engagements. The expansion of the Mexico City Policy, however, limits the U.S.'s capacity to operationalize its humanitarian involvement as leverage, leaving the U.S. at a national security disadvantage. Without this \"soft\" power influence, the U.S. will be more likely to lean on more coercive or aggressive methods of engagement to pursue its interests abroad.",
+                "analysis_by": "Riley Sullivan, Student Fellow"
+            },
+            {
+                "title": "Immigration Enforcement & Reproductive Rights",
+                "source": "Center for Reproductive Rights",
+                "image_url": "assets/senate-placeholder.jpg",
+                "link_url": "https://reproductiverights.org/news/trump-admin-must-provide-answers-for-horrifying-treatment-of-pregnant-ice-detainees/",
+                "analysis": "Emerging reports of inhumane treatment of pregnant women in ICE custody detail concerning deprivations of maternal healthcare. Federal policy establishes that CBP and ICE are mandated to provide maternal healthcare and prenatal care, are restricted from moving pregnant minors to detention centers in states that prohibit reproductive healthcare like abortions, and are barred from detaining pregnant, postpartum, or nursing mothers outside of \"extreme circumstances.\" Yet, the treatment of pregnant women by CBP and ICE officials has been demonstrated to violate federal regulations. This represents a broad disregard for existing protective policies, and, combined with impunity from the federal government for these offenses, demonstrates that ICE is operating outside the scope of the law. Failure to comply with the policy designed to protect vulnerable populations illustrates a broader trend of unchecked federal overreach that jeopardizes human security.",
+                "analysis_by": "Riley Sullivan, Student Fellow"
             }
         ]
     },
@@ -298,7 +315,7 @@ def image_to_base64(image_path):
         return None
 
 st.title("Scenario Outlook")
-st.markdown("<p style='font-size: 1.1rem; color: rgba(27, 23, 37, 0.85); margin-top: -20px;'>Explore different scenarios for the evolution of the U.S. gender policy landscape</p>", unsafe_allow_html=True)
+st.markdown("<p style='font-size: 1.1rem; color: rgba(27, 23, 37, 0.85); margin-top: -20px;'>Explore different forecast scenarios for the future of the U.S. gender policy landscape</p>", unsafe_allow_html=True)
 
 st.divider()
 
@@ -355,9 +372,11 @@ CARD_CSS = f"""
 }}
 
 .status-quo-section {{
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   padding-bottom: 2rem;
   border-bottom: 2px solid rgba(27, 23, 37, 0.15);
+  page-break-inside: avoid;
+  clear: both;
 }}
 
 .status-quo-label {{
@@ -380,51 +399,43 @@ CARD_CSS = f"""
   font-weight: 500;
 }}
 
-.assessment-toggle {{
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: none;
-  padding: 0.75rem 0;
+.assessment-details {{
+  margin-top: 0.5rem;
+}}
+
+.assessment-summary-toggle {{
+  cursor: pointer;
   color: #3b668c;
   font-size: 0.95rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: color 0.15s ease;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  list-style: none;
+  outline: none;
+  padding: 0.5rem 0;
 }}
 
-.assessment-toggle:hover {{
+.assessment-summary-toggle:hover {{
   color: #1b1725;
 }}
 
-.assessment-toggle-icon {{
+.assessment-summary-toggle::-webkit-details-marker {{
+  display: none;
+}}
+
+.assessment-summary-toggle::before {{
+  content: "▸";
   display: inline-block;
+  margin-right: 0.5rem;
   transition: transform 0.2s ease;
 }}
 
-.assessment-toggle.expanded .assessment-toggle-icon {{
-  transform: rotate(180deg);
+.assessment-details[open] .assessment-summary-toggle::before {{
+  transform: rotate(90deg);
 }}
 
-.assessment-full {{
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-  opacity: 0;
-  padding: 0;
-  color: rgba(27, 23, 37, 0.85);
-}}
-
-.assessment-full.expanded {{
-  max-height: 1000px;
-  opacity: 1;
-  padding: 1rem 0;
-}}
-
-.assessment-full {{
+.assessment-full-text {{
+  padding: 0.75rem 0 0 0;
   font-size: 0.93rem;
   line-height: 1.7;
   color: rgba(27, 23, 37, 0.85);
@@ -513,6 +524,38 @@ CARD_CSS = f"""
   display: none;
 }}
 
+/* Collapsible sections in cards */
+details {{
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(27, 23, 37, 0.15);
+}}
+
+details summary {{
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--nl-navy);
+  margin-bottom: 0.5rem;
+  list-style: none;
+  user-select: none;
+}}
+
+details summary::-webkit-details-marker {{
+  display: none;
+}}
+
+details summary::before {{
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.5rem;
+  transition: transform 0.2s ease;
+}}
+
+details[open] summary::before {{
+  transform: rotate(90deg);
+}}
+
 .deck-title {{
   font-size: 1.05rem;
   font-weight: 900;
@@ -562,26 +605,35 @@ CARD_CSS = f"""
 }}
 
 /* Probability bar */
-.prob-wrap {{ margin-top: .55rem; }}
+.prob-wrap {{ 
+  margin-top: .55rem;
+  display: block !important;
+  visibility: visible !important;
+}}
 .prob-label {{
   font-size: .72rem;
   letter-spacing: .2px;
   color: rgba(27, 23, 37, 0.75) !important;
   margin-bottom: .25rem;
+  display: block;
 }}
 
 .prob-bar {{
-  height: 10px;
+  height: 12px;
   border-radius: 999px;
   background: rgba(27, 23, 37, 0.10);
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid rgba(27, 23, 37, 0.12);
+  width: 100%;
+  display: block;
 }}
 
 .prob-fill {{
   height: 100%;
   border-radius: 999px;
-  background: var(--nl-gold); /* default fill */
+  background: var(--nl-gold);
+  display: block;
+  transition: width 0.3s ease;
 }}
 
 /* =========================
@@ -638,11 +690,13 @@ CARD_CSS = f"""
 /* PARENT WRAPPER */
 .spotlight-section {{
   background-color: #f1f0ec;
-  margin: 2rem 0;
+  margin: 3rem 0 2rem 0;
   padding: 2rem;
   border-radius: 4px;
   border-top: 1px solid rgba(27, 23, 37, 0.1);
   overflow: visible;
+  position: relative;
+  z-index: 1;
 }}
 
 .spotlight-title {{
@@ -658,7 +712,15 @@ CARD_CSS = f"""
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  align-items: stretch;
+  align-items: start;
+}}
+
+.spotlight-left {{
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+  justify-content: space-between;
 }}
 
 /* LEFT COLUMN */
@@ -670,10 +732,11 @@ CARD_CSS = f"""
   flex-direction: column;
   justify-content: space-between;  /* pushes source link down nicely */
   overflow: visible;
-  min-height: 100%;
+  min-height: 0;
   box-sizing: border-box;
   box-shadow: 0 1px 2px rgba(27, 23, 37, 0.06);
   border-top: 4px solid #3b668c;
+  flex: 1;
 }}
 
 .spotlight-main.disruption {{
@@ -769,7 +832,7 @@ CARD_CSS = f"""
 .article-tile {{
   background: white;
   border-radius: 4px;
-  overflow: visible;
+  overflow: hidden;
   box-shadow: 0 1px 2px rgba(27, 23, 37, 0.06);
   transition: box-shadow 0.2s ease;
   width: 100%;
@@ -784,11 +847,15 @@ CARD_CSS = f"""
 }}
 
 .article-image {{
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-  display: block;
-  flex-shrink: 0;
+  width: 100% !important;
+  height: 140px !important;
+  object-fit: cover !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+  background-color: #f0f0f0;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
 }}
 
 .article-content {{
@@ -800,25 +867,45 @@ CARD_CSS = f"""
 }}
 
 .article-title {{
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #1b1725;
-  margin-bottom: 0.5rem;
-  line-height: 1.3;
+  margin-bottom: 0.6rem;
+  line-height: 1.35;
 }}
 
 .article-source {{
-  font-size: 0.8rem;
-  color: rgba(27, 23, 37, 0.6);
+  font-size: 0.80rem;
+  color: #1b1725;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}}
+
+.article-analysis-by {{
+  font-size: 0.80rem;
+  color: #bfa359;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}}
+
+.article-analysis {{
+  font-size: 0.88rem;
+  color: #1b1725;
+  line-height: 1.55;
   margin-bottom: 0.75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }}
 
 .article-link {{
   display: inline-block;
   color: #bfa359;
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
+  margin-top: auto;
 }}
 
 .article-link:hover {{
@@ -866,6 +953,34 @@ def direction_class(direction: str, name: str = "") -> str:
     if "status" in d:
         return "statusquo"
     return "statusquo"
+
+def format_analysis_as_bullets(text: str) -> str:
+    """Convert analysis text into bullet-formatted HTML, treating paragraphs as distinct ideas."""
+    import re
+    
+    # First, try to detect paragraph breaks (double newlines or significant spacing)
+    # Split by double newlines, or by line breaks followed by capitalization
+    paragraphs = re.split(r'\n\s*\n|\n(?=[A-Z])', text.strip())
+    
+    # Clean up each paragraph
+    paragraphs = [p.strip() for p in paragraphs if p.strip()]
+    
+    if len(paragraphs) <= 1:
+        # If no paragraph breaks detected, fallback to sentence grouping
+        sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', text) if s.strip()]
+        if len(sentences) <= 1:
+            return text
+        paragraphs = sentences
+    
+    # Create bullet list HTML
+    bullets_html = '<ul style="margin: 0; padding-left: 1.2rem; list-style-type: disc;">'
+    for idea in paragraphs:
+        # Clean up the text (remove extra whitespace)
+        idea = ' '.join(idea.split())
+        bullets_html += f'<li style="margin-bottom: 0.35rem;">{idea}</li>'
+    bullets_html += '</ul>'
+    
+    return bullets_html
 
 PROB_WIDTH = {"low": "20%", "low-medium": "40%", "medium": "60%", "medium-high": "80%", "high": "100%"}
 
@@ -918,14 +1033,12 @@ if status_quo_card:
     # Summary text (always visible)
     status_quo_card_html += f'<div class="assessment-summary">{html.escape(summary)}</div>'
     
-    # Expandable section with toggle button
+    # Expandable section with native details/summary
     if full_assessment:
-        status_quo_card_html += '<button class="assessment-toggle" onclick="this.classList.toggle(\'expanded\'); this.nextElementSibling.classList.toggle(\'expanded\');">'
-        status_quo_card_html += '<span class="assessment-toggle-icon">▾</span>'
-        status_quo_card_html += '<span>Read Full Q1 Net Assessment</span>'
-        status_quo_card_html += '</button>'
-        # Use full_assessment directly (allows HTML links) instead of escaping
-        status_quo_card_html += f'<div class="assessment-full">{full_assessment}</div>'
+        status_quo_card_html += '<details class="assessment-details">'
+        status_quo_card_html += '<summary class="assessment-summary-toggle">Read Full Q1 Net Assessment</summary>'
+        status_quo_card_html += f'<div class="assessment-full-text">{full_assessment}</div>'
+        status_quo_card_html += '</details>'
     
     status_quo_card_html += '</div>'
 
@@ -937,38 +1050,43 @@ if FEATURED_DEEP_DIVES:
     direction_class_spotlight = spotlight_dive["direction"].lower()
     headline_escaped = html.escape(spotlight_dive["headline"])
     forecast_escaped = html.escape(spotlight_dive["forecast"])
-    date_escaped = html.escape(spotlight_dive["date"])
     analysis_escaped = html.escape(spotlight_dive["analysis"])
     source_url = html.escape(spotlight_dive["source_url"])
     
     spotlight_html = '<div class="spotlight-section">'
     spotlight_html += '<div class="spotlight-title">Developments Shaping the Current Assessment</div>'
+    spotlight_html += '<div style="font-size: 0.85rem; color: rgba(27, 23, 37, 0.6); margin-bottom: 1.5rem;">Last Updated: March 12, 2026</div>'
     spotlight_html += '<div class="spotlight-container">'
     
-    # Main content (60%)
+    # LEFT COLUMN: Main content + first article
+    spotlight_html += '<div class="spotlight-left">'
     spotlight_html += f'<div class="spotlight-main {direction_class_spotlight}">'
     spotlight_html += f'<div class="spotlight-headline">{headline_escaped}</div>'
     spotlight_html += '<div class="spotlight-meta">'
-    spotlight_html += f'<div class="spotlight-meta-item">📅 {date_escaped}</div>'
     spotlight_html += f'<span class="spotlight-badge {direction_class_spotlight}">{forecast_escaped}</span>'
     spotlight_html += '</div>'
+    analysis_by = html.escape(spotlight_dive.get("analysis_by", ""))
+    if analysis_by:
+        spotlight_html += f'<div style="font-size: 0.85rem; color: #bfa359; font-weight: 600; margin-bottom: 1rem;">— {analysis_by}</div>'
     spotlight_html += f'<div class="spotlight-analysis">{analysis_escaped}</div>'
-    spotlight_html += f'<a href="{source_url}" target="_blank" class="spotlight-source">Read more →</a>'
+    spotlight_html += f'<a href="{source_url}" target="_blank" class="spotlight-source">Read Bill</a>'
     spotlight_html += '</div>'
     
-    # Articles section (40%)
-    spotlight_html += '<div class="spotlight-articles">'
-    for article in spotlight_dive.get("articles", []):
+    # First article on the left
+    articles_list = spotlight_dive.get("articles", [])
+    if articles_list:
+        article = articles_list[0]
         article_title = html.escape(article["title"])
         article_source = html.escape(article["source"])
         article_image_path = article["image_url"]
         article_link = html.escape(article["link_url"])
+        article_analysis_raw = article.get("analysis", "")
+        article_analysis = format_analysis_as_bullets(article_analysis_raw)
+        article_analysis_by = html.escape(article.get("analysis_by", ""))
         
-        # Convert image to base64 data URI
         article_image_data = image_to_base64(article_image_path)
         if article_image_data is None:
-            # Fallback if image can't be loaded
-            article_image_data = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='140'%3E%3Crect fill='%23ddd' width='300' height='140'/%3E%3C/svg%3E"
+            article_image_data = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 300 140'%3E%3Crect fill='%23ddd' width='300' height='140'/%3E%3C/svg%3E"
         
         spotlight_html += '<a href="' + article_link + '" target="_blank" style="text-decoration: none;">'
         spotlight_html += '<div class="article-tile">'
@@ -976,7 +1094,37 @@ if FEATURED_DEEP_DIVES:
         spotlight_html += '<div class="article-content">'
         spotlight_html += f'<div class="article-title">{article_title}</div>'
         spotlight_html += f'<div class="article-source">{article_source}</div>'
-        spotlight_html += '<div class="article-link">Read article →</div>'
+        spotlight_html += f'<div class="article-analysis-by">— {article_analysis_by}</div>'
+        spotlight_html += f'<div class="article-analysis">{article_analysis}</div>'
+        spotlight_html += '<div class="article-link">Source →</div>'
+        spotlight_html += '</div></div></a>'
+    
+    spotlight_html += '</div>'  # Close spotlight-left
+    
+    # RIGHT COLUMN: remaining 2 articles
+    spotlight_html += '<div class="spotlight-articles">'
+    for article in articles_list[1:]:  # Only articles 1 and 2
+        article_title = html.escape(article["title"])
+        article_source = html.escape(article["source"])
+        article_image_path = article["image_url"]
+        article_link = html.escape(article["link_url"])
+        article_analysis_raw = article.get("analysis", "")
+        article_analysis = format_analysis_as_bullets(article_analysis_raw)
+        article_analysis_by = html.escape(article.get("analysis_by", ""))
+        
+        article_image_data = image_to_base64(article_image_path)
+        if article_image_data is None:
+            article_image_data = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 300 140'%3E%3Crect fill='%23ddd' width='300' height='140'/%3E%3C/svg%3E"
+        
+        spotlight_html += '<a href="' + article_link + '" target="_blank" style="text-decoration: none;">'
+        spotlight_html += '<div class="article-tile">'
+        spotlight_html += f'<img src="{article_image_data}" alt="Article" class="article-image">'
+        spotlight_html += '<div class="article-content">'
+        spotlight_html += f'<div class="article-title">{article_title}</div>'
+        spotlight_html += f'<div class="article-source">{article_source}</div>'
+        spotlight_html += f'<div class="article-analysis-by">— {article_analysis_by}</div>'
+        spotlight_html += f'<div class="article-analysis">{article_analysis}</div>'
+        spotlight_html += '<div class="article-link">Source →</div>'
         spotlight_html += '</div></div></a>'
     spotlight_html += '</div>'
     
@@ -1019,10 +1167,10 @@ for pile_direction in ["Disruption", "Hybrid Disruption", "Progression"]:
         
         if c.get("direction") != "Status Quo":
             indicators_section = f"""
-      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(27, 23, 37, 0.15);">
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--nl-navy); margin-bottom: 0.5rem;">Selected Monitoring Indicators</div>
+      <details style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(27, 23, 37, 0.15);">
+        <summary style="cursor: pointer; font-size: 0.85rem; font-weight: 700; color: var(--nl-navy); margin-bottom: 0.5rem; list-style: none;">Selected Monitoring Indicators</summary>
         {indicators_html}
-      </div>
+      </details>
 """
             
             # Build implications HTML
@@ -1036,10 +1184,10 @@ for pile_direction in ["Disruption", "Hybrid Disruption", "Progression"]:
                 implications_html = '<div style="font-size: 0.90rem; color: rgba(27, 23, 37, 0.75);">Implications coming soon</div>'
             
             implications_section = f"""
-      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(27, 23, 37, 0.15);">
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--nl-navy); margin-bottom: 0.5rem;">Potential Implications</div>
+      <details style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(27, 23, 37, 0.15);">
+        <summary style="cursor: pointer; font-size: 0.85rem; font-weight: 700; color: var(--nl-navy); margin-bottom: 0.5rem; list-style: none;">Potential Implications</summary>
         {implications_html}
-      </div>
+      </details>
 """
 
         cards_html += f"""
@@ -1078,7 +1226,7 @@ DECK_JS = """
 document.addEventListener('DOMContentLoaded', function() {
   const cards = document.querySelectorAll('.deck-card');
 
-  // Add click handlers
+  // Add click handlers for cards
   cards.forEach((card) => {
     card.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -1098,7 +1246,7 @@ document.addEventListener('DOMContentLoaded', function() {
 # Split rendering: Gender Currently section (Status Quo + Developments)
 cards_html_current = cards_html.split('<div class="scenario-cards-container">')[0]
 cards_html_current_final = cards_html_current + DECK_JS
-components.html(cards_html_current_final, height=825)
+st.markdown(cards_html_current_final, unsafe_allow_html=True)
 
 # Forecast Scenarios section
 st.subheader("Forecast Scenarios")

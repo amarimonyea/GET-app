@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import altair as alt
 
+st.set_page_config(page_title="Sector Impact")
+
 # ---------------------------
 # 1) THEME / CSS (inject once)
 # ---------------------------
@@ -107,24 +109,85 @@ section[data-testid="stSidebar"] > div:nth-child(n+2) {
 }
 
 section[data-testid="stSidebar"] img {
-  position: fixed;
-  bottom: 60px;
-  left: 10px;
-  right: 10px;
-  width: calc(100% - 20px);
   max-width: 280px;
-  z-index: 999;
+  margin-top: auto;
 }
 </style>
 """,
     unsafe_allow_html=True
 )
 
+# Chart border styling
+st.markdown(
+    """
+    <style>
+      /* Wrap the chart container with gold border */
+      div[data-testid="stVegaLiteChart"] {
+        border: 4px solid #e1bb4b !important;
+        border-radius: 14px !important;
+        padding: 4px !important;
+        background: #ffffff !important;
+        margin-top: 10px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        max-width: 100% !important;
+      }
+      
+      div[data-testid="stVegaLiteChart"] > div {
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+      }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Sector Chart Controls in sidebar
+st.sidebar.subheader("Sector Chart Controls")
+
+# Reset controls callback
+def reset_sector_controls():
+    st.session_state["display_sectors"] = "Top 5"
+    st.session_state["rank_by"] = "Number of Developments"
+
+st.sidebar.button("Reset Controls", on_click=reset_sector_controls)
+
+display_sectors = st.sidebar.selectbox(
+    "Display sectors",
+    options=["Top 3", "Top 5", "Top 10", "All"],
+    index=1,
+    key="display_sectors"
+)
+
+rank_by = st.sidebar.selectbox(
+    "Rank sectors by",
+    options=["Number of Developments", "Disruption Intensity", "Overall Policy Activity"],
+    index=0,
+    key="rank_by"
+)
+
+# Forecast Direction
+st.sidebar.subheader("Forecast Direction")
+st.sidebar.markdown("""
+<div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
+  <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <div style="width: 20px; height: 20px; background-color: #cf5442; border-radius: 3px;"></div>
+    <span style="color: #ffffff;"><strong>Disruption</strong> — Challenges to gender equity</span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <div style="width: 20px; height: 20px; background-color: #3b668c; border-radius: 3px;"></div>
+    <span style="color: #ffffff;"><strong>Progression</strong> — Advances in gender equity</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
 # Logo at bottom of sidebar
 st.sidebar.divider()
 st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 
-st.title("📊 Sector Impacts Analysis")
+st.title("Sector Impact Analysis")
 
 # Load and prepare data
 df = pd.read_csv("data/Monitor_Gender_Equality_sample_data.csv", skiprows=1)
@@ -133,89 +196,317 @@ df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
 df = df.dropna(subset=["Date", "Slider Score"])
 
 st.write(
-    "Explore which sectors are most impacted by gender-related policy developments and disruptions."
+    "Explore which sectors are most impacted by gender policy developments."
 )
 
 st.divider()
 
 SECTOR_COL = "Sector Impacted"
 
-top_n = st.slider("Show top N sectors", min_value=5, max_value=25, value=10, step=1)
+# Compute initial metrics for Key Insights
+df_initial = df.copy()
+df_initial["Weighted Disruption"] = np.where(df_initial["Slider Score"] > 0, df_initial["Slider Score"], 0)
+df_initial["Weighted Progression"] = np.where(df_initial["Slider Score"] < 0, -df_initial["Slider Score"], 0)
+df_initial["Absolute Intensity"] = df_initial["Slider Score"].abs()
 
-metric_choice = st.radio(
-    "Rank sectors by:",
-    [
-        "Event Count",
-        "Weighted Disruption (sum of positive Slider Score)",
-        "Total Intensity (sum of |Slider Score|)"
-    ],
-    horizontal=True,
-)
+sector_counts_initial = df_initial[SECTOR_COL].value_counts().reset_index()
+sector_counts_initial.columns = [SECTOR_COL, "Event_Count"]
 
-# Compute metrics for each sector
-df["Weighted Disruption"] = np.where(df["Slider Score"] > 0, df["Slider Score"], 0)
-df["Weighted Progression"] = np.where(df["Slider Score"] < 0, -df["Slider Score"], 0)
-df["Absolute Intensity"] = df["Slider Score"].abs()
-
-# Get actual event counts by sector
-sector_counts = df[SECTOR_COL].value_counts().reset_index()
-sector_counts.columns = [SECTOR_COL, "Event_Count"]
-
-# Compute aggregated metrics per sector
-sector_metrics = (
-    df.groupby(SECTOR_COL, as_index=False)
+sector_metrics_initial = (
+    df_initial.groupby(SECTOR_COL, as_index=False)
     .agg({
         "Weighted Disruption": "sum",
         "Weighted Progression": "sum",
         "Absolute Intensity": "sum",
     })
 )
+sector_metrics_initial = sector_metrics_initial.merge(sector_counts_initial, on=SECTOR_COL, how="left")
 
-# Merge with event counts
-sector_metrics = sector_metrics.merge(sector_counts, on=SECTOR_COL, how="left")
+# Generate Key Insights
+insights = []
+if not sector_metrics_initial.empty:
+    most_impacted = sector_metrics_initial.loc[sector_metrics_initial["Absolute Intensity"].idxmax()]
+    insights.append(f"<strong>{most_impacted[SECTOR_COL]}</strong> experiences the highest total intensity of impact ({most_impacted['Absolute Intensity']:.1f})")
+    
+    most_disrupted = sector_metrics_initial.loc[sector_metrics_initial["Weighted Disruption"].idxmax()]
+    if most_disrupted["Weighted Disruption"] > 0:
+        insights.append(f"<strong>{most_disrupted[SECTOR_COL]}</strong> is most affected by disruption (weighted disruption score: {most_disrupted['Weighted Disruption']:.1f})")
+    
+    most_events = sector_metrics_initial.loc[sector_metrics_initial["Event_Count"].idxmax()]
+    insights.append(f"<strong>{most_events[SECTOR_COL]}</strong> has the most recorded developments ({int(most_events['Event_Count'])} events)")
+    
+    most_progressed = sector_metrics_initial.loc[sector_metrics_initial["Weighted Progression"].idxmax()]
+    if most_progressed["Weighted Progression"] > 0:
+        insights.append(f"<strong>{most_progressed[SECTOR_COL]}</strong> shows the most progression (weighted progression score: {most_progressed['Weighted Progression']:.1f})")
 
-# Sort by chosen metric
-if metric_choice == "Event Count":
+# Determine number of unique sectors
+num_sectors = sector_metrics_initial.shape[0]
+
+# Use sidebar controls to determine display settings
+if display_sectors == "Top 3":
+    top_n = 3
+elif display_sectors == "Top 5":
+    top_n = 5
+elif display_sectors == "Top 10":
+    top_n = 10
+else:  # "All"
+    top_n = num_sectors
+
+# Map rank_by selection to column name
+if rank_by == "Number of Developments":
     sort_col = "Event_Count"
-elif metric_choice == "Weighted Disruption (sum of positive Slider Score)":
+elif rank_by == "Disruption Intensity":
     sort_col = "Weighted Disruption"
 else:
     sort_col = "Absolute Intensity"
 
+# Use pre-computed metrics from Key Insights section
+sector_metrics = sector_metrics_initial.copy()
 sector_metrics = sector_metrics.sort_values(sort_col, ascending=False).head(top_n)
 
-st.subheader(f"Top {top_n} Sectors by {metric_choice}")
+st.subheader("Sector Impact Rankings")
 
-# Display as table
-st.dataframe(
-    sector_metrics.sort_values(sort_col, ascending=False),
-    column_config={
-        "Weighted Disruption": st.column_config.NumberColumn(format="%.1f"),
-        "Weighted Progression": st.column_config.NumberColumn(format="%.1f"),
-        "Absolute Intensity": st.column_config.NumberColumn(format="%.1f"),
-    },
-    use_container_width=True,
-)
+# Prepare data for visualizations
+sector_counts = sector_counts_initial.copy()
+chart_data = sector_metrics.sort_values(sort_col, ascending=False).head(top_n)
 
-st.divider()
+# Dynamic chart height based on number of sectors
+chart_height = max(250, top_n * 35 + 50)  # ~35px per bar plus padding
 
-# Chart: Event count by sector
-chart_data = sector_counts.sort_values("Event_Count", ascending=False).head(top_n)
+# Map sort_col to display titles
+if sort_col == "Event_Count":
+    x_field = "Event_Count:Q"
+    x_title = "Number of Developments"
+elif sort_col == "Weighted Disruption":
+    x_field = "Weighted Disruption:Q"
+    x_title = "Disruption Intensity"
+else:  # "Absolute Intensity"
+    x_field = "Absolute Intensity:Q"
+    x_title = "Overall Policy Activity"
 
+# Enhanced chart with better labeling and no interactivity
 sector_chart = (
     alt.Chart(chart_data)
-    .mark_bar()
+    .mark_bar(opacity=1)
     .encode(
-        x=alt.X("Event_Count:Q", title="Number of Events"),
-        y=alt.Y(SECTOR_COL + ":N", title="Sector", sort="-x"),
-        color=alt.value("#cf5442"),
-        tooltip=[SECTOR_COL, "Event_Count"],
+        x=alt.X(x_field, title=x_title, axis=alt.Axis(tickCount=10)),
+        y=alt.Y(SECTOR_COL + ":N", title="Sector", sort="-x", axis=alt.Axis(labelLimit=300, labelPadding=10)),
+        color=alt.value(COLOR_DISRUPTION),
+        tooltip=[alt.Tooltip(SECTOR_COL, title="Sector"), 
+                alt.Tooltip(x_field, title=x_title)],
     )
-    .properties(height=400)
+    .properties(height=chart_height, width=1000, title="Gender Policy Activity by Sector")
+    .configure_mark(opacity=1)
+    .configure_title(anchor="middle")
 )
 
 st.altair_chart(sector_chart, use_container_width=True)
 
-st.caption(
-    "✨ Sectors closest to the bottom are most frequently impacted by gender-related policy developments."
+# How to Interpret This Chart section
+with st.expander("How to Interpret This Chart", expanded=False):
+    st.markdown("""
+**Number of Developments:** The total count of gender policy developments recorded in each sector. Higher counts indicate sectors experiencing more frequent policy change.
+
+**Disruption Intensity:** The cumulative impact of constraints, restrictions, and disruptive policy changes. Higher values indicate sectors facing greater institutional pressure.
+
+**Overall Policy Activity:** The combined magnitude of policy change regardless of direction. This metric highlights which sectors are experiencing the greatest volume of institutional change.
+
+**Interpretation:** Taken together, these metrics help distinguish between sectors under sustained pressure (high frequency + high disruption) versus those in transition (high activity but mixed directional impact).
+""")
+
+# Key Insights section
+insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in insights])
+
+st.markdown(f"""
+<div style="background-color: #f1f0ec; border-left: 4px solid #bfa359; padding: 1rem; margin: 1.5rem 0; border-radius: 2px; box-shadow: 0 1px 3px rgba(27, 23, 37, 0.08);">
+  <div style="font-size: 1.1rem; font-weight: 700; color: #1b1725; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">Key Insights</div>
+  <ul style="margin: 0; padding-left: 1.5rem; list-style: disc;">
+    {insights_html}
+  </ul>
+</div>
+""", unsafe_allow_html=True)
+
+# Display as collapsible table
+with st.expander("View Detailed Sector Metrics", expanded=False):
+    # Reorder columns for display
+    display_columns = [SECTOR_COL, "Weighted Disruption", "Weighted Progression", "Absolute Intensity", "Event_Count"]
+    st.dataframe(
+        sector_metrics[display_columns].sort_values(sort_col, ascending=False),
+        column_config={
+            SECTOR_COL: st.column_config.TextColumn(label="Sector"),
+            "Weighted Disruption": st.column_config.NumberColumn(label="Disruption Intensity", format="%d"),
+            "Weighted Progression": st.column_config.NumberColumn(label="Progression Intensity", format="%d"),
+            "Absolute Intensity": st.column_config.NumberColumn(label="Overall Policy Activity", format="%d"),
+            "Event_Count": st.column_config.NumberColumn(label="Number of Developments", format="%d"),
+        },
+        use_container_width=True,
+        hide_index=True,
+    )
+
+st.divider()
+
+# NEW: Recent Developments Panel
+st.subheader("Recent Developments by Sector")
+
+available_sectors = sorted(df[SECTOR_COL].dropna().unique())
+selected_sector = st.selectbox(
+    "Select Sector:",
+    available_sectors,
+    index=0 if available_sectors else None,
+    key="sector_selector"
 )
+
+if selected_sector:
+    # Get all developments for the selected sector
+    all_sector_data = df[df[SECTOR_COL] == selected_sector].sort_values("Date", ascending=False)
+    
+    if not all_sector_data.empty:
+        # Calculate context metrics
+        total_devs = len(all_sector_data)
+        disruption_count = len(all_sector_data[all_sector_data["Slider Score"] > 0])
+        progression_count = len(all_sector_data[all_sector_data["Slider Score"] < 0])
+        neutral_count = len(all_sector_data[all_sector_data["Slider Score"] == 0])
+        
+        # Get date range
+        earliest_date = all_sector_data["Date"].min()
+        latest_date = all_sector_data["Date"].max()
+        if pd.notna(earliest_date):
+            date_range_str = f"since {earliest_date.strftime('%b %Y')}"
+        else:
+            date_range_str = "on record"
+        
+        # Display context summary
+        st.markdown(f"""
+**{selected_sector}**  
+{total_devs} developments {date_range_str}  
+{disruption_count} Disruption | {neutral_count} Neutral | {progression_count} Progression
+        """)
+        
+        # Display recent developments (top 5)
+        sector_data = all_sector_data.head(5)
+        
+        st.markdown("**Latest developments:**")
+        
+        for idx, row in sector_data.iterrows():
+            # Format date
+            date_str = row["Date"].strftime("%b %d, %Y") if pd.notna(row["Date"]) else "Unknown Date"
+            
+            # Determine direction color
+            score = row["Slider Score"]
+            direction_color = COLOR_DISRUPTION if score > 0 else COLOR_PROGRESSION if score < 0 else "#999"
+            direction_label = "Disruption" if score > 0 else "Progression" if score < 0 else "Neutral"
+            
+            # Format development text (truncate if too long)
+            dev_text = str(row["Development"])
+            if len(dev_text) > 200:
+                dev_text = dev_text[:197] + "..."
+            
+            # Build the card with tighter layout
+            card_html = f"""
+            <div style="
+                background: white;
+                border-left: 4px solid {direction_color};
+                padding: 0.75rem 1rem;
+                margin-bottom: 0.75rem;
+                border-radius: 2px;
+                box-shadow: 0 1px 2px rgba(27, 23, 37, 0.08);
+            ">
+                <div style="font-size: 0.75rem; color: rgba(27, 23, 37, 0.6); font-weight: 600; margin-bottom: 0.4rem;">
+                    {date_str} • <span style="
+                        display: inline-block;
+                        text-transform: uppercase;
+                        background: {direction_color}25;
+                        color: {direction_color};
+                        padding: 0.3rem 0.6rem;
+                        border-radius: 2px;
+                        letter-spacing: 0.05em;
+                        font-size: 0.7rem;
+                        font-weight: 700;
+                    ">{direction_label}</span>
+                </div>
+                <div style="font-size: 0.9rem; color: #1b1725; line-height: 1.4; margin-bottom: 0.4rem; font-weight: 500;">
+                    {dev_text}
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
+                    <span style="color: rgba(27, 23, 37, 0.7);"><strong>{row.get("Forecast", "N/A")}</strong></span>
+                    {f'<a href="{row["Link"]}" target="_blank" style="color: #bfa359; text-decoration: none; font-weight: 600;">View Source →</a>' if pd.notna(row.get("Link")) and row["Link"] else ""}
+                </div>
+            </div>
+            """
+            
+            st.markdown(card_html, unsafe_allow_html=True)
+    else:
+        st.info(f"No developments recorded for {selected_sector}")
+
+st.divider()
+
+# NEW: Sector Risk Over Time
+st.subheader("Policy Activity Trends Over Time")
+
+# Prepare monthly trend data for top 3 most impacted sectors
+df_trends = df.copy()
+df_trends["Month"] = df_trends["Date"].dt.to_period("M").astype(str)
+df_trends["Absolute Intensity"] = df_trends["Slider Score"].abs()
+
+top_3_sectors = sector_metrics_initial.nlargest(3, "Absolute Intensity")[SECTOR_COL].tolist()
+
+trend_data = df_trends[df_trends[SECTOR_COL].isin(top_3_sectors)].groupby(["Month", SECTOR_COL], as_index=False).agg({
+    "Absolute Intensity": "sum",
+    "Slider Score": "count"
+}).rename(columns={"Slider Score": "Event_Count"})
+
+# Convert Month back to datetime for proper sorting
+trend_data["Month_Date"] = pd.to_datetime(trend_data["Month"])
+trend_data = trend_data.sort_values("Month_Date")
+# Format month for display in tooltip
+trend_data["Month_Display"] = trend_data["Month_Date"].dt.strftime("%b %Y")
+
+if not trend_data.empty:
+    # Create selection for tooltip
+    selection = alt.selection_single(on="mouseover", empty="none")
+    
+    # Custom color palette: gold, green, light blue
+    sector_colors = ["#bfa359", "#62af44", "#7fa3c0"]
+    
+    trend_chart = (
+        alt.Chart(trend_data)
+        .mark_line(point=True, size=2)
+        .encode(
+            x=alt.X(
+    "Month_Date:T",
+    title="Period",
+    axis=alt.Axis(format="%b %Y", labelAngle=0, labelPadding=15, tickCount=2),
+    scale=alt.Scale(nice=False)
+),
+            y=alt.Y("Absolute Intensity:Q", title="Cumulative Policy Activity"),
+            color=alt.Color(SECTOR_COL + ":N", 
+                           scale=alt.Scale(range=sector_colors),
+                           title="Sector",
+                           legend=alt.Legend(orient="bottom", symbolType="square", titleAnchor="start"))
+        )
+        .add_selection(selection)
+        .encode(
+            tooltip=[
+                alt.Tooltip("Month_Display:N", title="Month"),
+                alt.Tooltip(SECTOR_COL + ":N", title="Sector"),
+                alt.Tooltip("Absolute Intensity:Q", title="Policy Activity", format=".1f"),
+                alt.Tooltip("Event_Count:Q", title="Count")
+            ]
+        )
+        .properties(height=350, width=900)
+    )
+    
+    st.altair_chart(trend_chart, use_container_width=False)
+    
+    with st.expander("How to Interpret this Chart", expanded=False):
+        st.markdown("""
+**Lines:** Each line represents one of the three most impacted sectors, showing how cumulative policy activity evolves over time.
+
+**Rising lines:** Indicate accelerating institutional pressure and policy change in that sector.
+
+**Declining lines:** Suggest stabilization or a slowdown in policy activity.
+
+**Month-to-month comparison:** Compare sectors to identify which are experiencing intensifying vs. stabilizing policy environments. Sectors with steeper upward trends are experiencing rapid policy transformation.
+        """)
+else:
+    st.info("Insufficient data to generate trend visualization.")

@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from datetime import datetime, timedelta
 
 # ---------------------------
 # 1) THEME / CSS (inject once)
@@ -125,7 +126,7 @@ st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 # ---------------------------
 # DATA
 # ---------------------------
-DATA_PATH = "data/Monitor - Gender Equality - Core Indicator Outputs 2025.csv"
+DATA_PATH = "data/Monitor - Gender Equality - Core Indicator Outputs 2025 (1).csv"
 
 df = pd.read_csv(DATA_PATH)
 
@@ -134,27 +135,38 @@ DATE_COL = "Date"
 INDICATOR_COL = "Core Indicator"
 HEADLINE_COL = "Development"
 SOURCE_COL = "Link"
+DIRECTION_COL = "Column 2"
+
+# Direction mapping (using color scheme for consistency)
+DIRECTION_MAP_VALUES = {
+    1: "Worsening conditions",      # COLOR_DISRUPTION
+    0: "Neutral / mixed",            # COLOR_NEUTRAL
+    -1: "Improving conditions"       # COLOR_PROGRESSION
+}
 
 df[DATE_COL] = pd.to_datetime(df[DATE_COL], errors="coerce")
 df = df.dropna(subset=[DATE_COL, INDICATOR_COL]).copy()
 
-# ---------------------------
-# HEADER
-# ---------------------------
-st.title("🧭 Core Indicator Climate")
-st.caption(
-    "Core indicators function as a background climate layer. "
-    "They contextualize policy developments and inform analyst judgment, "
-    "but are not scored as discrete events."
-)
+# Add direction label column
+df["Trend"] = df[DIRECTION_COL].map(DIRECTION_MAP_VALUES)
 
 # ---------------------------
 # SIDEBAR FILTER
 # ---------------------------
 st.sidebar.header("Filter")
 
+# Reset filters callback
+def reset_filters():
+    st.session_state["indicator_filter"] = 0
+
+st.sidebar.button("Reset Filters", on_click=reset_filters)
+
 indicator_options = ["All"] + sorted(df[INDICATOR_COL].unique().tolist())
-selected_indicator = st.sidebar.selectbox("Core Indicator", indicator_options)
+selected_indicator = st.sidebar.selectbox(
+    "Core Indicator",
+    indicator_options,
+    key="indicator_filter"
+)
 
 if selected_indicator == "All":
     df_filtered = df.copy()
@@ -164,9 +176,18 @@ else:
 st.sidebar.caption(f"{len(df_filtered)} signals")
 
 # ---------------------------
+# HEADER
+# ---------------------------
+st.title("Core Indicator Contextualization")
+st.caption(
+    "Core indicators provide structural context for the policy environment. "
+    "They inform analyst judgment but are not coded as discrete events."
+)
+
+# ---------------------------
 # CLIMATE SUMMARY
 # ---------------------------
-st.subheader("Indicator Climate Overview")
+st.subheader("Core Indicator Overview")
 
 summary = (
     df_filtered
@@ -188,10 +209,10 @@ DIRECTION_MAP = {
 }
 
 NOTE_MAP = {
-    "Attitudinal Climate": "Changes in public opinion that shape political receptivity.",
+    "Attitudinal Climate": "Institutional protections, representation, and governance stability.",
     "Narrative Environment": "Media, rhetoric, and normalization patterns.",
     "Democratic Climate": "Representation, rights protection, and institutional resilience.",
-    "Gendered Economic Conditions": "Economic access, labor equity, and service stability.",
+    "Gendered Economic Conditions": "Economic access, labor equity, and service availability affecting gender equality.",
     "Legislative Momentum": "Rate and direction of legal and regulatory change.",
 }
 
@@ -214,19 +235,135 @@ for i, row in summary.iterrows():
 st.divider()
 
 # ---------------------------
+# HELPER FUNCTIONS
+# ---------------------------
+# Source name mapping
+SOURCE_MAP = {
+    "nytimes.com": "NYT",
+    "apnews.com": "AP",
+    "pewresearch.org": "Pew",
+    "nbcnews.com": "NBC",
+    "pbs.org": "PBS",
+    "aauw.org": "AAUW",
+    "politico.com": "POLITICO",
+    "gallup.com": "Gallup",
+    "glaad.org": "GLAAD",
+    "unwomen.org": "UN Women",
+    "independent.co.uk": "The Independent",
+    "newsweek.com": "Newsweek",
+    "axios.com": "Axios",
+    "catholicnewsagency.com": "CNA",
+    "usnews.com": "U.S. News",
+    "theatlantic.com": "The Atlantic",
+    "theguardian.com": "The Guardian",
+    "politico.com": "POLITICO",
+    "apresnouvellesquebec.com": "APR",
+    "congress.gov": "Congress.gov",
+}
+
+def get_short_source(url):
+    """Extract short source name from URL."""
+    if not url or not isinstance(url, str):
+        return "Source"
+    
+    url_lower = url.lower()
+    for domain, short_name in SOURCE_MAP.items():
+        if domain in url_lower:
+            return short_name
+    
+    # Fallback: extract domain name
+    try:
+        from urllib.parse import urlparse
+        domain = urlparse(url).netloc.replace("www.", "")
+        return domain.split(".")[0].upper()
+    except:
+        return "Source"
+
+def trim_text(text, max_length=120):
+    """Trim text to max_length characters, preferring sentence breaks."""
+    if not text or len(text) <= max_length:
+        return text
+    
+    # Try to find a sentence break before max_length
+    trimmed = text[:max_length]
+    
+    # Look for periods, exclamation marks, or question marks
+    for sentence_end in [". ", "! ", "? "]:
+        last_sentence_break = trimmed.rfind(sentence_end)
+        if last_sentence_break > 0 and last_sentence_break > max_length - 40:
+            return trimmed[:last_sentence_break + 1]
+    
+    # If no sentence break found, cut at last word boundary
+    last_space = trimmed.rfind(" ")
+    if last_space > 0:
+        return trimmed[:last_space] + "…"
+    
+    return trimmed + "…"
+
+# ---------------------------
+# CLIMATE DIRECTION SUMMARY
+# ---------------------------
+st.subheader("Climate Direction Summary")
+
+direction_counts = df_filtered[DIRECTION_COL].value_counts().sort_index(ascending=False)
+direction_labels = {
+    1: "Worsening conditions",
+    0: "Neutral / mixed",
+    -1: "Improving conditions"
+}
+
+total_signals = len(df_filtered)
+summary_cols = st.columns(3)
+
+for idx, direction_val in enumerate([1, 0, -1]):
+    count = direction_counts.get(direction_val, 0)
+    pct = (count / total_signals * 100) if total_signals > 0 else 0
+    
+    with summary_cols[idx]:
+        st.metric(
+            label=direction_labels[direction_val],
+            value=int(count),
+            delta=f"{pct:.1f}%" if total_signals > 0 else "0%"
+        )
+
+st.divider()
+
+# ---------------------------
 # EVIDENCE FEED 
 # ---------------------------
-st.subheader("Evidence Feed)")
+st.subheader("Evidence Feed")
 st.caption(
-    "Illustrative sample of underlying indicator signals. "
+    "Signals from the past 6 months. "
     "Full dataset is retained internally."
 )
 
+# Calculate 6 months ago
+six_months_ago = pd.Timestamp.now() - timedelta(days=180)
+
+# Filter for last 6 months and get the 10 most recent
 feed = (
-    df_filtered
+    df_filtered[df_filtered[DATE_COL] >= six_months_ago]
     .sort_values(DATE_COL, ascending=False)
-    [[DATE_COL, INDICATOR_COL, HEADLINE_COL, SOURCE_COL]]
     .head(10)
 )
 
-st.dataframe(feed, use_container_width=True)
+if len(feed) > 0:
+    for idx, row in feed.iterrows():
+        date_str = row[DATE_COL].strftime("%b %d, %Y")
+        headline = trim_text(row[HEADLINE_COL], 120)
+        source_short = get_short_source(row[SOURCE_COL])
+        source_url = row[SOURCE_COL]
+        indicator = row[INDICATOR_COL]
+        trend = row["Trend"]
+        
+        st.markdown(f"""
+**{date_str}** | {indicator} | {trend}
+
+{headline}
+
+[{source_short} →]({source_url})
+
+---
+""")
+else:
+    st.info("No signals in past 6 months for selected filters.")
