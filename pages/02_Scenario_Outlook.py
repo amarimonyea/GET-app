@@ -13,7 +13,7 @@ import re
 # 1) THEME / CSS (inject once)
 # ---------------------------
 COLOR_DISRUPTION = "#cf5442"   # New Lines red
-COLOR_PROGRESSION = "#3b668c"  # New Lines blue
+COLOR_PROGRESSION = "#62af44"  # New Lines green
 COLOR_NEUTRAL = "#1b1725"      # dark
 NL_GOLD = "#bfa359"
 NL_CREAM = "#f1f0ec"
@@ -211,7 +211,7 @@ FORECAST_CARDS = [
         "name": "Security", 
         "direction": "Disruption",
         "probability": "Medium (40-60%)",
-        "summary": "This forecast illustrates how national security laws targeting gender identity and expanded surveillance on women's and LGBTQ+ rights organizations criminalize vulnerable populations and limit civic participation. The weaponization of security frameworks for social control undermines institutional legitimacy and democratic participation.",
+        "summary": "This forecast illustrates how national security laws that target gender identity and that expand surveillance on women's and LGBTQ+ rights organizations criminalize vulnerable populations and limit civic participation.",
         "monitoring_indicators": ["National security laws targeting gender identity", "Expansion of state surveillance on women's and LGBTQ+ rights organizations"],
         "implications": ["Implications coming soon"]
     },
@@ -236,7 +236,7 @@ FORECAST_CARDS = [
         "direction": "Status Quo",
         "probability": "",
         "summary": "The U.S. gender policy landscape remains highly contested due to geopolitical shifts, withdrawal from global gender frameworks, and state-level policy restrictions rolling back reproductive and transgender rights.",
-        "full_assessment": "The US has been in several international conflicts since the beginning of the year including Mexico, Venezuela, and Iran. The United States's standing as global gender rights champion is no longer true as they have pulled out of <a href=\"https://apnews.com/article/united-nations-trump-international-organizations-withdrawal-d704fb9b444dc9cf569865d391b544a6\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">66 international organizations</a>, including UN Women, UNFPA, and other global cooperation initiatives.\n\nSeveral states are rolling back protections for trans individuals as Kansas passed a law <a href=\"https://apnews.com/article/united-nations-trump-international-organizations-withdrawal-d704fb9b444dc9cf569865d391b544a6\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">banning the changes of sex markers</a> on birth certificates and driver licenses, immediately making over 1000 residents IDs invalid.\n\nAdditionally, the SAVE Act represents another policy shift with significant implications for gender equity and immigration-related protections.",
+        "full_assessment": "<p>The US has instigated several international conflicts since the beginning of the year, including invading Venezuela and starting a war with Israel against Iran. The United States' standing as global gender rights champion is no longer true as the U.S. has pulled out of <a href=\"https://apnews.com/article/united-nations-trump-international-organizations-withdrawal-d704fb9b444dc9cf569865d391b544a6\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">66 international organizations</a>, including UN Women, UNFPA, and other global cooperation initiatives.</p><p>Several states are rolling back protections for transgender individuals. For example, Kansas passed a law <a href=\"https://apnews.com/article/transgender-rights-drivers-licenses-birth-certificates-bathrooms-3048b856b81d24553efd9da4aaa94bc7\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">banning the changes of sex markers</a> on birth certificates and driver licenses, immediately making over 1,800 residents' IDs invalid.</p><p>Additionally, the SAVE Act represents another policy shift with significant implications for gender equity and immigration-related protections.</p>",
         "implications": []
     },
 ]
@@ -246,7 +246,7 @@ FEATURED_DEEP_DIVES = [
         "headline": "SAVE Act Implementation: Implications for Gender Equity and Vulnerable Populations",
         "forecast": "Forecasted Political Disruption",
         "direction": "disruption",
-        "analysis": "will add later",
+        "analysis": "The Safeguard Voter Eligibility (SAVE) Act which passed in the House <a href=\"https://www.brennancenter.org/our-work/analysis-opinion/house-passes-save-act-brennan-center-reacts\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">last year</a>, an updated version in <a href=\"https://rules.house.gov/bill/119/s-1383#:~:text=Revises%20the%20effective%20date%20of,rather%20than%202027%20or%20later.&text=Revised%20Prohibits%20federal%20funds%20from,the%20militarization%20of%20polling%20places.\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">February</a>, and is likely to pass in the Senate within the next few months would dramatically change the way voting is conducted in the United States right before midterm elections. President Trump has uttered support for this Act and has said he would refuse to sign <a href=\"https://www.theguardian.com/us-news/2026/mar/13/explainer-save-america-act\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">any other bills until it is passed</a>.\n\nIf passed the SAVE Act would impose strict voter ID regulations requiring voters to produce proof of citizenship and introduces <a href=\"https://campaignlegal.org/document/fact-sheet-save-act-threatens-all-voters\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">criminal liability</a> for election officials who fail to register voters without proper documentation and allows them to be sued to by private citizens. Moreover, the Trump Administration has challenged the validity of <a href=\"https://thehill.com/homenews/senate/5786819-save-america-act-absentee-voting/\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">absentee ballots</a>, which could negatively impact rural and elderly Americans.\n\nPassing the SAVE Act before the midterms will cause confusion and chaos among voters and election precincts, also with provisions built in with <a href=\"https://www.pbs.org/newshour/politics/watch-live-senate-begins-consideration-of-save-america-act\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">Department of Homeland Security Oversight</a> it challenges the integrity of federal elections, undermining democratic processes.\n\nThe SAVE Act impacts all voters, but it specifically harms women, marginalized communities, and trans and non-binary communities. Several of these vulnerable populations do not have their personal documentation readily available and have financial barriers or social stigmas from obtaining new ones.",
         "analysis_by": "Amari Jones, Associate Analyst",
         "source_url": "https://www.congress.gov/bill/119th-congress/house-bill/22",
         "articles": [
@@ -315,7 +315,7 @@ def image_to_base64(image_path):
         return None
 
 st.title("Scenario Outlook")
-st.markdown("<p style='font-size: 1.1rem; color: rgba(27, 23, 37, 0.85); margin-top: -20px;'>Explore different forecast scenarios for the future of the U.S. gender policy landscape</p>", unsafe_allow_html=True)
+st.markdown("<p style='font-size: 1.1rem; color: rgba(27, 23, 37, 0.85); margin-top: -20px;'>Explore different forecast scenarios for the future of the U.S. gender policy landscape brought to you by New Lines' Gender Policy experts.</p>", unsafe_allow_html=True)
 
 st.divider()
 
@@ -1036,7 +1036,7 @@ if status_quo_card:
     # Expandable section with native details/summary
     if full_assessment:
         status_quo_card_html += '<details class="assessment-details">'
-        status_quo_card_html += '<summary class="assessment-summary-toggle">Read Full Q1 Net Assessment</summary>'
+        status_quo_card_html += '<summary class="assessment-summary-toggle">Read Full Q1 2026 Assessment</summary>'
         status_quo_card_html += f'<div class="assessment-full-text">{full_assessment}</div>'
         status_quo_card_html += '</details>'
     
@@ -1050,7 +1050,7 @@ if FEATURED_DEEP_DIVES:
     direction_class_spotlight = spotlight_dive["direction"].lower()
     headline_escaped = html.escape(spotlight_dive["headline"])
     forecast_escaped = html.escape(spotlight_dive["forecast"])
-    analysis_escaped = html.escape(spotlight_dive["analysis"])
+    analysis_escaped = spotlight_dive["analysis"]
     source_url = html.escape(spotlight_dive["source_url"])
     
     spotlight_html = '<div class="spotlight-section">'
@@ -1229,8 +1229,15 @@ document.addEventListener('DOMContentLoaded', function() {
   // Add click handlers for cards
   cards.forEach((card) => {
     card.addEventListener('click', function(e) {
+      // Don't toggle card if clicking on details/summary elements or links
+      if (e.target.tagName === 'SUMMARY' || 
+          e.target.tagName === 'A' || 
+          e.target.closest('details') ||
+          e.target.closest('a')) {
+        return;
+      }
+      
       e.stopPropagation();
-      // Simply toggle the clicked card
       card.classList.toggle('collapsed');
     });
   });

@@ -9,7 +9,7 @@ st.set_page_config(page_title="Human Impact")
 # 1) THEME / CSS (inject once)
 # ---------------------------
 COLOR_DISRUPTION = "#cf5442"   # New Lines red
-COLOR_PROGRESSION = "#3b668c"  # New Lines blue
+COLOR_PROGRESSION = "#62af44"  # New Lines green
 COLOR_NEUTRAL = "#1b1725"      # dark
 NL_GOLD = "#bfa359"
 NL_CREAM = "#f1f0ec"
@@ -186,7 +186,7 @@ st.sidebar.markdown("""
     <span style="color: #ffffff;"><strong>Disruption</strong> — Challenges to gender equity</span>
   </div>
   <div style="display: flex; align-items: center; gap: 0.5rem;">
-    <div style="width: 20px; height: 20px; background-color: #3b668c; border-radius: 3px;"></div>
+    <div style="width: 20px; height: 20px; background-color: #62af44; border-radius: 3px;"></div>
     <span style="color: #ffffff;"><strong>Progression</strong> — Advances in gender equity</span>
   </div>
 </div>
@@ -205,7 +205,7 @@ df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
 df = df.dropna(subset=["Date", "Slider Score"])
 
 st.write(
-    "Explore which population groups are most affected by gender policy developments."
+    "Explore which population groups are most affected by gender policy developments in the U.S."
 )
 
 st.divider()

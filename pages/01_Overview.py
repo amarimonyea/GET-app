@@ -12,7 +12,7 @@ import os
 # 1) THEME / CSS (inject once)
 # ---------------------------
 COLOR_DISRUPTION = "#cf5442"   # New Lines red
-COLOR_PROGRESSION = "#3b668c"  # New Lines blue
+COLOR_PROGRESSION = "#62af44"  # New Lines green
 COLOR_NEUTRAL = "#1b1725"      # dark
 NL_GOLD = "#bfa359"
 NL_CREAM = "#f1f0ec"
@@ -418,7 +418,7 @@ st.sidebar.markdown("""
     <span style="color: #ffffff;"><strong>Disruption</strong> — Challenges to gender equity</span>
   </div>
   <div style="display: flex; align-items: center; gap: 0.5rem;">
-    <div style="width: 20px; height: 20px; background-color: #3b668c; border-radius: 3px;"></div>
+    <div style="width: 20px; height: 20px; background-color: #62af44; border-radius: 3px;"></div>
     <span style="color: #ffffff;"><strong>Progression</strong> — Advances in gender equity</span>
   </div>
 </div>
@@ -517,7 +517,7 @@ else:
         "Color Category:N",
         scale=alt.Scale(
             domain=["Status Quo", "Disruption", "Progression"],
-            range=["#62af44", "#cf5442", "#3b668c"]
+            range=["#3b668c", "#cf5442", "#62af44"]
         ),
         legend=None
     ),
@@ -587,11 +587,11 @@ else:
         <span>Disruption</span>
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
-        <div style="width: 16px; height: 16px; background-color: #3b668c; border-radius: 2px;"></div>
+        <div style="width: 16px; height: 16px; background-color: #62af44; border-radius: 2px;"></div>
         <span>Progression</span>
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
-        <div style="width: 16px; height: 16px; background-color: #62af44; border-radius: 2px;"></div>
+        <div style="width: 16px; height: 16px; background-color: #3b668c; border-radius: 2px;"></div>
         <span>Status Quo</span>
       </div>
     </div>
@@ -601,7 +601,7 @@ else:
     # How to Interpret This Chart section (directly after chart)
     with st.expander("How to Interpret This Chart", expanded=False):
         st.markdown("""
-The Disruption and Progression Momentum graph plots cumulative forecast intensity against net directional movement. Cumulative intensity reflects the volume and concentration of forecasted developments within a domain (emerging → accelerating), while vertical positioning distinguishes between disruptive and progressive trajectories. The quadrant framework highlights which issue areas are early-stage signals versus accelerating structural shifts.
+The Disruption and Progression Momentum graph plots cumulative forecast intensity against net directional movement of tracked developments. The horizontal positioning of cumulative intensity reflects the volume and concentration of forecasted developments within a domain (emerging → accelerating), while the vertical positioning of Net Direction distinguishes between disruptive and progressive trajectories. The quadrant framework highlights which issue areas are early-stage signals versus accelerating structural shifts.
 """)
     
     # Statistics below chart
@@ -929,7 +929,7 @@ direction_click = alt.selection_point(fields=["Direction"], bind="legend")
 # Top level chart: Direction (Progression, Status Quo, Disruption)
 direction_colors = alt.Scale(
     domain=["Progression", "Status Quo", "Disruption"],
-    range=[COLOR_PROGRESSION, "#62af44", COLOR_DISRUPTION]
+    range=[COLOR_PROGRESSION, "#3b668c", COLOR_DISRUPTION]
 )
 
 # Calculate monthly totals for display
@@ -973,7 +973,7 @@ if not monthly_forecast_counts.empty:
     st.markdown("**Breakdown by Forecast Type** — Click a direction in the Forecast Direction legend above to highlight only that direction's forecast types")
     
     # Extended color palette for forecast categories
-    SECONDARY_COLORS = ["#1b1725", "#bfa359", "#f1f0ec", "#3b668c", "#cf5442", "#773344", "#e1bb4b", "#fade82", "#93b5c3", "#dca465", "#62af44"]
+    SECONDARY_COLORS = ["#1b1725", "#bfa359", "#f1f0ec", "#62af44", "#cf5442", "#773344", "#e1bb4b", "#fade82", "#93b5c3", "#dca465", "#3b668c"]
     
     # Get unique forecast values from data to map colors consistently
     forecast_categories = sorted(monthly_forecast_counts[FORECAST_COL].unique().tolist())
@@ -990,7 +990,7 @@ if not monthly_forecast_counts.empty:
         "Political Progression": "#2d5375",           # Navy blue
         "Social Disruption": "#f4896f",               # Coral
         "Social Progression": "#4a95d8",              # Sky blue
-        "Status Quo": "#62af44"                       # Green
+        "Status Quo": "#3b668c"                       # Blue
     }
     
     # Build color range: use custom colors for specified types, fill rest with SECONDARY_COLORS

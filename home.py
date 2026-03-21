@@ -10,7 +10,7 @@ st.set_page_config(page_title="Gender Equality Tracker", layout="wide")
 # 1) THEME / CSS (inject once)
 # ---------------------------
 COLOR_DISRUPTION = "#cf5442"   # New Lines red
-COLOR_PROGRESSION = "#3b668c"  # New Lines blue
+COLOR_PROGRESSION = "#62af44"  # New Lines green
 COLOR_NEUTRAL = "#1b1725"      # dark
 NL_GOLD = "#bfa359"
 NL_CREAM = "#f1f0ec"
@@ -185,9 +185,17 @@ st.subheader("Most Affected Sectors & Groups")
 @st.cache_data
 def load_data():
     df = pd.read_csv("data/Monitor_Gender_Equality_sample_data.csv", skiprows=1)
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
     return df
 
 df = load_data()
+
+# Get date range
+date_min = df["Date"].min()
+date_max = df["Date"].max()
+date_range_str = f"{date_min.strftime('%B %d, %Y')} to {date_max.strftime('%B %d, %Y')}"
+
+st.caption(f"Based on developments tracked from {date_range_str}")
 
 # Get top 3 sectors and groups
 top_sectors = df["Sector Impacted"].value_counts().head(3)

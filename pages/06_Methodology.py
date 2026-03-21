@@ -5,7 +5,7 @@ import pandas as pd
 # 1) THEME / CSS (inject once)
 # ---------------------------
 COLOR_DISRUPTION = "#cf5442"   # New Lines red
-COLOR_PROGRESSION = "#3b668c"  # New Lines blue
+COLOR_PROGRESSION = "#62af44"  # New Lines green
 COLOR_NEUTRAL = "#1b1725"      # dark
 NL_GOLD = "#bfa359"
 NL_CREAM = "#f1f0ec"
@@ -127,7 +127,7 @@ st.caption("Understanding the framework and approach behind the Gender Equality 
 
 st.write(
     """
-Gender Equality (GET) is a forecast model and early-warning system that tracks policy 
+The Gender Equality Tracker (GET) is a forecast model and early-warning system that tracks policy 
 developments, political discourse, and institutional actions related to gender equality and LGBTQ+ rights.
 """
 )

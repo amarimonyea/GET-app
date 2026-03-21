@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 # 1) THEME / CSS (inject once)
 # ---------------------------
 COLOR_DISRUPTION = "#cf5442"   # New Lines red
-COLOR_PROGRESSION = "#3b668c"  # New Lines blue
+COLOR_PROGRESSION = "#62af44"  # New Lines green
 COLOR_NEUTRAL = "#1b1725"      # dark
 NL_GOLD = "#bfa359"
 NL_CREAM = "#f1f0ec"
@@ -301,9 +301,10 @@ def trim_text(text, max_length=120):
     return trimmed + "…"
 
 # ---------------------------
-# CLIMATE DIRECTION SUMMARY
+# OVERALL INDICATOR DIRECTION
 # ---------------------------
-st.subheader("Climate Direction Summary")
+st.subheader("Overall Indicator Direction")
+st.markdown("##### Signals Informing Each Indicator")
 
 direction_counts = df_filtered[DIRECTION_COL].value_counts().sort_index(ascending=False)
 direction_labels = {
