@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import altair as alt
+import html
 
 st.set_page_config(page_title="Sector Impact")
 
@@ -190,7 +191,7 @@ st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 st.title("Sector Impact Analysis")
 
 # Load and prepare data
-df = pd.read_csv("data/Monitor_Gender_Equality_sample_data.csv", skiprows=1)
+df = pd.read_csv("data/Monitor - Gender Equality - GET 2025 (1).csv", skiprows=1)
 df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
 df = df.dropna(subset=["Date", "Slider Score"])
@@ -202,6 +203,60 @@ st.write(
 st.divider()
 
 SECTOR_COL = "Sector Impacted"
+
+def get_top_developments_for_sector(data_df, sector_name, top_n=2, score_filter=None):
+    """Extract top N contributing developments for a given sector.
+    
+    score_filter: None (all), 'disruption' (positive scores), or 'progression' (negative scores)
+    """
+    if data_df.empty:
+        return []
+    
+    filtered = data_df[
+        (data_df["Sector Impacted"].str.strip() == sector_name.strip()) & 
+        (data_df["Development"].notna())
+    ]
+    
+    # Apply score filter if specified
+    if score_filter == "disruption":
+        filtered = filtered[filtered["Slider Score"] > 0]
+    elif score_filter == "progression":
+        filtered = filtered[filtered["Slider Score"] < 0]
+    
+    if filtered.empty:
+        return []
+    
+    filtered = filtered.copy()
+    filtered["Abs Score"] = filtered["Slider Score"].abs()
+    filtered = filtered.sort_values(
+        by=["Abs Score", "Date"],
+        ascending=[False, False]
+    )
+    
+    top_developments = []
+    for idx, row in filtered.head(top_n).iterrows():
+        full_text = row["Development"]
+        # Create short text by finding first sentence (period + space) or truncating to 100 chars
+        if isinstance(full_text, str):
+            # Look for sentence end (period followed by space or end of string)
+            sentences = full_text.split('. ')
+            short_text = sentences[0]
+            # If first part is less than 20 chars and there's a second sentence, include both
+            if len(short_text) < 20 and len(sentences) > 1:
+                short_text = sentences[0] + '. ' + sentences[1]
+            short_text = short_text.strip()
+            if not short_text.endswith('.'):
+                short_text += '.'
+        else:
+            short_text = full_text
+        # Truncate if too long
+        if len(short_text) > 100:
+            short_text = short_text[:97] + "..."
+        source_url = row.get("Link", "")
+        score = row["Slider Score"]
+        top_developments.append((short_text, full_text, source_url, score))
+    
+    return top_developments
 
 # Compute initial metrics for Key Insights
 df_initial = df.copy()
@@ -222,22 +277,52 @@ sector_metrics_initial = (
 )
 sector_metrics_initial = sector_metrics_initial.merge(sector_counts_initial, on=SECTOR_COL, how="left")
 
-# Generate Key Insights
+# Generate Key Insights with development examples
 insights = []
+insights_devs = {}
+
 if not sector_metrics_initial.empty:
+    # Insight 1: Highest Absolute Intensity
     most_impacted = sector_metrics_initial.loc[sector_metrics_initial["Absolute Intensity"].idxmax()]
     insights.append(f"<strong>{most_impacted[SECTOR_COL]}</strong> experiences the highest total intensity of impact ({most_impacted['Absolute Intensity']:.1f})")
+    insights_devs["impact"] = {
+        "sector": most_impacted[SECTOR_COL],
+        "devs": get_top_developments_for_sector(df_initial, most_impacted[SECTOR_COL], top_n=2)
+    }
     
+    # Insight 2: Most Disrupted (different sector if possible)
     most_disrupted = sector_metrics_initial.loc[sector_metrics_initial["Weighted Disruption"].idxmax()]
     if most_disrupted["Weighted Disruption"] > 0:
+        # If same as most_impacted, try to get the 2nd most disrupted
+        if most_disrupted[SECTOR_COL] == most_impacted[SECTOR_COL] and len(sector_metrics_initial) > 1:
+            most_disrupted = sector_metrics_initial.nlargest(2, "Weighted Disruption").iloc[1]
+        
         insights.append(f"<strong>{most_disrupted[SECTOR_COL]}</strong> is most affected by disruption (weighted disruption score: {most_disrupted['Weighted Disruption']:.1f})")
+        insights_devs["disruption"] = {
+            "sector": most_disrupted[SECTOR_COL],
+            "devs": get_top_developments_for_sector(df_initial, most_disrupted[SECTOR_COL], top_n=2, score_filter="disruption")
+        }
     
-    most_events = sector_metrics_initial.loc[sector_metrics_initial["Event_Count"].idxmax()]
-    insights.append(f"<strong>{most_events[SECTOR_COL]}</strong> has the most recorded developments ({int(most_events['Event_Count'])} events)")
-    
+    # Insight 3: Most Progressed (different sector from impact and disruption if possible)
     most_progressed = sector_metrics_initial.loc[sector_metrics_initial["Weighted Progression"].idxmax()]
     if most_progressed["Weighted Progression"] > 0:
+        # Try to get a different sector
+        used_sectors = {most_impacted[SECTOR_COL]}
+        if "disruption" in insights_devs:
+            used_sectors.add(insights_devs["disruption"]["sector"])
+        
+        # Find first progression entry not in used_sectors
+        progression_sorted = sector_metrics_initial.nlargest(len(sector_metrics_initial), "Weighted Progression")
+        for idx, row in progression_sorted.iterrows():
+            if row[SECTOR_COL] not in used_sectors:
+                most_progressed = row
+                break
+        
         insights.append(f"<strong>{most_progressed[SECTOR_COL]}</strong> shows the most progression (weighted progression score: {most_progressed['Weighted Progression']:.1f})")
+        insights_devs["progression"] = {
+            "sector": most_progressed[SECTOR_COL],
+            "devs": get_top_developments_for_sector(df_initial, most_progressed[SECTOR_COL], top_n=2, score_filter="progression")
+        }
 
 # Determine number of unique sectors
 num_sectors = sector_metrics_initial.shape[0]
@@ -326,7 +411,46 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Display as collapsible table
+# Display development examples for each insight
+st.subheader("Example Developments")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    if "impact" in insights_devs and insights_devs["impact"]["devs"]:
+        with st.expander("Highest Impact Developments"):
+            st.caption(f"From: {insights_devs['impact']['sector']}")
+            for short_text, full_text, url, score in insights_devs["impact"]["devs"]:
+                st.write(f"**{short_text}**")
+                if full_text and full_text != short_text:
+                    st.caption(full_text)
+                if url:
+                    st.caption(f"[View Source]({url})")
+
+with col2:
+    if "disruption" in insights_devs and insights_devs["disruption"]["devs"]:
+        with st.expander("Disruption Examples"):
+            st.caption(f"From: {insights_devs['disruption']['sector']}")
+            for short_text, full_text, url, score in insights_devs["disruption"]["devs"]:
+                st.write(f"**{short_text}**")
+                if full_text and full_text != short_text:
+                    st.caption(full_text)
+                if url:
+                    st.caption(f"[View Source]({url})")
+
+with col3:
+    if "progression" in insights_devs and insights_devs["progression"]["devs"]:
+        with st.expander("Progression Examples"):
+            st.caption(f"From: {insights_devs['progression']['sector']}")
+            for short_text, full_text, url, score in insights_devs["progression"]["devs"]:
+                st.write(f"**{short_text}**")
+                if full_text and full_text != short_text:
+                    st.caption(full_text)
+                if url:
+                    st.caption(f"[View Source]({url})")
+
+st.divider()
+
 with st.expander("View Detailed Sector Metrics", expanded=False):
     # Reorder columns for display
     display_columns = [SECTOR_COL, "Weighted Disruption", "Weighted Progression", "Absolute Intensity", "Event_Count"]
@@ -482,7 +606,7 @@ if not trend_data.empty:
             color=alt.Color(SECTOR_COL + ":N", 
                            scale=alt.Scale(range=sector_colors),
                            title="Sector",
-                           legend=alt.Legend(orient="bottom", symbolType="square", titleAnchor="start"))
+                           legend=alt.Legend(orient="bottom", symbolType="square", titleAnchor="start", labelLimit=200, labelPadding=10))
         )
         .add_selection(selection)
         .encode(

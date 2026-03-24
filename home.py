@@ -184,7 +184,7 @@ st.subheader("Most Affected Sectors & Groups")
 # Load data
 @st.cache_data
 def load_data():
-    df = pd.read_csv("data/Monitor_Gender_Equality_sample_data.csv", skiprows=1)
+    df = pd.read_csv("data/Monitor - Gender Equality - GET 2025 (1).csv", skiprows=1)
     df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
     return df
 

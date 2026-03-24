@@ -253,7 +253,7 @@ FEATURED_DEEP_DIVES = [
             {
                 "title": "Transgender Rights & Gender Recognition",
                 "source": "AP News",
-                "image_url": "assets/senate-placeholder.jpg",
+                "image_url": "assets/trans-kansas-id.jpg",
                 "link_url": "https://apnews.com/article/transgender-drivers-licenses-kansas-lawsuit-b34d868d7fe93b2946f54c831307b935",
                 "analysis": "A case filed on Feb 26 by two transgender men against the state of Kansas argues that a new state law, which invalidated roughly 1800 transgender people's identification documents, violates rights privacy, autonomy, and due legal process granted by the state's Constitution. This law forces trans individuals in Kansas to carry identification that matches their sex as assigned on their birth certificate.\n\nThe new legislation represents ongoing attempts at the state and national levels to dehumanize, erase, and discriminate against transgender individuals, stripping them of their civil and legal rights and increasing already disproportionate community level vulnerabilities to mental health challenges, body dysphoria, suicide, self-harm, and identity-based targeting and violence.\n\nThe case challenging the law represents mobilized resistance against the escalated dehumanization of and discrimination against trans people—while Kansas is not the first state to enact this kind of policy, it is the first state to retroactively invalidate licenses already given, demonstrating a further regression of gender equality.",
                 "analysis_by": "Riley Sullivan, Student Fellow"
@@ -261,7 +261,7 @@ FEATURED_DEEP_DIVES = [
             {
                 "title": "US International Reproductive Health Funding Restrictions",
                 "source": "NPR",
-                "image_url": "assets/un-women-placeholder.jpg",
+                "image_url": "assets/trump-mexico-city-policy.avif",
                 "link_url": "https://www.npr.org/2026/01/23/nx-s1-5683204/abortion-trump-mexico-city-policy",
                 "analysis": "The federal government announced an expansion of the Mexico City Policy, a policy that initially barred U.S. funds from being used for abortions and reproductive healthcare. The new iteration of the policy earmarks $30 billion in federal aid funding to restrict its use for programs related to \"gender ideology\" and DEI.\n\nForeign- and U.S.-based organizations will be forced to stop lifesaving international programming for women, the LGBTQ+ community, people with HIV/AIDS, and other marginalized communities or risk funding withdrawals and becoming effectively defunct.\n\nOn top of the detriments to human security and organizational functionality, this shift will affect the U.S.'s ability to exert influence over and garner information from global public health networks, making the U.S. more vulnerable to public health threats.\n\nFurther, humanitarian assistance has been a long-established bargaining chip for the U.S. to use in diplomatic engagements. The expansion of the Mexico City Policy, however, limits the U.S.'s capacity to operationalize its humanitarian involvement as leverage, leaving the U.S. at a national security disadvantage. Without this \"soft\" power influence, the U.S. will be more likely to lean on more coercive or aggressive methods of engagement to pursue its interests abroad.",
                 "analysis_by": "Riley Sullivan, Student Fellow"
@@ -269,7 +269,7 @@ FEATURED_DEEP_DIVES = [
             {
                 "title": "Immigration Enforcement & Reproductive Rights",
                 "source": "Center for Reproductive Rights",
-                "image_url": "assets/senate-placeholder.jpg",
+                "image_url": "assets/ice-women-detention.png",
                 "link_url": "https://reproductiverights.org/news/trump-admin-must-provide-answers-for-horrifying-treatment-of-pregnant-ice-detainees/",
                 "analysis": "Emerging reports of inhumane treatment of pregnant women in ICE custody detail concerning deprivations of maternal healthcare. Federal policy establishes that CBP and ICE are mandated to provide maternal healthcare and prenatal care, are restricted from moving pregnant minors to detention centers in states that prohibit reproductive healthcare like abortions, and are barred from detaining pregnant, postpartum, or nursing mothers outside of \"extreme circumstances.\" Yet, the treatment of pregnant women by CBP and ICE officials has been demonstrated to violate federal regulations. This represents a broad disregard for existing protective policies, and, combined with impunity from the federal government for these offenses, demonstrates that ICE is operating outside the scope of the law. Failure to comply with the policy designed to protect vulnerable populations illustrates a broader trend of unchecked federal overreach that jeopardizes human security.",
                 "analysis_by": "Riley Sullivan, Student Fellow"

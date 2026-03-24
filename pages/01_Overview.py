@@ -6,7 +6,8 @@ import altair as alt
 import html
 import textwrap
 import base64
-import os 
+import os
+from urllib.parse import urlparse
 
 # ---------------------------
 # 1) THEME / CSS (inject once)
@@ -281,7 +282,7 @@ FEATURED_DEEP_DIVES = [
 # ---------------------------
 # 4) LOAD + CLEAN DATA
 # ---------------------------
-DATA_PATH = "data/Monitor_Gender_Equality_sample_data.csv"
+DATA_PATH = "data/Monitor - Gender Equality - GET 2025 (1).csv"
 df = pd.read_csv(DATA_PATH, skiprows=1)
 
 df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
@@ -309,8 +310,205 @@ def shorten_text(text, max_chars=120):
 
 df["Development Short"] = df["Development"].apply(shorten_text)
 
-def get_key_insights(forecast_points_df, forecast_col):
-    """Generate key insights from forecast_points dataframe including Status Quo."""
+# ---------------------------
+# SIGNPOST MAPPING (Full to Short Labels)
+# ---------------------------
+SIGNPOST_MAPPING = {
+    "Signpost - Legislative or executive actions restricting reproductive, gender, or workplace rights": "legislative restrictions",
+    "Signpost - US withdrawal from or defunding of international organizations advancing gender, LGBTQ+, or reproductive rights": "international withdrawal",
+    "Signpost - Public information and data erasure in government systems": "information erasure",
+    "Signpost - Politicization or repurposing of protective institutions for political objectives": "institutional politicization",
+    "Signpost - Changes to legal recognition of gender and family structure": "legal recognition changes",
+    "Signpost - Increased use of executive orders to circumvent legislative and judicial constraints": "executive overreach",
+    "Signpost - Removal of qualified civil servants and service members in national security sectors due to sexual orientation or gender identity": "personnel removal",
+    "Signpost - Reduction of protections against gender-based violence": "violence protection rollback",
+    "Signpost - Service withdrawal or denial driven by anticipated legal, financial, or political retaliation": "service withdrawal",
+    "Signpost - Institutional adoption of gender-restrictive participation policies in education and sports": "participation restrictions",
+    "Signpost - Judicial challenges seeking to weaken, reinterpret, or overturn gender-related civil rights precedents": "legal challenges",
+    "Signpost - State or federal policy actions that establish, reinstate, or expand gender, reproductive, or LGBTQ+ protections": "rights expansions",
+    "Signpost - State-level legal challenges seeking to block or overturn federal gender restrictive actions": "state legal defense",
+    "Signpost - Cuts or divestments in federal scientific, evidence-based research, or mass media related to equity, gender, or social policy": "research defunding",
+    "Signpost - Judicial challenges seeking to weaken…": "legal challenges",
+}
+
+def get_signpost_label(signpost_text):
+    """Convert full signpost text to short label."""
+    if pd.isna(signpost_text):
+        return "other"
+    signpost_text = str(signpost_text).strip()
+    return SIGNPOST_MAPPING.get(signpost_text, signpost_text[:40] + "…")
+
+def get_top_signposts_for_forecast(data_df, forecast_name, top_n=2):
+    """
+    Extract top N most frequent signposts for a given forecast category.
+    Excludes Status Quo developments.
+    Returns list of short label strings.
+    """
+    if data_df.empty:
+        return []
+    
+    # Filter to the specific forecast and exclude empty signposts
+    filtered = data_df[
+        (data_df["Forecast"].str.strip() == forecast_name.strip()) & 
+        (data_df["Signpost"].notna())
+    ]
+    
+    if filtered.empty:
+        return []
+    
+    # Group by signpost and count
+    signpost_counts = filtered["Signpost"].value_counts()
+    
+    # Get top N and convert to short labels
+    top_signposts = []
+    for signpost in signpost_counts.head(top_n).index:
+        label = get_signpost_label(signpost)
+        top_signposts.append(label)
+    
+    return top_signposts
+
+def get_top_developments_for_forecast(data_df, forecast_name, top_n=2):
+    """
+    Extract top N contributing developments for a given forecast category.
+    Selects by highest score magnitude first, recency as tiebreaker.
+    
+    Args:
+        data_df: Filtered data containing all developments
+        forecast_name: Forecast category to filter by
+        top_n: Number of developments to return (default: 2)
+    
+    Returns:
+        List of tuples: (shortened_text, full_development_text, source_url, score)
+    """
+    if data_df.empty:
+        return []
+    
+    # Filter to the specific forecast
+    filtered = data_df[
+        (data_df["Forecast"].str.strip() == forecast_name.strip()) & 
+        (data_df["Development Short"].notna())
+    ]
+    
+    if filtered.empty:
+        return []
+    
+    # Sort by absolute score magnitude (descending), then by date (descending for recency)
+    filtered = filtered.copy()
+    filtered["Abs Score"] = filtered["Slider Score"].abs()
+    filtered = filtered.sort_values(
+        by=["Abs Score", "Date"],
+        ascending=[False, False]
+    )
+    
+    # Get top N developments with full details
+    top_developments = []
+    for idx, row in filtered.head(top_n).iterrows():
+        short_text = row["Development Short"]
+        full_text = row["Development"]
+        source_url = row.get("Link", "")
+        score = row["Slider Score"]
+        top_developments.append((short_text, full_text, source_url, score))
+    
+    return top_developments
+
+def get_top_developments_for_domain(data_df, domain_name, top_n=2):
+    """
+    Extract top N contributing developments for a given domain of assessment.
+    Selects by highest score magnitude first, recency as tiebreaker.
+    
+    Args:
+        data_df: Filtered data containing all developments
+        domain_name: Domain of assessment to filter by
+        top_n: Number of developments to return (default: 2)
+    
+    Returns:
+        List of tuples: (shortened_text, full_development_text, source_url, score)
+    """
+    if data_df.empty:
+        return []
+    
+    # Filter to the specific domain
+    filtered = data_df[
+        (data_df["Domains of Assessment"].str.strip() == domain_name.strip()) & 
+        (data_df["Development Short"].notna())
+    ]
+    
+    if filtered.empty:
+        return []
+    
+    # Sort by absolute score magnitude (descending), then by date (descending for recency)
+    filtered = filtered.copy()
+    filtered["Abs Score"] = filtered["Slider Score"].abs()
+    filtered = filtered.sort_values(
+        by=["Abs Score", "Date"],
+        ascending=[False, False]
+    )
+    
+    # Get top N developments with full details
+    top_developments = []
+    for idx, row in filtered.head(top_n).iterrows():
+        short_text = row["Development Short"]
+        full_text = row["Development"]
+        source_url = row.get("Link", "")
+        score = row["Slider Score"]
+        top_developments.append((short_text, full_text, source_url, score))
+    
+    return top_developments
+
+def get_top_developments_for_direction(data_df, direction, top_n=2):
+    """
+    Extract top N contributing developments for a given direction (Disruption, Progression, Status Quo).
+    Selects by highest score magnitude first, recency as tiebreaker.
+    
+    Args:
+        data_df: Filtered data containing all developments
+        direction: Direction to filter by ("Disruption", "Progression", "Status Quo")
+        top_n: Number of developments to return (default: 2)
+    
+    Returns:
+        List of tuples: (shortened_text, full_development_text, source_url, score)
+    """
+    if data_df.empty:
+        return []
+    
+    # Filter based on direction using Slider Score
+    if direction == "Disruption":
+        filtered = data_df[(data_df["Slider Score"] > 0) & (data_df["Development Short"].notna())]
+    elif direction == "Progression":
+        filtered = data_df[(data_df["Slider Score"] < 0) & (data_df["Development Short"].notna())]
+    else:  # Status Quo
+        filtered = data_df[(data_df["Slider Score"] == 0) & (data_df["Development Short"].notna())]
+    
+    if filtered.empty:
+        return []
+    
+    # Sort by absolute score magnitude (descending), then by date (descending for recency)
+    filtered = filtered.copy()
+    filtered["Abs Score"] = filtered["Slider Score"].abs()
+    filtered = filtered.sort_values(
+        by=["Abs Score", "Date"],
+        ascending=[False, False]
+    )
+    
+    # Get top N developments with full details
+    top_developments = []
+    for idx, row in filtered.head(top_n).iterrows():
+        short_text = row["Development Short"]
+        full_text = row["Development"]
+        source_url = row.get("Link", "")
+        score = row["Slider Score"]
+        top_developments.append((short_text, full_text, source_url, score))
+    
+    return top_developments
+
+def get_key_insights(forecast_points_df, forecast_col, data_df=None):
+    """Generate key insights from forecast_points dataframe including Status Quo.
+    
+    Args:
+        forecast_points_df: Aggregated forecast data
+        forecast_col: Forecast column name
+        data_df: Original detailed data (optional, used for development extraction)
+    """
     if forecast_points_df.empty:
         return ["No insights available for the selected filters."]
     
@@ -320,13 +518,75 @@ def get_key_insights(forecast_points_df, forecast_col):
     max_disr_idx = forecast_points_df["Disr"].idxmax()
     max_disr_name = forecast_points_df.loc[max_disr_idx, forecast_col]
     max_disr_score = forecast_points_df.loc[max_disr_idx, "Disr"]
-    insights.append(f"<strong>Highest cumulative disruption:</strong> {max_disr_name} ({max_disr_score:.1f})")
+    
+    insight_text = f"<strong>Highest cumulative disruption:</strong> {max_disr_name} ({max_disr_score:.1f})"
+    
+    # Add development-based examples if data available
+    if data_df is not None and not data_df.empty:
+        top_developments = get_top_developments_for_forecast(data_df, max_disr_name, top_n=2)
+        if top_developments:
+            examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples include:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
+            for short_text, full_text, source_url, score in top_developments:
+                # Create expandable details
+                source_domain = "Source unknown"
+                if source_url:
+                    try:
+                        from urllib.parse import urlparse
+                        domain = urlparse(source_url).netloc
+                        source_domain = domain.replace("www.", "")
+                    except:
+                        pass
+                
+                details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
+<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
+<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
+<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
+<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
+<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
+</div>
+</details>"""
+                examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
+            examples_html += "</ul>"
+            insight_text += examples_html
+    
+    insights.append(insight_text)
     
     # Insight 2: Highest cumulative progression
     max_prog_idx = forecast_points_df["Prog"].idxmax()
     max_prog_name = forecast_points_df.loc[max_prog_idx, forecast_col]
     max_prog_score = forecast_points_df.loc[max_prog_idx, "Prog"]
-    insights.append(f"<strong>Highest cumulative progression:</strong> {max_prog_name} ({max_prog_score:.1f})")
+    
+    insight_text = f"<strong>Highest cumulative progression:</strong> {max_prog_name} ({max_prog_score:.1f})"
+    
+    # Add development-based examples if data available
+    if data_df is not None and not data_df.empty:
+        top_developments = get_top_developments_for_forecast(data_df, max_prog_name, top_n=2)
+        if top_developments:
+            examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples include:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
+            for short_text, full_text, source_url, score in top_developments:
+                # Create expandable details
+                source_domain = "Source unknown"
+                if source_url:
+                    try:
+                        from urllib.parse import urlparse
+                        domain = urlparse(source_url).netloc
+                        source_domain = domain.replace("www.", "")
+                    except:
+                        pass
+                
+                details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
+<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
+<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
+<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
+<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
+<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
+</div>
+</details>"""
+                examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
+            examples_html += "</ul>"
+            insight_text += examples_html
+    
+    insights.append(insight_text)
     
     # Insight 3: Status Quo forecasts count
     status_quo_count = len(forecast_points_df[forecast_points_df["Color Category"] == "Status Quo"])
@@ -434,6 +694,29 @@ st.divider()
 # 8) DISRUPTION AND PROGRESSION MOMENTUM (cleaner)
 # ---------------------------
 st.subheader("Disruption and Progression Momentum")
+
+# Lightweight explanatory block
+st.markdown(
+    """
+    <div style="
+        background-color: rgba(191, 163, 89, 0.08);
+        border-left: 3px solid rgba(191, 163, 89, 0.4);
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin-bottom: 16px;
+    ">
+        <p style="margin: 0; font-size: 0.95rem; color: #4a4a4a; line-height: 1.5;">
+            <strong style="color: #5a5a5a;">How to Read the Data</strong><br>
+            Developments are real-world policy actions tracked by the Gender Equality Tracker. Each development is categorized by forecast (for example, disruption or progression) and assigned a score based on its scale, impact, and institutional significance. Scores reflect the magnitude and direction of change using publicly reported policy, legal, and institutional developments.
+        </p>
+        <p style="margin: 6px 0 0 0; font-size: 0.88rem; color: #7a7a7a; font-style: italic; line-height: 1.4;">
+            Example: Political Disruption (+3) — Executive branch pressure on the judiciary/intimidation of judges
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 st.markdown("**Cumulative intensity (emerging → accelerating) vs net direction (progression ↓ | disruption ↑).**")
 quad = df.copy()
 quad["Prog"] = np.where(quad["Slider Score"] < 0, -quad["Slider Score"], 0)
@@ -443,21 +726,57 @@ forecast_points = quad.groupby(FORECAST_COL, as_index=False)[["Prog", "Disr"]].s
 forecast_points["Cumulative Intensity"] = forecast_points["Prog"] + forecast_points["Disr"]
 forecast_points["Net Direction"] = forecast_points["Disr"] - forecast_points["Prog"]
 
-# Get latest event per forecast from filtered data
+# Get latest event per forecast from filtered data first
 if not df_filtered.empty:
     latest_by_forecast = df_filtered.sort_values("Date", ascending=False).groupby(FORECAST_COL, as_index=False).first()
-    latest_by_forecast = latest_by_forecast[[FORECAST_COL, "Date", "Development Short", "Slider Score", DOMAIN_COL, SECTOR_COL, "Link"]].rename(
-        columns={"Date": "Latest Date", "Development Short": "Latest Development", "Slider Score": "Latest Slider Score", DOMAIN_COL: "Latest Domain", SECTOR_COL: "Latest Sector", "Link": "Latest Link"}
+    latest_by_forecast = latest_by_forecast[[FORECAST_COL, "Date", "Development Short", "Development", "Slider Score", DOMAIN_COL, SECTOR_COL, "Link"]].rename(
+        columns={"Date": "Latest Date", "Development Short": "Latest Development", "Development": "Latest Development Full", "Slider Score": "Latest Slider Score", DOMAIN_COL: "Latest Domain", SECTOR_COL: "Latest Sector", "Link": "Latest Link"}
     )
     forecast_points = forecast_points.merge(latest_by_forecast, left_on=FORECAST_COL, right_on=FORECAST_COL, how="left")
-    forecast_points["Latest Date Str"] = forecast_points["Latest Date"].dt.strftime("%b %d, %Y")
 else:
     forecast_points["Latest Date"] = None
-    forecast_points["Latest Date Str"] = "No data"
     forecast_points["Latest Development"] = None
+    forecast_points["Latest Development Full"] = None
     forecast_points["Latest Slider Score"] = None
     forecast_points["Latest Domain"] = None
     forecast_points["Latest Sector"] = None
+    forecast_points["Latest Link"] = None
+
+# For forecasts missing Latest Development Full (because they weren't in filtered data), get from full data
+if "Latest Development Full" in forecast_points.columns:
+    missing_full_dev = forecast_points[forecast_points["Latest Development Full"].isna() | (forecast_points["Latest Development Full"] == "")]
+    if not missing_full_dev.empty:
+        latest_all = df.sort_values("Date", ascending=False).groupby(FORECAST_COL, as_index=False).first()
+        latest_all = latest_all[[FORECAST_COL, "Development"]].rename(columns={"Development": "Latest Development Full"})
+        forecast_points.loc[missing_full_dev.index, "Latest Development Full"] = forecast_points.loc[missing_full_dev.index, FORECAST_COL].map(
+            dict(zip(latest_all[FORECAST_COL], latest_all["Latest Development Full"]))
+        )
+
+# For forecasts missing Latest Link (because they weren't in filtered data), get from full data
+if "Latest Link" in forecast_points.columns:
+    missing_links = forecast_points[forecast_points["Latest Link"].isna() | (forecast_points["Latest Link"] == "")]
+    if not missing_links.empty:
+        latest_all = df.sort_values("Date", ascending=False).groupby(FORECAST_COL, as_index=False).first()
+        latest_all = latest_all[[FORECAST_COL, "Link"]].rename(columns={"Link": "Latest Link"})
+        forecast_points.loc[missing_links.index, "Latest Link"] = forecast_points.loc[missing_links.index, FORECAST_COL].map(
+            dict(zip(latest_all[FORECAST_COL], latest_all["Latest Link"]))
+        )
+
+# Format Latest Date Str
+if "Latest Date" in forecast_points.columns:
+    forecast_points["Latest Date Str"] = forecast_points["Latest Date"].dt.strftime("%b %d, %Y") if pd.api.types.is_datetime64_ns_dtype(forecast_points["Latest Date"]) else "No data"
+else:
+    forecast_points["Latest Date Str"] = "No data"
+
+if "Latest Development" not in forecast_points.columns:
+    forecast_points["Latest Development"] = None
+if "Latest Slider Score" not in forecast_points.columns:
+    forecast_points["Latest Slider Score"] = None
+if "Latest Domain" not in forecast_points.columns:
+    forecast_points["Latest Domain"] = None
+if "Latest Sector" not in forecast_points.columns:
+    forecast_points["Latest Sector"] = None
+if "Latest Link" not in forecast_points.columns:
     forecast_points["Latest Link"] = None
 
 if forecast_points.empty:
@@ -614,7 +933,7 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
 """)
     
     # Key Insights Strip
-    insights_list = get_key_insights(forecast_points, FORECAST_COL)
+    insights_list = get_key_insights(forecast_points, FORECAST_COL, data_df=df_filtered)
     insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in insights_list])
     
     st.markdown(f"""
@@ -629,7 +948,13 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
     # Latest Development by Forecast panel
     with st.expander("Latest Developments by Forecast", expanded=False):
         if not df_filtered.empty:
-            latest_events_display = forecast_points[[FORECAST_COL, "Latest Date Str", "Latest Development", "Latest Domain", "Latest Sector", "Latest Slider Score", "Latest Link"]].copy()
+            # Check required columns exist
+            if "Latest Link" not in forecast_points.columns:
+                forecast_points["Latest Link"] = ""
+            if "Latest Development Full" not in forecast_points.columns:
+                forecast_points["Latest Development Full"] = forecast_points.get("Latest Development", "")
+            
+            latest_events_display = forecast_points[[FORECAST_COL, "Latest Date Str", "Latest Development", "Latest Development Full", "Latest Domain", "Latest Sector", "Latest Slider Score", "Latest Link"]].copy()
             latest_events_display = latest_events_display[latest_events_display["Latest Date Str"] != "No data"]
             # Remove rows with NaN values in critical columns
             latest_events_display = latest_events_display.dropna(subset=["Latest Development", "Latest Date Str"])
@@ -639,39 +964,26 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
                     FORECAST_COL: "Forecast",
                     "Latest Date Str": "Date",
                     "Latest Development": "Development Title",
+                    "Latest Development Full": "Full Development",
                     "Latest Domain": "Domain",
                     "Latest Sector": "Sector",
                     "Latest Slider Score": "Score",
-                    "Latest Link": "Source"
+                    "Latest Link": "Source URL"
                 })
                 # Sort by date descending (most recent first)
                 latest_events_display["Date"] = pd.to_datetime(latest_events_display["Date"], format="%b %d, %Y", errors="coerce")
                 latest_events_display = latest_events_display.sort_values("Date", ascending=False).head(5)
                 latest_events_display["Date"] = latest_events_display["Date"].dt.strftime("%b %d, %Y")
-                latest_events_display = latest_events_display[[c for c in ["Forecast", "Date", "Development Title", "Score", "Source"] if c in latest_events_display.columns]]
                 
-                # Cap Development Title at 100 characters without breaking words
-                def truncate_at_word_boundary(text, max_length=100):
-                    if pd.isna(text) or not isinstance(text, str):
-                        return ""
-                    if len(text) <= max_length:
-                        return text
-                    truncated = text[:max_length]
-                    last_space = truncated.rfind(' ')
-                    if last_space > 0:
-                        return truncated[:last_space] + "..."
-                    return truncated + "..."
-                
-                # Extract domain from URL and format as readable source name
+                # Extract readable source name from URL - improved version
                 def extract_source_name(url):
-                    if pd.isna(url) or not url:
-                        return "Unknown"
+                    if pd.isna(url) or not url or not str(url).strip():
+                        return None  # Return None instead of "Unknown"
                     
-                    # Mapping of domain names to proper publication names
                     source_mapping = {
                         "usatoday": "USA Today",
-                        "nytimes": "New York Times",
-                        "wsj": "Wall Street Journal",
+                        "nytimes": "NYT",
+                        "wsj": "WSJ",
                         "politico": "Politico",
                         "thehill": "The Hill",
                         "reuters": "Reuters",
@@ -685,59 +997,90 @@ The Disruption and Progression Momentum graph plots cumulative forecast intensit
                         "npr": "NPR",
                         "theguardian": "The Guardian",
                         "bloomberg": "Bloomberg",
-                        "bgov": "Bloomberg Government",
+                        "bgov": "BGov",
                         "cnbc": "CNBC",
                         "axios": "Axios",
                         "vox": "Vox",
-                        "cpr": "Colorado Public Radio",
+                        "cpr": "CPR",
+                        "apnews": "AP",
+                        "pbs": "PBS",
+                        "nbcnews": "NBC",
+                        "abcnews": "ABC",
+                        "cbsnews": "CBS",
                     }
                     
                     try:
                         from urllib.parse import urlparse
                         parsed = urlparse(str(url))
                         domain = parsed.netloc.replace("www.", "").lower()
-                        
-                        # Split by dots to get domain parts
                         domain_parts = domain.split(".")
                         
-                        # Try to find the main domain (second-to-last part before TLD)
-                        # For news.bgov.com, we want "bgov"
-                        # For usatoday.com, we want "usatoday"
+                        # Try second-to-last part first
                         if len(domain_parts) >= 2:
-                            # Try the second-to-last part first (handles news.bgov.com, etc.)
                             main_domain = domain_parts[-2]
-                        else:
-                            main_domain = domain_parts[0]
+                            if main_domain in source_mapping:
+                                return source_mapping[main_domain]
                         
-                        # Check if we have a mapping for this domain
-                        if main_domain in source_mapping:
-                            return source_mapping[main_domain]
-                        
-                        # If not found, try the first part (for simple domains)
-                        if len(domain_parts) > 1 and domain_parts[0] in source_mapping:
+                        # Try first part
+                        if domain_parts[0] in source_mapping:
                             return source_mapping[domain_parts[0]]
                         
-                        # Otherwise, format the main domain name
-                        main_domain = main_domain.replace("-", " ").replace("_", " ")
-                        return main_domain.title()
+                        # Format domain name
+                        main_domain = domain_parts[0].replace("-", " ").replace("_", " ").title()
+                        return main_domain if main_domain else None
                     except:
-                        return "Unknown"
+                        return None
                 
-                latest_events_display["Development Title"] = latest_events_display["Development Title"].apply(truncate_at_word_boundary)
-                latest_events_display["Source"] = latest_events_display["Source"].apply(extract_source_name)
+                # Create Source Display column
+                latest_events_display["Source Display"] = latest_events_display["Source URL"].apply(extract_source_name)
                 
-                st.markdown(
-                    """
-                    <style>
-                    [data-testid="stDataFrame"] [data-testid="stDataFrameContainer"] div {
-                        word-wrap: break-word;
-                        white-space: normal;
-                    }
-                    </style>
-                    """,
-                    unsafe_allow_html=True,
-                )
-                st.dataframe(latest_events_display, use_container_width=True, hide_index=True)
+                # Build custom card-style layout instead of table to avoid rendering issues
+                html_output = "<div style='display: flex; flex-direction: column; gap: 1.5rem;'>"
+                
+                for idx, row in latest_events_display.iterrows():
+                    forecast_name = html.escape(str(row["Forecast"]))
+                    date_str = html.escape(str(row["Date"]))
+                    title = html.escape(str(row["Development Title"]))
+                    full_text = html.escape(str(row["Full Development"])) if pd.notna(row["Full Development"]) else ""
+                    score = row["Score"]
+                    source_url = str(row["Source URL"]).strip() if pd.notna(row["Source URL"]) else ""
+                    source_display = row["Source Display"]
+                    
+                    # Build source link
+                    if source_url and source_display:
+                        source_html = f"<a href='{html.escape(source_url)}' target='_blank' style='color: #0066cc; text-decoration: underline; font-weight: 500;'>{html.escape(str(source_display))}</a>"
+                    else:
+                        source_html = "<span style='color: #999;'>No source</span>"
+                    
+                    # Card HTML with all information in a readable format
+                    card_html = f"""
+<div style='border: 1px solid #ddd; border-radius: 4px; padding: 1rem; background-color: #fafafa; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>
+  <div style='display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;'>
+    <div style='flex: 1;'>
+      <div style='display: flex; gap: 1rem; margin-bottom: 0.75rem; font-size: 0.9em;'>
+        <span style='background-color: #e8e7e0; padding: 0.25rem 0.5rem; border-radius: 3px; color: #1b1725;'><strong>{forecast_name}</strong></span>
+        <span style='color: #666;'>{date_str}</span>
+      </div>
+      <div style='margin-bottom: 0.75rem;'>
+        <details style='cursor: pointer; user-select: none;'>
+          <summary style='color: #0066cc; text-decoration: underline; cursor: pointer; font-weight: 500; margin-bottom: 0.5rem;'>{title}</summary>
+          <div style='margin-top: 0.75rem; padding: 0.75rem; background-color: #fff; border-left: 3px solid #bfa359; border-radius: 2px; font-size: 0.95em; line-height: 1.6; color: #333; white-space: normal; word-wrap: break-word; overflow-wrap: break-word;'>
+{full_text}
+          </div>
+        </details>
+      </div>
+      <div style='display: flex; gap: 1rem; font-size: 0.85em;'>
+        <span style='color: #666;'><strong>Source:</strong> {source_html}</span>
+        <span style='color: #666;'><strong>Score:</strong> {score}</span>
+      </div>
+    </div>
+  </div>
+</div>
+"""
+                    html_output += card_html
+                
+                html_output += "</div>"
+                st.markdown(html_output, unsafe_allow_html=True)
             else:
                 st.info("No events available for selected forecasts in current filters.")
         else:
@@ -861,11 +1204,93 @@ Net direction indicates whether developments within each domain are trending tow
         most_balanced_domain = dom_balance.loc[dom_balance["Balance"].idxmin(), DOMAIN_COL]
         most_balanced_value = dom_balance.loc[dom_balance["Balance"].idxmin(), "Net Direction"]
         
-        domain_insights_list = [
-            f"<strong>Most disruption-oriented domain:</strong> {max_disruption_domain} (net direction: {max_disruption_value:.1f})",
-            f"<strong>Most progression-oriented domain:</strong> {min_disruption_domain} (net direction: {min_disruption_value:.1f})",
-            f"<strong>Most balanced domain:</strong> {most_balanced_domain} (net direction: {most_balanced_value:.1f})"
-        ]
+        # Build insights with expandable development examples
+        domain_insights_list = []
+        
+        # Insight 1: Most disruption-oriented domain
+        insight1_text = f"<strong>Most disruption-oriented domain:</strong> {max_disruption_domain} (net direction: {max_disruption_value:.1f})"
+        if not df_filtered.empty:
+            top_developments = get_top_developments_for_domain(df_filtered, max_disruption_domain, top_n=2)
+            if top_developments:
+                examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
+                for short_text, full_text, source_url, score in top_developments:
+                    source_domain = "Source unknown"
+                    if source_url:
+                        try:
+                            domain = urlparse(source_url).netloc
+                            source_domain = domain.replace("www.", "")
+                        except:
+                            pass
+                    
+                    details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
+<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
+<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
+<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
+<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
+<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
+</div>
+</details>"""
+                    examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
+                examples_html += "</ul>"
+                insight1_text += examples_html
+        domain_insights_list.append(insight1_text)
+        
+        # Insight 2: Most progression-oriented domain
+        insight2_text = f"<strong>Most progression-oriented domain:</strong> {min_disruption_domain} (net direction: {min_disruption_value:.1f})"
+        if not df_filtered.empty:
+            top_developments = get_top_developments_for_domain(df_filtered, min_disruption_domain, top_n=2)
+            if top_developments:
+                examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
+                for short_text, full_text, source_url, score in top_developments:
+                    source_domain = "Source unknown"
+                    if source_url:
+                        try:
+                            domain = urlparse(source_url).netloc
+                            source_domain = domain.replace("www.", "")
+                        except:
+                            pass
+                    
+                    details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
+<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
+<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
+<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
+<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
+<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
+</div>
+</details>"""
+                    examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
+                examples_html += "</ul>"
+                insight2_text += examples_html
+        domain_insights_list.append(insight2_text)
+        
+        # Insight 3: Most balanced domain
+        insight3_text = f"<strong>Most balanced domain:</strong> {most_balanced_domain} (net direction: {most_balanced_value:.1f})"
+        if not df_filtered.empty:
+            top_developments = get_top_developments_for_domain(df_filtered, most_balanced_domain, top_n=2)
+            if top_developments:
+                examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
+                for short_text, full_text, source_url, score in top_developments:
+                    source_domain = "Source unknown"
+                    if source_url:
+                        try:
+                            domain = urlparse(source_url).netloc
+                            source_domain = domain.replace("www.", "")
+                        except:
+                            pass
+                    
+                    details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
+<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
+<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
+<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
+<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
+<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
+</div>
+</details>"""
+                    examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
+                examples_html += "</ul>"
+                insight3_text += examples_html
+        domain_insights_list.append(insight3_text)
+        
         domain_insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in domain_insights_list])
         
         st.markdown(f"""
@@ -1040,9 +1465,18 @@ if not monthly_forecast_counts.empty:
         )
     )
     
+    # Add text labels with monthly totals on top of breakdown bars
+    breakdown_text = alt.Chart(monthly_breakdown_totals).mark_text(dy=-5, fontSize=11, fontWeight="bold").encode(
+        x=alt.X("MonthLabel:N", sort=breakdown_month_sort),
+        y=alt.Y("Count:Q"),
+        text=alt.Text("Count:Q")
+    )
+    
+    breakdown_chart_with_totals = (breakdown_chart + breakdown_text)
+    
     # Combine both charts vertically so interaction works across both
     # Using alt.vconcat() for vertical stacking with shared interaction
-    combined_chart = alt.vconcat(direction_chart_with_totals, breakdown_chart).properties(
+    combined_chart = alt.vconcat(direction_chart_with_totals, breakdown_chart_with_totals).properties(
         spacing=20
     ).resolve_scale(color='independent')
     
@@ -1068,11 +1502,68 @@ These charts show how forecast developments are distributed over time. The top c
         # Calculate total developments
         total_developments = monthly_forecast_counts["Count"].sum()
         
-        composition_insights_list = [
-            f"<strong>Most represented direction:</strong> {most_represented_direction} ({most_represented_count} developments)",
-            f"<strong>Most represented forecast type:</strong> {most_represented_forecast} ({most_represented_forecast_count} developments)",
-            f"<strong>Total developments tracked:</strong> {total_developments} developments"
-        ]
+        # Build insights with expandable development examples
+        composition_insights_list = []
+        
+        # Insight 1: Most represented direction
+        insight1_text = f"<strong>Most represented direction:</strong> {most_represented_direction} ({most_represented_count} developments)"
+        if not df_filtered.empty:
+            top_developments = get_top_developments_for_direction(df_filtered, most_represented_direction, top_n=2)
+            if top_developments:
+                examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
+                for short_text, full_text, source_url, score in top_developments:
+                    source_domain = "Source unknown"
+                    if source_url:
+                        try:
+                            domain = urlparse(source_url).netloc
+                            source_domain = domain.replace("www.", "")
+                        except:
+                            pass
+                    
+                    details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
+<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
+<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
+<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
+<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
+<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
+</div>
+</details>"""
+                    examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
+                examples_html += "</ul>"
+                insight1_text += examples_html
+        composition_insights_list.append(insight1_text)
+        
+        # Insight 2: Most represented forecast type
+        insight2_text = f"<strong>Most represented forecast type:</strong> {most_represented_forecast} ({most_represented_forecast_count} developments)"
+        if not df_filtered.empty:
+            top_developments = get_top_developments_for_forecast(df_filtered, most_represented_forecast, top_n=2)
+            if top_developments:
+                examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
+                for short_text, full_text, source_url, score in top_developments:
+                    source_domain = "Source unknown"
+                    if source_url:
+                        try:
+                            domain = urlparse(source_url).netloc
+                            source_domain = domain.replace("www.", "")
+                        except:
+                            pass
+                    
+                    details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
+<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
+<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
+<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
+<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
+<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
+</div>
+</details>"""
+                    examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
+                examples_html += "</ul>"
+                insight2_text += examples_html
+        composition_insights_list.append(insight2_text)
+        
+        # Insight 3: Total developments (no examples needed)
+        composition_insights_list.append(f"<strong>Total developments tracked:</strong> {total_developments} developments")
+        
         composition_insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in composition_insights_list])
         
         st.markdown(f"""

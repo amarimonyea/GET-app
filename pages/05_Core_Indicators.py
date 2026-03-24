@@ -126,9 +126,9 @@ st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 # ---------------------------
 # DATA
 # ---------------------------
-DATA_PATH = "data/Monitor - Gender Equality - Core Indicator Outputs 2025 (1).csv"
+DATA_PATH = "data/Monitor - Gender Equality - Core Indicator Outputs 2025 (2).csv"
 
-df = pd.read_csv(DATA_PATH)
+df = pd.read_csv(DATA_PATH, skiprows=1)
 
 
 DATE_COL = "Date"
