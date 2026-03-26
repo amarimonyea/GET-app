@@ -622,7 +622,7 @@ SECTOR_COL = "Sector Impacted"
 # ---------------------------
 # 5) PAGE TITLE
 # ---------------------------
-st.title("🌎 Gender Equality Tracker")
+st.title("🌎 U.S. Gender Equality Tracker")
 st.markdown("<p style='font-size: 1.3rem; color: rgba(27, 23, 37, 0.85); margin-top: -20px;'>Tracking directional shifts in the U.S. gender policy landscape</p>", unsafe_allow_html=True)
 
 # ---------------------------

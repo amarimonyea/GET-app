@@ -4,7 +4,7 @@ import pandas as pd
 # ---------------------------
 # 0) PAGE CONFIG MUST BE FIRST
 # ---------------------------
-st.set_page_config(page_title="Gender Equality Tracker", layout="wide")
+st.set_page_config(page_title="U.S. Gender Equality Tracker", layout="wide")
 
 # ---------------------------
 # 1) THEME / CSS (inject once)
@@ -126,9 +126,9 @@ section[data-testid="stSidebar"] img {
 # Logo at bottom of sidebar
 st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 
-st.title("🌎 Gender Equality Tracker")
+st.title("🌎 U.S. Gender Equality Tracker")
 st.write("**How to use the tracker:** Use the sidebar to explore sector impacts, human impacts, and the indicators shaping the forecast.")
-st.write("The Gender Equality Tracker (GET) is an early-warning system that tracks gender-related policies and forecasts their broader political, social, and security impacts.")
+st.write("The U.S. Gender Equality Tracker (GET) is an early-warning system that tracks gender-related policies and forecasts their broader political, social, and security impacts.")
 
 # Video placeholder
 st.markdown("---")
