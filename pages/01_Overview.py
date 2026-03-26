@@ -633,6 +633,7 @@ with col1:
     st.metric("Total Developments", len(df))
 with col2:
     st.metric("Slider Score Range", f"{df['Slider Score'].min()} to {df['Slider Score'].max()}")
+    st.markdown(f"<p style='font-size: 0.85rem; margin-top: -10px;'><a href='./Methodology' target='_self' style='color: #3b668c; text-decoration: none;'>Learn more about scoring →</a></p>", unsafe_allow_html=True)
 
 # ---------------------------
 # 7) SIDEBAR FILTERS (clean + reset works)
