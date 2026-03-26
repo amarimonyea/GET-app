@@ -212,7 +212,7 @@ st.divider()
 
 IMPACT_COL = "Who is impacted?"
 
-def get_top_developments_for_group(data_df, group_name, top_n=2, score_filter=None):
+def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=None):
     """Extract top N contributing developments for a given population group.
     
     score_filter: None (all), 'disruption' (positive scores), or 'progression' (negative scores)
@@ -314,7 +314,7 @@ if not impact_metrics_initial.empty:
     insights.append(f"<strong>{most_impacted[IMPACT_COL]}</strong> experiences the highest total intensity of impact ({most_impacted['Absolute Intensity']:.1f})")
     insights_devs["impact"] = {
         "group": most_impacted[IMPACT_COL],
-        "devs": get_top_developments_for_group(df_initial, most_impacted[IMPACT_COL], top_n=2)
+        "devs": get_top_developments_for_group(df_initial, most_impacted[IMPACT_COL], top_n=1)
     }
     
     # Insight 2: Most Disrupted (different group if possible)
@@ -327,7 +327,7 @@ if not impact_metrics_initial.empty:
         insights.append(f"<strong>{most_disrupted[IMPACT_COL]}</strong> is most affected by disruption (weighted disruption score: {most_disrupted['Weighted Disruption']:.1f})")
         insights_devs["disruption"] = {
             "group": most_disrupted[IMPACT_COL],
-            "devs": get_top_developments_for_group(df_initial, most_disrupted[IMPACT_COL], top_n=2, score_filter="disruption")
+            "devs": get_top_developments_for_group(df_initial, most_disrupted[IMPACT_COL], top_n=1, score_filter="disruption")
         }
     
     # Insight 3: Most Progressed (different group from impact and disruption if possible)
@@ -348,7 +348,7 @@ if not impact_metrics_initial.empty:
         insights.append(f"<strong>{most_progressed[IMPACT_COL]}</strong> shows the most progression (weighted progression score: {most_progressed['Weighted Progression']:.1f})")
         insights_devs["progression"] = {
             "group": most_progressed[IMPACT_COL],
-            "devs": get_top_developments_for_group(df_initial, most_progressed[IMPACT_COL], top_n=2, score_filter="progression")
+            "devs": get_top_developments_for_group(df_initial, most_progressed[IMPACT_COL], top_n=1, score_filter="progression")
         }
 
 # Determine number of unique groups

@@ -204,7 +204,7 @@ st.divider()
 
 SECTOR_COL = "Sector Impacted"
 
-def get_top_developments_for_sector(data_df, sector_name, top_n=2, score_filter=None):
+def get_top_developments_for_sector(data_df, sector_name, top_n=1, score_filter=None):
     """Extract top N contributing developments for a given sector.
     
     score_filter: None (all), 'disruption' (positive scores), or 'progression' (negative scores)
@@ -287,7 +287,7 @@ if not sector_metrics_initial.empty:
     insights.append(f"<strong>{most_impacted[SECTOR_COL]}</strong> experiences the highest total intensity of impact ({most_impacted['Absolute Intensity']:.1f})")
     insights_devs["impact"] = {
         "sector": most_impacted[SECTOR_COL],
-        "devs": get_top_developments_for_sector(df_initial, most_impacted[SECTOR_COL], top_n=2)
+        "devs": get_top_developments_for_sector(df_initial, most_impacted[SECTOR_COL], top_n=1)
     }
     
     # Insight 2: Most Disrupted (different sector if possible)
@@ -300,7 +300,7 @@ if not sector_metrics_initial.empty:
         insights.append(f"<strong>{most_disrupted[SECTOR_COL]}</strong> is most affected by disruption (weighted disruption score: {most_disrupted['Weighted Disruption']:.1f})")
         insights_devs["disruption"] = {
             "sector": most_disrupted[SECTOR_COL],
-            "devs": get_top_developments_for_sector(df_initial, most_disrupted[SECTOR_COL], top_n=2, score_filter="disruption")
+            "devs": get_top_developments_for_sector(df_initial, most_disrupted[SECTOR_COL], top_n=1, score_filter="disruption")
         }
     
     # Insight 3: Most Progressed (different sector from impact and disruption if possible)
@@ -321,7 +321,7 @@ if not sector_metrics_initial.empty:
         insights.append(f"<strong>{most_progressed[SECTOR_COL]}</strong> shows the most progression (weighted progression score: {most_progressed['Weighted Progression']:.1f})")
         insights_devs["progression"] = {
             "sector": most_progressed[SECTOR_COL],
-            "devs": get_top_developments_for_sector(df_initial, most_progressed[SECTOR_COL], top_n=2, score_filter="progression")
+            "devs": get_top_developments_for_sector(df_initial, most_progressed[SECTOR_COL], top_n=1, score_filter="progression")
         }
 
 # Determine number of unique sectors
