@@ -177,9 +177,9 @@ with col3:
     </div>
     """, unsafe_allow_html=True)
 
-# Most Affected Groups and Systems
+# Most Targeted Groups and Systems
 st.markdown("---")
-st.subheader("Most Affected Sectors & Groups")
+st.subheader("Most Targeted Sectors & Groups")
 
 # Load data
 @st.cache_data
@@ -201,30 +201,30 @@ st.caption(f"Based on developments tracked from {date_range_str}")
 top_sectors = df["Sector Impacted"].value_counts().head(3)
 top_groups = df["Who is impacted?"].value_counts().head(3)
 
-affected_col1, affected_col2, affected_col3 = st.columns(3)
+targeted_col1, targeted_col2, targeted_col3 = st.columns(3)
 
 # Display top 3 sectors
-with affected_col1:
+with targeted_col1:
     st.markdown("""
     <div style="background: linear-gradient(135deg, #cf5442 0%, #a83c2f 100%); padding: 25px; border-radius: 8px; height: 100%; text-align: center;">
-        <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Affected Sectors</p>
+        <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Targeted Sectors</p>
     </div>
     """, unsafe_allow_html=True)
     for i, (sector, count) in enumerate(top_sectors.items(), 1):
         st.markdown(f"<p style='margin: 12px 0; font-size: 16px;'>{sector}<br><span style='font-size: 14px; color: #666; font-weight: 500;'>{count} incident{'s' if count > 1 else ''}</span></p>", unsafe_allow_html=True)
 
 # Display top 3 groups
-with affected_col2:
+with targeted_col2:
     st.markdown("""
     <div style="background: linear-gradient(135deg, #bfa359 0%, #9d8247 100%); padding: 25px; border-radius: 8px; height: 100%; text-align: center;">
-        <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Affected Groups</p>
+        <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Targeted Groups</p>
     </div>
     """, unsafe_allow_html=True)
     for i, (group, count) in enumerate(top_groups.items(), 1):
         st.markdown(f"<p style='margin: 12px 0; font-size: 16px;'>{group}<br><span style='font-size: 14px; color: #666; font-weight: 500;'>{count} incident{'s' if count > 1 else ''}</span></p>", unsafe_allow_html=True)
 
 # Display total entries
-with affected_col3:
+with targeted_col3:
     st.markdown(f"""
     <div style="background: linear-gradient(135deg, #3b668c 0%, #2d4a66 100%); padding: 25px; border-radius: 8px; text-align: center; height: 100%;">
         <p style="color: #ffffff; font-size: 13px; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Scope of Impact</p>
