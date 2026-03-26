@@ -206,7 +206,7 @@ targeted_col1, targeted_col2, targeted_col3 = st.columns(3)
 # Display top 3 sectors
 with targeted_col1:
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #d4af88 0%, #bfa359 100%); padding: 25px; border-radius: 8px; height: 100%; text-align: center;">
+    <div style="background: linear-gradient(135deg, #262232 0%, #1b1725 100%); padding: 25px; border-radius: 8px; height: 100%; text-align: center;">
         <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Targeted Sectors</p>
     </div>
     """, unsafe_allow_html=True)
@@ -216,7 +216,7 @@ with targeted_col1:
 # Display top 3 groups
 with targeted_col2:
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #bfa359 0%, #9d8247 100%); padding: 25px; border-radius: 8px; height: 100%; text-align: center;">
+    <div style="background: linear-gradient(135deg, #1b1725 0%, #0f0f1a 100%); padding: 25px; border-radius: 8px; height: 100%; text-align: center;">
         <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Targeted Groups</p>
     </div>
     """, unsafe_allow_html=True)
@@ -226,7 +226,7 @@ with targeted_col2:
 # Display total entries
 with targeted_col3:
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #c9a868 0%, #b39556 100%); padding: 25px; border-radius: 8px; text-align: center; height: 100%;">
+    <div style="background: linear-gradient(135deg, #1f1b2e 0%, #1b1725 100%); padding: 25px; border-radius: 8px; text-align: center; height: 100%;">
         <p style="color: #ffffff; font-size: 13px; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Scope of Impact</p>
         <p style="color: #ffffff; font-size: 42px; margin: 15px 0; font-weight: 700;">{len(df)}</p>
         <p style="color: #ffffff; font-size: 12px; margin: 0; opacity: 0.95;">total developments<br>tracked</p>
