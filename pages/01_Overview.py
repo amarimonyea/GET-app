@@ -140,15 +140,15 @@ FORECAST_CARDS = [
     },
     {
         "name": "Political", 
-        "direction": "Disruption",
+        "direction": "Repression",
         "probability": "Medium/High (60-75%)",
-        "summary": "This forecast illustrates how concentrated executive authority and heightened political polarization can drive accelerated disruption within the gender policy landscape. As institutional checks erode, policy volatility and rights fragmentation become more likely.",
+        "summary": "This forecast illustrates how concentrated executive authority and heightened political polarization can drive accelerated repression within the gender policy landscape. As institutional checks erode, policy volatility and rights fragmentation become more likely.",
         "monitoring_indicators": ["Legislative or executive actions restricting reproductive, gender, or workplace rights", "Politicization or repurposing of protective institutions for political objectives"],
         "implications": ["Normalization of executive unilateralism in policymaking", "Federal-state fragmentation in rights protection"]
     },
     {
         "name": "Diplomatic", 
-        "direction": "Disruption",
+        "direction": "Repression",
         "probability": "Low/Medium (25-40%)",
         "summary": "Come back and write real scenarios later",
         "monitoring_indicators": ["Adoption of US aligned conservative gender policies by foreign governments", "US withdrawal from or defunding of international organizations advancing gender, LGBTQ+, or reproductive rights"],
@@ -170,15 +170,15 @@ FORECAST_CARDS = [
     },
      {
         "name": "Economic", 
-        "direction": "Disruption",
+        "direction": "Repression",
         "probability": "Low/Medium (25-40%)",
         "summary": "Come back and write real scenarios later",
         "monitoring_indicators": ["Cuts or divestments in federal scientific, evidence-based research, or mass media related to equity, gender, or social policy", "Decreased funding for public universities focused on social science research"],
-        "implications": ["Reduced economic opportunities for marginalized communities", "Disruption of workforce diversity and inclusion initiatives"]
+        "implications": ["Reduced economic opportunities for marginalized communities", "Repression of workforce diversity and inclusion initiatives"]
     },
      {
         "name": "Social", 
-        "direction": "Disruption",
+        "direction": "Repression",
         "probability": "Medium/High (60-75%)",
         "summary": "Come back and write real scenarios later",
         "monitoring_indicators": ["Medical and ethical crises emerging from restrictive abortion policies", "Service withdrawal or denial driven by anticipated legal, financial, or political retaliation"],
@@ -200,7 +200,7 @@ FORECAST_CARDS = [
     },
         {
         "name": "Security", 
-        "direction": "Disruption",
+        "direction": "Repression",
         "probability": "Medium (40-60%)",
         "summary": "Come back and write real scenarios later",
         "monitoring_indicators": ["Removal of gender diverse and trans individuals from law enforcement, military, and intelligence roles", "Targeting of healthcare officials and personnel providing gender affirming services and care"],
@@ -208,14 +208,14 @@ FORECAST_CARDS = [
     },
      {
         "name": "Hybrid Political/Security", 
-        "direction": "Disruption",
+        "direction": "Repression",
         "probability": "Medium (40-60%)",
         "summary": "Come back and write real scenarios later",
         "implications": ["Implications coming soon"]
     },
       {
         "name": "Hybrid Political/Social", 
-        "direction": "Disruption",
+        "direction": "Repression",
         "probability": "Medium (40-60%)",
         "summary": "Come back and write real scenarios later",
         "implications": ["Implications coming soon"]
@@ -224,7 +224,7 @@ FORECAST_CARDS = [
         "name": "Status Quo", 
         "direction": "Status Quo",
         "probability": "",
-        "summary": "Current policy and institutional landscape continues without major directional shifts. Existing protections and disruptions remain relatively stable.",
+        "summary": "Current policy and institutional landscape continues without major directional shifts. Existing protections and repressions remain relatively stable.",
         "implications": []
     },
 ]
@@ -258,9 +258,9 @@ FEATURED_DEEP_DIVES = [
     {
         "headline": "Corporate Diversity Programs Under Increased Legal Scrutiny",
         "date": "March 10, 2025",
-        "forecast": "Political Disruption",
-        "direction": "disruption",
-        "analysis": "Multiple lawsuits targeting DEI initiatives and affirmative action programs suggest sustained legal challenges to gender equity mechanisms. The Supreme Court's recent standing decisions lower barriers for plaintiffs. Legal uncertainty may prompt corporations to pause or restructure programs, creating short-term disruption in institutional commitments to gender parity.",
+        "forecast": "Political Repression",
+        "direction": "repression",
+        "analysis": "Multiple lawsuits targeting DEI initiatives and affirmative action programs suggest sustained legal challenges to gender equity mechanisms. The Supreme Court's recent standing decisions lower barriers for plaintiffs. Legal uncertainty may prompt corporations to pause or restructure programs, creating short-term repression in institutional commitments to gender parity.",
         "source_url": "https://www.scotus.gov",
         "articles": [
             {
@@ -457,12 +457,12 @@ def get_top_developments_for_domain(data_df, domain_name, top_n=2):
 
 def get_top_developments_for_direction(data_df, direction, top_n=2):
     """
-    Extract top N contributing developments for a given direction (Disruption, Progression, Status Quo).
+    Extract top N contributing developments for a given direction (Repression, Progression, Status Quo).
     Selects by highest score magnitude first, recency as tiebreaker.
     
     Args:
         data_df: Filtered data containing all developments
-        direction: Direction to filter by ("Disruption", "Progression", "Status Quo")
+        direction: Direction to filter by ("Repression", "Progression", "Status Quo")
         top_n: Number of developments to return (default: 2)
     
     Returns:
@@ -472,7 +472,7 @@ def get_top_developments_for_direction(data_df, direction, top_n=2):
         return []
     
     # Filter based on direction using Slider Score
-    if direction == "Disruption":
+    if direction == "Repression":
         filtered = data_df[(data_df["Slider Score"] > 0) & (data_df["Development Short"].notna())]
     elif direction == "Progression":
         filtered = data_df[(data_df["Slider Score"] < 0) & (data_df["Development Short"].notna())]
@@ -514,12 +514,12 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
     
     insights = []
     
-    # Insight 1: Highest cumulative disruption
+    # Insight 1: Highest cumulative repression
     max_disr_idx = forecast_points_df["Disr"].idxmax()
     max_disr_name = forecast_points_df.loc[max_disr_idx, forecast_col]
     max_disr_score = forecast_points_df.loc[max_disr_idx, "Disr"]
     
-    insight_text = f"<strong>Highest cumulative disruption:</strong> {max_disr_name} ({max_disr_score:.1f})"
+    insight_text = f"<strong>Highest cumulative repression:</strong> {max_disr_name} ({max_disr_score:.1f})"
     
     # Add development-based examples if data available
     if data_df is not None and not data_df.empty:
@@ -676,7 +676,7 @@ st.sidebar.markdown("""
 <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #cf5442; border-radius: 3px;"></div>
-    <span style="color: #ffffff;"><strong>Disruption</strong> — Challenges to gender equity</span>
+    <span style="color: #ffffff;"><strong>Repression</strong> — Challenges to gender equity</span>
   </div>
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #62af44; border-radius: 3px;"></div>
@@ -694,7 +694,7 @@ st.divider()
 # ---------------------------
 # 8) DISRUPTION AND PROGRESSION MOMENTUM (cleaner)
 # ---------------------------
-st.subheader("Disruption and Progression Momentum")
+st.subheader("Repression and Progression Momentum")
 
 # Lightweight explanatory block
 st.markdown(
@@ -708,17 +708,17 @@ st.markdown(
     ">
         <p style="margin: 0; font-size: 0.95rem; color: #4a4a4a; line-height: 1.5;">
             <strong style="color: #5a5a5a;">How to Read the Data</strong><br>
-            Developments are real-world policy actions tracked by the Gender Equality Tracker. Each development is categorized by forecast (for example, disruption or progression) and assigned a score based on its scale, impact, and institutional significance. Scores reflect the magnitude and direction of change using publicly reported policy, legal, and institutional developments.
+            Developments are real-world policy actions tracked by the Gender Equality Tracker. Each development is categorized by forecast (for example, repression or progression) and assigned a score based on its scale, impact, and institutional significance. Scores reflect the magnitude and direction of change using publicly reported policy, legal, and institutional developments.
         </p>
         <p style="margin: 6px 0 0 0; font-size: 0.88rem; color: #7a7a7a; font-style: italic; line-height: 1.4;">
-            Example: Political Disruption (+3) — Executive branch pressure on the judiciary/intimidation of judges
+            Example: Political Repression (+3) — Executive branch pressure on the judiciary/intimidation of judges
         </p>
     </div>
     """,
     unsafe_allow_html=True
 )
 
-st.markdown("**Cumulative intensity (emerging → accelerating) vs net direction (progression ↓ | disruption ↑).**")
+st.markdown("**Cumulative intensity (emerging → accelerating) vs net direction (progression ↓ | repression ↑).**")
 quad = df.copy()
 quad["Prog"] = np.where(quad["Slider Score"] < 0, -quad["Slider Score"], 0)
 quad["Disr"] = np.where(quad["Slider Score"] > 0,  quad["Slider Score"], 0)
@@ -819,7 +819,7 @@ else:
         if "Status Quo" in str(row[FORECAST_COL]):
             return "Status Quo"
         elif row["Net Direction"] > 0:
-            return "Disruption"
+            return "Repression"
         else:
             return "Progression"
     
@@ -836,7 +836,7 @@ else:
     color=alt.Color(
         "Color Category:N",
         scale=alt.Scale(
-            domain=["Status Quo", "Disruption", "Progression"],
+            domain=["Status Quo", "Repression", "Progression"],
             range=["#3b668c", "#cf5442", "#62af44"]
         ),
         legend=None
@@ -844,7 +844,7 @@ else:
     tooltip=[
     alt.Tooltip(f"{FORECAST_COL}:N", title="Forecast"),
     alt.Tooltip("Prog:Q", title="Cumulative Progression", format=".1f"),
-    alt.Tooltip("Disr:Q", title="Cumulative Disruption", format=".1f"),
+    alt.Tooltip("Disr:Q", title="Cumulative Repression", format=".1f"),
     alt.Tooltip("Cumulative Intensity:Q", title="Cumulative Intensity", format=".1f"),
     alt.Tooltip("Net Direction:Q", title="Net Direction", format=".1f"),
     alt.Tooltip("Latest Date Str:N", title="Latest Event Date"),
@@ -879,8 +879,8 @@ else:
 
     # place quadrant text inside chart area
     quad_labels = pd.DataFrame([
-        {"x": x0 * 0.20, "y": y_max * 0.85 if y_max > 0 else 5,  "t": "Emerging Disruption"},
-        {"x": x0 + (x_max - x0) * 0.55, "y": y_max * 0.85 if y_max > 0 else 5, "t": "Accelerating Disruption"},
+        {"x": x0 * 0.20, "y": y_max * 0.85 if y_max > 0 else 5,  "t": "Emerging Repression"},
+        {"x": x0 + (x_max - x0) * 0.55, "y": y_max * 0.85 if y_max > 0 else 5, "t": "Accelerating Repression"},
         {"x": x0 * 0.20, "y": y_min * 0.85 if y_min < 0 else -5, "t": "Emerging Progression"},
         {"x": x0 + (x_max - x0) * 0.55, "y": y_min * 0.85 if y_min < 0 else -5, "t": "Accelerating Progression"},
     ])
@@ -904,7 +904,7 @@ else:
     <div style="display: flex; gap: 20px; margin-bottom: 15px; font-size: 0.9rem;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <div style="width: 16px; height: 16px; background-color: #cf5442; border-radius: 2px;"></div>
-        <span>Disruption</span>
+        <span>Repression</span>
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <div style="width: 16px; height: 16px; background-color: #62af44; border-radius: 2px;"></div>
@@ -921,12 +921,12 @@ else:
     # How to Interpret This Chart section (directly after chart)
     with st.expander("How to Interpret This Chart", expanded=False):
         st.markdown("""
-The Disruption and Progression Momentum graph plots cumulative forecast intensity against net directional movement of tracked developments. The horizontal positioning of cumulative intensity reflects the volume and concentration of forecasted developments within a domain (emerging → accelerating), while the vertical positioning of Net Direction distinguishes between disruptive and progressive trajectories. The quadrant framework highlights which issue areas are early-stage signals versus accelerating structural shifts.
+The Repression and Progression Momentum graph plots cumulative forecast intensity against net directional movement of tracked developments. The horizontal positioning of cumulative intensity reflects the volume and concentration of forecasted developments within a domain (emerging → accelerating), while the vertical positioning of Net Direction distinguishes between disruptive and progressive trajectories. The quadrant framework highlights which issue areas are early-stage signals versus accelerating structural shifts.
 """)
     
     # Statistics below chart
     st.markdown(f"""
-**Highest cumulative disruption observed to date:** {max_disr_name} (cumulative disruption score: {max_disr_score:.1f})
+**Highest cumulative repression observed to date:** {max_disr_name} (cumulative repression score: {max_disr_score:.1f})
 
 **Highest cumulative progression observed to date:** {max_prog_name} (cumulative progression score: {max_prog_score:.1f})
 
@@ -1122,7 +1122,7 @@ import re
 st.subheader("Net Direction by Domain of Assessment")
 
 st.caption(
-    "Net direction reflects the balance between disruptive and progressive developments across domains of assessment based on the currently selected filters. Values represent cumulative disruption minus cumulative progression."
+    "Net direction reflects the balance between disruptive and progressive developments across domains of assessment based on the currently selected filters. Values represent cumulative repression minus cumulative progression."
 )
 
 # guardrails
@@ -1149,7 +1149,7 @@ else:
 
     # color by direction (NL colors)
     dom_top["Direction Label"] = np.where(
-        dom_top["Net Direction"] > 0, "Disruption", np.where(dom_top["Net Direction"] < 0, "Progression", "Neutral")
+        dom_top["Net Direction"] > 0, "Repression", np.where(dom_top["Net Direction"] < 0, "Progression", "Neutral")
     )
 
     # nicer ordering for horizontal bars
@@ -1161,18 +1161,18 @@ else:
         .mark_bar()
         .encode(
             y=alt.Y(f"{DOMAIN_COL}:N", sort=None, title="Domain of Assessment", axis=alt.Axis(labelLimit=300, labelPadding=15)),
-            x=alt.X("Net Direction:Q", title="Net Direction Score (Progression ← 0 → Disruption)"),
+            x=alt.X("Net Direction:Q", title="Net Direction Score (Progression ← 0 → Repression)"),
             color=alt.Color(
                 "Direction Label:N",
                 scale=alt.Scale(
-                    domain=["Progression", "Disruption", "Neutral"],
+                    domain=["Progression", "Repression", "Neutral"],
                     range=[COLOR_PROGRESSION, COLOR_DISRUPTION, COLOR_NEUTRAL],
                 ),
                 legend=alt.Legend(title=None),
             ),
             tooltip=[
                 alt.Tooltip(f"{DOMAIN_COL}:N", title="Domain"),
-                alt.Tooltip("Disr:Q", title="Weighted Disruption", format=".1f"),
+                alt.Tooltip("Disr:Q", title="Weighted Repression", format=".1f"),
                 alt.Tooltip("Prog:Q", title="Weighted Progression", format=".1f"),
                 alt.Tooltip("Net Direction:Q", title="Net Direction", format=".1f"),
             ],
@@ -1187,17 +1187,17 @@ else:
 
     with st.expander("How to Interpret This Chart", expanded=False):
         st.markdown("""
-Net direction indicates whether developments within each domain are trending towards disruption or progression. The value reflects the difference between cumulative disruption and progression based on the currently selected forecast type, sector, and group filters. Higher values indicate domains where disruptive developments trend higher, while values closer to zero indicate a more balanced mix of disruption and progression.
+Net direction indicates whether developments within each domain are trending towards repression or progression. The value reflects the difference between cumulative repression and progression based on the currently selected forecast type, sector, and group filters. Higher values indicate domains where disruptive developments trend higher, while values closer to zero indicate a more balanced mix of repression and progression.
 """)
 
     # Key Insights for Domain Assessment (only if data exists)
     if not dom_top.empty:
         dom_sorted = dom_top.sort_values("Net Direction", ascending=False)
-        max_disruption_domain = dom_sorted.iloc[0][DOMAIN_COL]
-        max_disruption_value = dom_sorted.iloc[0]["Net Direction"]
+        max_repression_domain = dom_sorted.iloc[0][DOMAIN_COL]
+        max_repression_value = dom_sorted.iloc[0]["Net Direction"]
         
-        min_disruption_domain = dom_sorted.iloc[-1][DOMAIN_COL]
-        min_disruption_value = dom_sorted.iloc[-1]["Net Direction"]
+        min_repression_domain = dom_sorted.iloc[-1][DOMAIN_COL]
+        min_repression_value = dom_sorted.iloc[-1]["Net Direction"]
         
         # Find most balanced (closest to zero)
         dom_balance = dom_top.copy()
@@ -1208,10 +1208,10 @@ Net direction indicates whether developments within each domain are trending tow
         # Build insights with expandable development examples
         domain_insights_list = []
         
-        # Insight 1: Most disruption-oriented domain
-        insight1_text = f"<strong>Most disruption-oriented domain:</strong> {max_disruption_domain} (net direction: {max_disruption_value:.1f})"
+        # Insight 1: Most repression-oriented domain
+        insight1_text = f"<strong>Most repression-oriented domain:</strong> {max_repression_domain} (net direction: {max_repression_value:.1f})"
         if not df_filtered.empty:
-            top_developments = get_top_developments_for_domain(df_filtered, max_disruption_domain, top_n=2)
+            top_developments = get_top_developments_for_domain(df_filtered, max_repression_domain, top_n=2)
             if top_developments:
                 examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
                 for short_text, full_text, source_url, score in top_developments:
@@ -1237,9 +1237,9 @@ Net direction indicates whether developments within each domain are trending tow
         domain_insights_list.append(insight1_text)
         
         # Insight 2: Most progression-oriented domain
-        insight2_text = f"<strong>Most progression-oriented domain:</strong> {min_disruption_domain} (net direction: {min_disruption_value:.1f})"
+        insight2_text = f"<strong>Most progression-oriented domain:</strong> {min_repression_domain} (net direction: {min_repression_value:.1f})"
         if not df_filtered.empty:
-            top_developments = get_top_developments_for_domain(df_filtered, min_disruption_domain, top_n=2)
+            top_developments = get_top_developments_for_domain(df_filtered, min_repression_domain, top_n=2)
             if top_developments:
                 examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
                 for short_text, full_text, source_url, score in top_developments:
@@ -1326,8 +1326,8 @@ def get_direction(forecast_name):
     forecast_name = str(forecast_name).lower()
     if "status quo" in forecast_name:
         return "Status Quo"
-    elif any(word in forecast_name for word in ["disruption", "disruption"]):
-        return "Disruption"
+    elif any(word in forecast_name for word in ["repression", "repression"]):
+        return "Repression"
     else:  # Contains "progression" or other
         return "Progression"
 
@@ -1352,9 +1352,9 @@ monthly_forecast_counts = (
 # Interactive selection on direction
 direction_click = alt.selection_point(fields=["Direction"], bind="legend")
 
-# Top level chart: Direction (Progression, Status Quo, Disruption)
+# Top level chart: Direction (Progression, Status Quo, Repression)
 direction_colors = alt.Scale(
-    domain=["Progression", "Status Quo", "Disruption"],
+    domain=["Progression", "Status Quo", "Repression"],
     range=[COLOR_PROGRESSION, "#3b668c", COLOR_DISRUPTION]
 )
 
@@ -1406,15 +1406,15 @@ if not monthly_forecast_counts.empty:
     
     # Custom color mapping for all forecast types - each with distinct color
     custom_colors = {
-        "Diplomatic Disruption": "#d97e7a",           # Light red
+        "Diplomatic Repression": "#d97e7a",           # Light red
         "Diplomatic Progression": "#5081a3",          # Deep blue
-        "Economic Disruption": "#c94b3a",             # Dark red
+        "Economic Repression": "#c94b3a",             # Dark red
         "Economic Progression": "#7fa3c0",            # Light blue
-        "Hybrid Political/Security Disruption": "#8b4453",   # Burgundy
-        "Hybrid Political/Social Disruption": "#6b9d7d",     # Sage green
-        "Political Disruption": "#e85c52",            # Bright red-orange
+        "Hybrid Political/Security Repression": "#8b4453",   # Burgundy
+        "Hybrid Political/Social Repression": "#6b9d7d",     # Sage green
+        "Political Repression": "#e85c52",            # Bright red-orange
         "Political Progression": "#2d5375",           # Navy blue
-        "Social Disruption": "#f4896f",               # Coral
+        "Social Repression": "#f4896f",               # Coral
         "Social Progression": "#4a95d8",              # Sky blue
         "Status Quo": "#3b668c"                       # Blue
     }
@@ -1485,7 +1485,7 @@ if not monthly_forecast_counts.empty:
     
     with st.expander("How to Interpret This Chart", expanded=False):
         st.markdown("""
-These charts show how forecast developments are distributed over time. The top chart displays the total number of developments grouped by direction (disruption, status quo, and progression). The lower chart breaks those developments down by forecast type. Selecting a direction in the top chart filters the lower chart to highlight the associated forecasts.
+These charts show how forecast developments are distributed over time. The top chart displays the total number of developments grouped by direction (repression, status quo, and progression). The lower chart breaks those developments down by forecast type. Selecting a direction in the top chart filters the lower chart to highlight the associated forecasts.
 """)
     
     # Key Insights for Forecast Composition
