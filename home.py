@@ -110,8 +110,13 @@ section[data-testid="stSidebar"] > div:nth-child(n+2) {
 }
 
 section[data-testid="stSidebar"] img {
+  position: fixed;
+  bottom: 80px;
+  left: 10px;
+  right: 10px;
+  width: calc(100% - 20px);
   max-width: 280px;
-  margin-top: 20px;
+  z-index: 999;
 }
 </style>
 """,
@@ -119,6 +124,7 @@ section[data-testid="stSidebar"] img {
 )
 
 # Logo at bottom of sidebar
+st.sidebar.divider()
 st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 
 st.title("🌎 U.S. Gender Equality Tracker")
