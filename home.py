@@ -110,13 +110,8 @@ section[data-testid="stSidebar"] > div:nth-child(n+2) {
 }
 
 section[data-testid="stSidebar"] img {
-  position: fixed;
-  bottom: 80px;
-  left: 10px;
-  right: 10px;
-  width: calc(100% - 20px);
   max-width: 280px;
-  z-index: 999;
+  margin-top: 20px;
 }
 </style>
 """,
