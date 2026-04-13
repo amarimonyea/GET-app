@@ -236,7 +236,7 @@ with targeted_col3:
     , unsafe_allow_html=True)
     
     # What are Developments? Info
-    with st.expander("❓ What are Developments?", expanded=False):
+    with st.expander("What are Developments?", expanded=False):
         st.markdown("""
         **Developments** are real-world policy actions, legal decisions, and institutional changes tracked by the Gender Equality Tracker.
         
