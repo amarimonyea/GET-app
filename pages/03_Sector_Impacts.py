@@ -303,7 +303,7 @@ if not sector_metrics_initial.empty:
             "devs": get_top_developments_for_sector(df_initial, most_disrupted[SECTOR_COL], top_n=1, score_filter="disruption")
         }
     
-    # Insight 3: Most Progressed (different sector from impact and repression if possible)
+    # Insight 3: Most Progressed (different sector from impact and disruption if possible)
     most_progressed = sector_metrics_initial.loc[sector_metrics_initial["Weighted Progression"].idxmax()]
     if most_progressed["Weighted Progression"] > 0:
         # Try to get a different sector
@@ -396,7 +396,7 @@ with st.expander("How to Interpret This Chart", expanded=False):
 
 **Overall Policy Activity:** The combined magnitude of policy change regardless of direction. This metric highlights which sectors are experiencing the greatest volume of institutional change.
 
-**Interpretation:** Taken together, these metrics help distinguish between sectors under sustained pressure (high frequency + high repression) versus those in transition (high activity but mixed directional impact).
+**Interpretation:** Taken together, these metrics help distinguish between sectors under sustained pressure (high frequency + high disruption) versus those in transition (high activity but mixed directional impact).
 """)
 
 # Key Insights section
@@ -428,10 +428,10 @@ with col1:
                     st.caption(f"[View Source]({url})")
 
 with col2:
-    if "repression" in insights_devs and insights_devs["repression"]["devs"]:
-        with st.expander("Repression Examples"):
-            st.caption(f"From: {insights_devs['repression']['sector']}")
-            for short_text, full_text, url, score in insights_devs["repression"]["devs"]:
+    if "disruption" in insights_devs and insights_devs["disruption"]["devs"]:
+        with st.expander("Disruption Examples"):
+            st.caption(f"From: {insights_devs['disruption']['sector']}")
+            for short_text, full_text, url, score in insights_devs["disruption"]["devs"]:
                 st.write(f"**{short_text}**")
                 if full_text and full_text != short_text:
                     st.caption(full_text)
@@ -453,12 +453,12 @@ st.divider()
 
 with st.expander("View Detailed Sector Metrics", expanded=False):
     # Reorder columns for display
-    display_columns = [SECTOR_COL, "Weighted Repression", "Weighted Progression", "Absolute Intensity", "Event_Count"]
+    display_columns = [SECTOR_COL, "Weighted Disruption", "Weighted Progression", "Absolute Intensity", "Event_Count"]
     st.dataframe(
         sector_metrics[display_columns].sort_values(sort_col, ascending=False),
         column_config={
             SECTOR_COL: st.column_config.TextColumn(label="Sector"),
-            "Weighted Repression": st.column_config.NumberColumn(label="Repression Intensity", format="%d"),
+            "Weighted Disruption": st.column_config.NumberColumn(label="Disruption Intensity", format="%d"),
             "Weighted Progression": st.column_config.NumberColumn(label="Progression Intensity", format="%d"),
             "Absolute Intensity": st.column_config.NumberColumn(label="Overall Policy Activity", format="%d"),
             "Event_Count": st.column_config.NumberColumn(label="Number of Developments", format="%d"),
@@ -487,7 +487,7 @@ if selected_sector:
     if not all_sector_data.empty:
         # Calculate context metrics
         total_devs = len(all_sector_data)
-        repression_count = len(all_sector_data[all_sector_data["Slider Score"] > 0])
+        disruption_count = len(all_sector_data[all_sector_data["Slider Score"] > 0])
         progression_count = len(all_sector_data[all_sector_data["Slider Score"] < 0])
         neutral_count = len(all_sector_data[all_sector_data["Slider Score"] == 0])
         
@@ -503,7 +503,7 @@ if selected_sector:
         st.markdown(f"""
 **{selected_sector}**  
 {total_devs} developments {date_range_str}  
-{repression_count} Repression | {neutral_count} Neutral | {progression_count} Progression
+{disruption_count} Disruption | {neutral_count} Neutral | {progression_count} Progression
         """)
         
         # Display recent developments (top 5)
@@ -518,7 +518,7 @@ if selected_sector:
             # Determine direction color
             score = row["Slider Score"]
             direction_color = COLOR_DISRUPTION if score > 0 else COLOR_PROGRESSION if score < 0 else "#999"
-            direction_label = "Repression" if score > 0 else "Progression" if score < 0 else "Neutral"
+            direction_label = "Disruption" if score > 0 else "Progression" if score < 0 else "Neutral"
             
             # Format development text (truncate if too long)
             dev_text = str(row["Development"])

@@ -153,7 +153,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     st.markdown("""
     <div style="background-color: #cf5442; padding: 20px; border-radius: 8px; text-align: center; height: 100%;">
-        <p style="color: #ffffff; font-size: 16px; margin: 0 0 10px 0; font-weight: 400;">Political Repression Risk</p>
+        <p style="color: #ffffff; font-size: 16px; margin: 0 0 10px 0; font-weight: 400;">Political Disruption Risk</p>
         <p style="color: #ffffff; font-size: 32px; margin: 10px 0; font-weight: 700;">Elevated</p>
         <p style="color: #ffffff; font-size: 16px; margin: 10px 0 0 0; opacity: 0.9;">Based on policy and discourse trends</p>
     </div>

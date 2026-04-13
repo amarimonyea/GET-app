@@ -1187,7 +1187,7 @@ else:
 
     with st.expander("How to Interpret This Chart", expanded=False):
         st.markdown("""
-Net direction indicates whether developments within each domain are trending towards repression or progression. The value reflects the difference between cumulative repression and progression based on the currently selected forecast type, sector, and group filters. Higher values indicate domains where disruptive developments trend higher, while values closer to zero indicate a more balanced mix of repression and progression.
+Net direction indicates whether developments within each domain are trending towards disruption or progression. The value reflects the difference between cumulative disruption and progression based on the currently selected forecast type, sector, and group filters. Higher values indicate domains where disruptive developments trend higher, while values closer to zero indicate a more balanced mix of disruption and progression.
 """)
 
     # Key Insights for Domain Assessment (only if data exists)
@@ -1326,7 +1326,7 @@ def get_direction(forecast_name):
     forecast_name = str(forecast_name).lower()
     if "status quo" in forecast_name:
         return "Status Quo"
-    elif any(word in forecast_name for word in ["disruption", "repression"]):
+    elif any(word in forecast_name for word in ["disruption"]):
         return "Disruption"
     else:  # Contains "progression" or other
         return "Progression"
@@ -1352,7 +1352,7 @@ monthly_forecast_counts = (
 # Interactive selection on direction
 direction_click = alt.selection_point(fields=["Direction"], bind="legend")
 
-# Top level chart: Direction (Progression, Status Quo, Repression)
+# Top level chart: Direction (Progression, Status Quo, Disruption)
 direction_colors = alt.Scale(
     domain=["Progression", "Status Quo", "Disruption"],
     range=[COLOR_PROGRESSION, "#3b668c", COLOR_DISRUPTION]
@@ -1485,7 +1485,7 @@ if not monthly_forecast_counts.empty:
     
     with st.expander("How to Interpret This Chart", expanded=False):
         st.markdown("""
-These charts show how forecast developments are distributed over time. The top chart displays the total number of developments grouped by direction (repression, status quo, and progression). The lower chart breaks those developments down by forecast type. Selecting a direction in the top chart filters the lower chart to highlight the associated forecasts.
+These charts show how forecast developments are distributed over time. The top chart displays the total number of developments grouped by direction (disruption, status quo, and progression). The lower chart breaks those developments down by forecast type. Selecting a direction in the top chart filters the lower chart to highlight the associated forecasts.
 """)
     
     # Key Insights for Forecast Composition

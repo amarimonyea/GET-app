@@ -163,7 +163,7 @@ display_groups = st.sidebar.selectbox(
 
 rank_by_impact = st.sidebar.selectbox(
     "Rank groups by",
-    options=["Number of Developments", "Repression Intensity", "Overall Policy Activity"],
+    options=["Number of Developments", "Disruption Intensity", "Overall Policy Activity"],
     index=0,
     key="rank_by_impact"
 )
@@ -183,7 +183,7 @@ st.sidebar.markdown("""
 <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #cf5442; border-radius: 3px;"></div>
-    <span style="color: #ffffff;"><strong>Repression</strong> — Challenges to gender equity</span>
+    <span style="color: #ffffff;"><strong>Disruption</strong> — Challenges to gender equity</span>
   </div>
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #62af44; border-radius: 3px;"></div>
@@ -215,7 +215,7 @@ IMPACT_COL = "Who is impacted?"
 def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=None):
     """Extract top N contributing developments for a given population group.
     
-    score_filter: None (all), 'repression' (positive scores), or 'progression' (negative scores)
+    score_filter: None (all), 'disruption' (positive scores), or 'progression' (negative scores)
     """
     if data_df.empty:
         return []
@@ -226,7 +226,7 @@ def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=No
     ]
     
     # Apply score filter if specified
-    if score_filter == "repression":
+    if score_filter == "disruption":
         filtered = filtered[filtered["Slider Score"] > 0]
     elif score_filter == "progression":
         filtered = filtered[filtered["Slider Score"] < 0]
@@ -268,7 +268,7 @@ def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=No
 
 # Compute initial metrics for Key Insights
 df_initial = df.copy()
-df_initial["Weighted Repression"] = np.where(df_initial["Slider Score"] > 0, df_initial["Slider Score"], 0)
+df_initial["Weighted Disruption"] = np.where(df_initial["Slider Score"] > 0, df_initial["Slider Score"], 0)
 df_initial["Weighted Progression"] = np.where(df_initial["Slider Score"] < 0, -df_initial["Slider Score"], 0)
 df_initial["Absolute Intensity"] = df_initial["Slider Score"].abs()
 
@@ -296,13 +296,13 @@ for group in impact_counts_df[IMPACT_COL]:
     if len(group_df) > 0:
         impact_metrics_initial.append({
             IMPACT_COL: group,
-            "Weighted Repression": group_df["Weighted Repression"].sum(),
+            "Weighted Disruption": group_df["Weighted Disruption"].sum(),
             "Weighted Progression": group_df["Weighted Progression"].sum(),
             "Absolute Intensity": group_df["Absolute Intensity"].sum(),
             "Event_Count": len(group_df)
         })
 
-impact_metrics_initial = pd.DataFrame(impact_metrics_initial) if impact_metrics_initial else pd.DataFrame(columns=[IMPACT_COL, "Weighted Repression", "Weighted Progression", "Absolute Intensity", "Event_Count"])
+impact_metrics_initial = pd.DataFrame(impact_metrics_initial) if impact_metrics_initial else pd.DataFrame(columns=[IMPACT_COL, "Weighted Disruption", "Weighted Progression", "Absolute Intensity", "Event_Count"])
 
 # Generate Key Insights with development examples
 insights = []
@@ -318,25 +318,25 @@ if not impact_metrics_initial.empty:
     }
     
     # Insight 2: Most Disrupted (different group if possible)
-    most_disrupted = impact_metrics_initial.loc[impact_metrics_initial["Weighted Repression"].idxmax()]
-    if most_disrupted["Weighted Repression"] > 0:
+    most_disrupted = impact_metrics_initial.loc[impact_metrics_initial["Weighted Disruption"].idxmax()]
+    if most_disrupted["Weighted Disruption"] > 0:
         # If same as most_impacted, try to get the 2nd most disrupted
         if most_disrupted[IMPACT_COL] == most_impacted[IMPACT_COL] and len(impact_metrics_initial) > 1:
-            most_disrupted = impact_metrics_initial.nlargest(2, "Weighted Repression").iloc[1]
+            most_disrupted = impact_metrics_initial.nlargest(2, "Weighted Disruption").iloc[1]
         
-        insights.append(f"<strong>{most_disrupted[IMPACT_COL]}</strong> is most affected by repression (weighted repression score: {most_disrupted['Weighted Repression']:.1f})")
-        insights_devs["repression"] = {
+        insights.append(f"<strong>{most_disrupted[IMPACT_COL]}</strong> is most affected by disruption (weighted disruption score: {most_disrupted['Weighted Disruption']:.1f})")
+        insights_devs["disruption"] = {
             "group": most_disrupted[IMPACT_COL],
-            "devs": get_top_developments_for_group(df_initial, most_disrupted[IMPACT_COL], top_n=1, score_filter="repression")
+            "devs": get_top_developments_for_group(df_initial, most_disrupted[IMPACT_COL], top_n=1, score_filter="disruption")
         }
     
-    # Insight 3: Most Progressed (different group from impact and repression if possible)
+    # Insight 3: Most Progressed (different group from impact and disruption if possible)
     most_progressed = impact_metrics_initial.loc[impact_metrics_initial["Weighted Progression"].idxmax()]
     if most_progressed["Weighted Progression"] > 0:
         # Try to get a different group
         used_groups = {most_impacted[IMPACT_COL]}
-        if "repression" in insights_devs:
-            used_groups.add(insights_devs["repression"]["group"])
+        if "disruption" in insights_devs:
+            used_groups.add(insights_devs["disruption"]["group"])
         
         # Find first progression entry not in used_groups
         progression_sorted = impact_metrics_initial.nlargest(len(impact_metrics_initial), "Weighted Progression")
@@ -367,8 +367,8 @@ else:  # "All"
 # Map rank_by selection to column name
 if rank_by_impact == "Number of Developments":
     sort_col = "Event_Count"
-elif rank_by_impact == "Repression Intensity":
-    sort_col = "Weighted Repression"
+elif rank_by_impact == "Disruption Intensity":
+    sort_col = "Weighted Disruption"
 else:
     sort_col = "Absolute Intensity"
 
@@ -389,9 +389,9 @@ chart_height = max(400, len(impact_metrics) * min_height_per_group + base_height
 if sort_col == "Event_Count":
     x_field = "Event_Count:Q"
     x_title = "Number of Developments"
-elif sort_col == "Weighted Repression":
-    x_field = "Weighted Repression:Q"
-    x_title = "Repression Intensity"
+elif sort_col == "Weighted Disruption":
+    x_field = "Weighted Disruption:Q"
+    x_title = "Disruption Intensity"
 else:  # "Absolute Intensity"
     x_field = "Absolute Intensity:Q"
     x_title = "Overall Policy Activity"
@@ -422,11 +422,11 @@ with st.expander("How to Interpret This Chart", expanded=False):
     st.markdown("""
 **Number of Developments:** The total number of gender policy developments affecting each population group. Higher counts indicate groups experiencing more frequent policy impact.
 
-**Repression Intensity:** The cumulative impact of constraints, restrictions, and disruptive policy changes on each group. Higher values indicate groups facing greater institutional pressure.
+**Disruption Intensity:** The cumulative impact of constraints, restrictions, and disruptive policy changes on each group. Higher values indicate groups facing greater institutional pressure.
 
 **Overall Policy Activity:** The combined magnitude of policy change affecting each group regardless of direction. This metric highlights which groups are experiencing the greatest volume of policy activity.
 
-**Interpretation:** Taken together, these metrics help distinguish between groups under sustained pressure (high frequency + high repression) versus those in transition (high activity but mixed directional impact).
+**Interpretation:** Taken together, these metrics help distinguish between groups under sustained pressure (high frequency + high disruption) versus those in transition (high activity but mixed directional impact).
 """)
 
 # Key Insights section
@@ -458,10 +458,10 @@ with col1:
                     st.caption(f"[View Source]({url})")
 
 with col2:
-    if "repression" in insights_devs and insights_devs["repression"]["devs"]:
-        with st.expander("Repression Examples"):
-            st.caption(f"From: {insights_devs['repression']['group']}")
-            for short_text, full_text, url, score in insights_devs["repression"]["devs"]:
+    if "disruption" in insights_devs and insights_devs["disruption"]["devs"]:
+        with st.expander("Disruption Examples"):
+            st.caption(f"From: {insights_devs['disruption']['group']}")
+            for short_text, full_text, url, score in insights_devs["disruption"]["devs"]:
                 st.write(f"**{short_text}**")
                 if full_text and full_text != short_text:
                     st.caption(full_text)
@@ -485,12 +485,12 @@ st.divider()
 with st.expander("View Detailed Population Group Metrics", expanded=False):
     if not impact_metrics_initial.empty:
         # Reorder columns for display
-        display_columns = [IMPACT_COL, "Weighted Repression", "Weighted Progression", "Absolute Intensity", "Event_Count"]
+        display_columns = [IMPACT_COL, "Weighted Disruption", "Weighted Progression", "Absolute Intensity", "Event_Count"]
         st.dataframe(
             impact_metrics_initial[display_columns].sort_values(sort_col, ascending=False),
             column_config={
                 IMPACT_COL: st.column_config.TextColumn(label="Population Group"),
-                "Weighted Repression": st.column_config.NumberColumn(label="Repression Intensity", format="%d"),
+                "Weighted Disruption": st.column_config.NumberColumn(label="Disruption Intensity", format="%d"),
                 "Weighted Progression": st.column_config.NumberColumn(label="Progression Intensity", format="%d"),
                 "Absolute Intensity": st.column_config.NumberColumn(label="Overall Policy Activity", format="%d"),
                 "Event_Count": st.column_config.NumberColumn(label="Number of Developments", format="%d"),
@@ -521,7 +521,7 @@ if selected_group:
     if not all_group_data.empty:
         # Calculate context metrics
         total_devs = len(all_group_data)
-        repression_count = len(all_group_data[all_group_data["Slider Score"] > 0])
+        disruption_count = len(all_group_data[all_group_data["Slider Score"] > 0])
         progression_count = len(all_group_data[all_group_data["Slider Score"] < 0])
         neutral_count = len(all_group_data[all_group_data["Slider Score"] == 0])
         
@@ -537,7 +537,7 @@ if selected_group:
         st.markdown(f"""
 **{selected_group}**  
 {total_devs} developments {date_range_str}  
-{repression_count} Repression | {neutral_count} Neutral | {progression_count} Progression
+{disruption_count} Disruption | {neutral_count} Neutral | {progression_count} Progression
         """)
         
         # Display recent developments (top 5)
@@ -552,7 +552,7 @@ if selected_group:
             # Determine direction color
             score = row["Slider Score"]
             direction_color = COLOR_DISRUPTION if score > 0 else COLOR_PROGRESSION if score < 0 else "#999"
-            direction_label = "Repression" if score > 0 else "Progression" if score < 0 else "Neutral"
+            direction_label = "Disruption" if score > 0 else "Progression" if score < 0 else "Neutral"
             
             # Format development text
             dev_text = str(row["Development"])

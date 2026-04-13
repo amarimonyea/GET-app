@@ -139,7 +139,7 @@ st.write(
     """
 GET functions as a **strategic foresight tool** to:
 - **Interpret** developments in gender, reproductive, and LGBTQ+ policy landscapes
-- **Identify** risk trajectories and emerging repressions
+- **Identify** risk trajectories and emerging disruptions
 - **Support** decision-making across public, private, and civil society sectors
 """
 )
@@ -156,7 +156,7 @@ Each policy development is assigned a **Slider Score** ranging from **-4 to +4**
   - Policy actions that establish, reinstate, or expand gender, reproductive, or LGBTQ+ protections
   - Examples: State legislation protecting reproductive rights, hate crime law expansions
 
-- **Positive scores (+1 to +4)**: Represent **repressions**
+- **Positive scores (+1 to +4)**: Represent **disruptions**
   - Legislative or executive actions restricting gender, reproductive, or workplace rights
   - Defunding of protections, institutional rollbacks, or service denials
   
@@ -165,22 +165,22 @@ Each policy development is assigned a **Slider Score** ranging from **-4 to +4**
 
 ### Analytic Dimensions
 
-Each development is evaluated across **four analytic dimensions**. Scores range from **-1 (progression)** to **+1 (repression)**, with **0 indicating neutrality**. These dimensions combine to form the final slider score.
+Each development is evaluated across **four analytic dimensions**. Scores range from **-1 (progression)** to **+1 (disruption)**, with **0 indicating neutrality**. These dimensions combine to form the final slider score.
 
-| Dimension | +1 (Repression) | 0 (Neutral) | -1 (Progression) |
+| Dimension | +1 (Disruption) | 0 (Neutral) | -1 (Progression) |
 |-----------|---|---|---|
 | **Monitoring Indicator Alignment** | Reinforces an existing monitoring indicator | No relation | Contradicts an existing monitoring indicator |
 | **Driver Alignment** | Advances or accelerates an existing scenario driver | Neutral | Opposes or slows a scenario driver |
 | **Core Indicator Influence** | Reinforces attitudinal, democratic, legislative, narrative, or gendered economic deterioration | No effect | Reinforces stabilizing or protective indicator trends |
-| **Impact on Scenario Probability** | Increases the likelihood of a repression scenario | No measurable probability change | Decreases the likelihood of a repression scenario |
+| **Impact on Scenario Probability** | Increases the likelihood of a disruption scenario | No measurable probability change | Decreases the likelihood of a disruption scenario |
 
 *Note: Status quo developments can have low positive or negative scores depending on their alignment with these dimensions.*
 
 ### Weighted Analysis
 
-- **Weighted Repression** = Sum of all positive slider scores
+- **Weighted Disruption** = Sum of all positive slider scores
 - **Weighted Progression** = Sum of absolute values of negative slider scores
-- **Net Trend** = Repression - Progression direction
+- **Net Trend** = Disruption - Progression direction
 
 """)
 
@@ -190,10 +190,10 @@ with st.expander("**Score Aggregation: Computing Key Indicators**", expanded=Fal
     st.markdown("""
 The dashboard aggregates individual slider scores across forecasts to compute four key indicators:
 
-#### **Cumulative Repression**
+#### **Cumulative Disruption**
 Sum of all **positive slider scores** for a given forecast:
 - Represents the total magnitude of restrictive or disruptive policy developments
-- Higher values indicate more severe or numerous repressions targeting gender equality or LGBTQ+ rights
+- Higher values indicate more severe or numerous disruptions targeting gender equality or LGBTQ+ rights
 
 #### **Cumulative Progression**
 Sum of the absolute values of all **negative slider scores** for a given forecast:
@@ -207,10 +207,10 @@ Sum of the absolute values of **all slider scores** (disruptive + progressive):
 - Higher values show more intense or frequent policy activity
 
 #### **Net Direction**
-Calculated as **Cumulative Repression − Cumulative Progression**:
-- Ranges from negative (more progression) to positive (more repression)
+Calculated as **Cumulative Disruption − Cumulative Progression**:
+- Ranges from negative (more progression) to positive (more disruption)
 - Provides a directional indicator of whether developments lean toward expanding or restricting gender equality
-- Shown on the y-axis of the Repression and Progression Momentum chart
+- Shown on the y-axis of the Disruption and Progression Momentum chart
 
 These aggregations are computed at multiple levels:
 - By individual **Forecast** (showing trajectory within a specific policy scenario)
@@ -287,7 +287,7 @@ with st.expander("**Development Classifications**", expanded=False):
 Each entry is categorized by:
 
 - **Forecast Type**: Describes the nature of the development
-  - Political Repression, Diplomatic Progression, Social Repression, etc.
+  - Political Disruption, Diplomatic Progression, Social Disruption, etc.
 
 - **Monitoring Indicator**: Observable signals that characterize the nature of developments and help identify broader policy trends
   - Example indicators include:
