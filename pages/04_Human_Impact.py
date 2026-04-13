@@ -205,7 +205,7 @@ df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
 df = df.dropna(subset=["Date", "Slider Score"])
 
 st.write(
-    "Explore which population groups are most affected by gender policy developments in the U.S."
+    "Explore which population groups are most targeted by gender policy developments in the U.S."
 )
 
 st.divider()
