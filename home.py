@@ -240,5 +240,7 @@ with targeted_col3:
         st.markdown("""
         **Developments** are real-world policy actions, legal decisions, and institutional changes tracked by the Gender Equality Tracker.
         
+        Examples include state laws, federal agency actions, court rulings, executive orders, and internal agency memos.
+        
         For more details on how developments are identified and evaluated, see the [**Methodology →**](./Methodology)
         """)
