@@ -179,7 +179,7 @@ with col3:
 
 # Most Targeted Groups and Systems
 st.markdown("---")
-st.subheader("Most Targeted Sectors & Groups")
+st.subheader("Most Targeted Institutions & Groups")
 
 # Load data
 @st.cache_data
@@ -207,7 +207,7 @@ targeted_col1, targeted_col2, targeted_col3 = st.columns(3)
 with targeted_col1:
     st.markdown("""
     <div style="background: linear-gradient(135deg, #262232 0%, #1b1725 100%); padding: 25px; border-radius: 8px; height: 100%; text-align: center;">
-        <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Targeted Sectors</p>
+        <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Targeted Institutions</p>
     </div>
     """, unsafe_allow_html=True)
     for i, (sector, count) in enumerate(top_sectors.items(), 1):
