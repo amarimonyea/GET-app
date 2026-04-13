@@ -164,7 +164,7 @@ display_sectors = st.sidebar.selectbox(
 
 rank_by = st.sidebar.selectbox(
     "Rank sectors by",
-    options=["Number of Developments", "Repression Intensity", "Overall Policy Activity"],
+    options=["Number of Developments", "Disruption Intensity", "Overall Policy Activity"],
     index=0,
     key="rank_by"
 )
@@ -175,7 +175,7 @@ st.sidebar.markdown("""
 <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #cf5442; border-radius: 3px;"></div>
-    <span style="color: #ffffff;"><strong>Repression</strong> — Challenges to gender equity</span>
+    <span style="color: #ffffff;"><strong>Disruption</strong> — Challenges to gender equity</span>
   </div>
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #62af44; border-radius: 3px;"></div>
@@ -207,7 +207,7 @@ SECTOR_COL = "Sector Impacted"
 def get_top_developments_for_sector(data_df, sector_name, top_n=1, score_filter=None):
     """Extract top N contributing developments for a given sector.
     
-    score_filter: None (all), 'repression' (positive scores), or 'progression' (negative scores)
+    score_filter: None (all), 'disruption' (positive scores), or 'progression' (negative scores)
     """
     if data_df.empty:
         return []
@@ -218,7 +218,7 @@ def get_top_developments_for_sector(data_df, sector_name, top_n=1, score_filter=
     ]
     
     # Apply score filter if specified
-    if score_filter == "repression":
+    if score_filter == "disruption":
         filtered = filtered[filtered["Slider Score"] > 0]
     elif score_filter == "progression":
         filtered = filtered[filtered["Slider Score"] < 0]
@@ -260,7 +260,7 @@ def get_top_developments_for_sector(data_df, sector_name, top_n=1, score_filter=
 
 # Compute initial metrics for Key Insights
 df_initial = df.copy()
-df_initial["Weighted Repression"] = np.where(df_initial["Slider Score"] > 0, df_initial["Slider Score"], 0)
+df_initial["Weighted Disruption"] = np.where(df_initial["Slider Score"] > 0, df_initial["Slider Score"], 0)
 df_initial["Weighted Progression"] = np.where(df_initial["Slider Score"] < 0, -df_initial["Slider Score"], 0)
 df_initial["Absolute Intensity"] = df_initial["Slider Score"].abs()
 
@@ -270,7 +270,7 @@ sector_counts_initial.columns = [SECTOR_COL, "Event_Count"]
 sector_metrics_initial = (
     df_initial.groupby(SECTOR_COL, as_index=False)
     .agg({
-        "Weighted Repression": "sum",
+        "Weighted Disruption": "sum",
         "Weighted Progression": "sum",
         "Absolute Intensity": "sum",
     })
@@ -291,16 +291,16 @@ if not sector_metrics_initial.empty:
     }
     
     # Insight 2: Most Disrupted (different sector if possible)
-    most_disrupted = sector_metrics_initial.loc[sector_metrics_initial["Weighted Repression"].idxmax()]
-    if most_disrupted["Weighted Repression"] > 0:
+    most_disrupted = sector_metrics_initial.loc[sector_metrics_initial["Weighted Disruption"].idxmax()]
+    if most_disrupted["Weighted Disruption"] > 0:
         # If same as most_impacted, try to get the 2nd most disrupted
         if most_disrupted[SECTOR_COL] == most_impacted[SECTOR_COL] and len(sector_metrics_initial) > 1:
-            most_disrupted = sector_metrics_initial.nlargest(2, "Weighted Repression").iloc[1]
+            most_disrupted = sector_metrics_initial.nlargest(2, "Weighted Disruption").iloc[1]
         
-        insights.append(f"<strong>{most_disrupted[SECTOR_COL]}</strong> is most affected by repression (weighted repression score: {most_disrupted['Weighted Repression']:.1f})")
-        insights_devs["repression"] = {
+        insights.append(f"<strong>{most_disrupted[SECTOR_COL]}</strong> is most affected by disruption (weighted disruption score: {most_disrupted['Weighted Disruption']:.1f})")
+        insights_devs["disruption"] = {
             "sector": most_disrupted[SECTOR_COL],
-            "devs": get_top_developments_for_sector(df_initial, most_disrupted[SECTOR_COL], top_n=1, score_filter="repression")
+            "devs": get_top_developments_for_sector(df_initial, most_disrupted[SECTOR_COL], top_n=1, score_filter="disruption")
         }
     
     # Insight 3: Most Progressed (different sector from impact and repression if possible)
@@ -308,8 +308,8 @@ if not sector_metrics_initial.empty:
     if most_progressed["Weighted Progression"] > 0:
         # Try to get a different sector
         used_sectors = {most_impacted[SECTOR_COL]}
-        if "repression" in insights_devs:
-            used_sectors.add(insights_devs["repression"]["sector"])
+        if "disruption" in insights_devs:
+            used_sectors.add(insights_devs["disruption"]["sector"])
         
         # Find first progression entry not in used_sectors
         progression_sorted = sector_metrics_initial.nlargest(len(sector_metrics_initial), "Weighted Progression")
@@ -340,8 +340,8 @@ else:  # "All"
 # Map rank_by selection to column name
 if rank_by == "Number of Developments":
     sort_col = "Event_Count"
-elif rank_by == "Repression Intensity":
-    sort_col = "Weighted Repression"
+elif rank_by == "Disruption Intensity":
+    sort_col = "Weighted Disruption"
 else:
     sort_col = "Absolute Intensity"
 
@@ -362,9 +362,9 @@ chart_height = max(250, top_n * 35 + 50)  # ~35px per bar plus padding
 if sort_col == "Event_Count":
     x_field = "Event_Count:Q"
     x_title = "Number of Developments"
-elif sort_col == "Weighted Repression":
-    x_field = "Weighted Repression:Q"
-    x_title = "Repression Intensity"
+elif sort_col == "Weighted Disruption":
+    x_field = "Weighted Disruption:Q"
+    x_title = "Disruption Intensity"
 else:  # "Absolute Intensity"
     x_field = "Absolute Intensity:Q"
     x_title = "Overall Policy Activity"
@@ -392,7 +392,7 @@ with st.expander("How to Interpret This Chart", expanded=False):
     st.markdown("""
 **Number of Developments:** The total count of gender policy developments recorded in each sector. Higher counts indicate sectors experiencing more frequent policy change.
 
-**Repression Intensity:** The cumulative impact of constraints, restrictions, and disruptive policy changes. Higher values indicate sectors facing greater institutional pressure.
+**Disruption Intensity:** The cumulative impact of constraints, restrictions, and disruptive policy changes. Higher values indicate sectors facing greater institutional pressure.
 
 **Overall Policy Activity:** The combined magnitude of policy change regardless of direction. This metric highlights which sectors are experiencing the greatest volume of institutional change.
 
