@@ -177,7 +177,7 @@ with col3:
     </div>
     """, unsafe_allow_html=True)
 
-# Most Targeted Groups and Systems
+# Most Targeted Institutions and Population Groups
 st.markdown("---")
 st.subheader("Most Targeted Institutions & Groups")
 
@@ -217,7 +217,7 @@ with targeted_col1:
 with targeted_col2:
     st.markdown("""
     <div style="background: linear-gradient(135deg, #1b1725 0%, #0f0f1a 100%); padding: 25px; border-radius: 8px; height: 100%; text-align: center;">
-        <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Targeted Groups</p>
+        <p style="color: #ffffff; font-size: 16px; margin: 0 0 20px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Most Targeted Population Groups</p>
     </div>
     """, unsafe_allow_html=True)
     for i, (group, count) in enumerate(top_groups.items(), 1):
