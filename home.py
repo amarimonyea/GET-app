@@ -234,16 +234,16 @@ with targeted_col3:
     </div>
     """
     , unsafe_allow_html=True)
-
-# What are Developments? Info
-with st.expander("❓ What are Developments?", expanded=False):
-    st.markdown("""
-    **Developments** are real-world policy actions, legal decisions, and institutional changes tracked by the Gender Equality Tracker. Each development is:
     
-    - **Scored** based on its scale, impact, and institutional significance
-    - **Categorized** by forecast type (Political, Economic, Social, Diplomatic, Security, Hybrid)
-    - **Dated** from official sources and public reporting
-    - **Assigned a direction** indicating whether it challenges (Disruption) or advances (Progression) gender equity
-    
-    For more details on how developments are identified and evaluated, see the [**Methodology →**](./Methodology)
-    """)
+    # What are Developments? Info
+    with st.expander("❓ What are Developments?", expanded=False):
+        st.markdown("""
+        **Developments** are real-world policy actions, legal decisions, and institutional changes tracked by the Gender Equality Tracker. Each development is:
+        
+        - **Scored** based on its scale, impact, and institutional significance
+        - **Categorized** by forecast type (Political, Economic, Social, Diplomatic, Security, Hybrid)
+        - **Dated** from official sources and public reporting
+        - **Assigned a direction** indicating whether it challenges (Disruption) or advances (Progression) gender equity
+        
+        For more details on how developments are identified and evaluated, see the [**Methodology →**](./Methodology)
+        """)
