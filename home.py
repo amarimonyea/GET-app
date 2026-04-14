@@ -144,6 +144,25 @@ st.markdown("""
 
 # Forecasts Section
 st.markdown("---")
+st.markdown("""
+<div style="
+    background: linear-gradient(135deg, #cf5442 0%, #b83f2e 100%);
+    padding: 30px;
+    border-radius: 12px;
+    border-left: 6px solid #8b2e1f;
+    box-shadow: 0 4px 12px rgba(207, 84, 66, 0.3);
+    margin-bottom: 20px;
+">
+    <div>
+        <p style="color: #ffffff; font-size: 18px; font-weight: 700; margin: 0 0 12px 0; line-height: 1.4;">
+            At a Glance
+        </p>
+        <p style="color: #f8f8f8; font-size: 16px; margin: 0; line-height: 1.6; font-weight: 400;">
+            Gender-related developments in the United States since January 2025 forecast a trajectory of social and political repression primarily driven by federal executive and state-level policy actions. These policies most consistently target women, transgender and gender-diverse individuals, and racially and ethnically marginalized groups.
+        </p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 st.subheader("Current Risk Outlook")
 st.write("Overview of principal forecasts and risk trajectories:")
 st.caption("Updated: March 2026")
