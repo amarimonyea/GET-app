@@ -6,6 +6,72 @@ import altair as alt
 st.set_page_config(page_title="Human Impact")
 
 # ---------------------------
+# POPULATION GROUP HIERARCHY
+# ---------------------------
+POPULATION_STRUCTURE = {
+    "Women and Girls": {
+        "All Women": ["women and girls", "women"],
+        "Pregnant Women": ["pregnant women"],
+        "Texas Women": ["texas women", "women in TX"],
+        "Women Servicemembers or Veterans": ["women servicemembers", "women veterans", "female servicemembers", "female veterans"],
+    },
+    "Transgender & Gender-Diverse Individuals": {
+        "Transgender Individuals and Nonbinary People": ["transgender individuals", "transgender and gender-diverse individuals", "nonbinary people"],
+        "Trans and Gender-Diverse Community": ["trans and gender-diverse community", "trans and gender diverse community"],
+        "UK Trans and Gender Diverse Community": ["UK trans", "trans and gender diverse community"],
+        "People with Gender Dysphoria": ["gender dysphoria"],
+    },
+    "Transgender & Gender-Diverse Youth": {
+        "Transgender and Gender-Diverse Youth": ["transgender and gender-diverse youth", "trans and non-binary youth"],
+        "Trans Youth": ["trans youth", "transgender youth"],
+        "Trans Youth in Public Schools": ["trans youth in public schools", "transgender youth in public schools"],
+        "Transgender Youth in Arkansas": ["transgender youth in arkansas"],
+        "LGBTQ+ Youth": ["LGBTQ+ youth"],
+    },
+    "LGBTQ+ Individuals": {
+        "LGBTQ+ Individuals": ["LGBTQ+ individuals"],
+        "Women and LGBTQ+ Beneficiaries": ["women and LGBTQ+ beneficiaries"],
+        "LGBTQ+ Individuals and Advocates": ["LGBTQ+ individuals", "human rights advocates", "activists"],
+    },
+    "Patients & Beneficiaries": {
+        "Reproductive Healthcare Patients": ["reproductive healthcare patients", "abortion patients", "planned parenthood"],
+        "Beneficiaries of Federal Programs": ["beneficiaries of federal programs", "SNAP recipients", "WIC recipients", "medicaid recipients"],
+        "International Aid Recipients": ["international aid recipients", "international gender rights organizations"],
+        "US-Funded Civil Society Organizations": ["US-funded civil society organizations"],
+    },
+    "Practitioners & Researchers": {
+        "Healthcare Practitioners": ["healthcare practitioners", "healthcare providers", "pediatric healthcare providers", "healthcare agencies"],
+        "Legal Practitioners": ["legal practitioners"],
+        "Education Practitioners": ["education practitioners", "educators", "educator workforce", "public school districts"],
+        "California and Oklahoma Educators": ["california public school districts", "oklahoma public education system"],
+        "Academic and Public Health Researchers": ["academic researchers", "public health researchers", "researchers"],
+    },
+    "Workforce & Institutional Personnel": {
+        "Federal Workforce": ["federal workforce", "trans and non-binary federal workforce", "trans federal workforce"],
+        "Trans and Gender-Diverse Workforce": ["trans and gender-diverse workforce"],
+        "Trans Military Personnel": ["trans military personnel", "trans service members", "experienced U.S. Navy personnel"],
+        "Women Servicemembers or Veterans": ["women servicemembers", "women veterans"],
+        "Elected Officials and State Governments": ["elected officials", "state governments"],
+    },
+    "Justice & Detention Populations": {
+        "Trans and Non-Binary Inmates": ["trans and non-binary inmates", "incarcerated trans community"],
+        "Kentucky Incarcerated Trans Community": ["kentucky incarcerated trans community"],
+        "Survivors of Violence": ["survivors of sexual violence", "victims of GBV"],
+    },
+    "General / Community Populations": {
+        "Local Residents": ["local residents", "chicago residents", "FL residents", "florida residents", "indiana residents"],
+        "State Residents": ["DMV residents", "IL residents", "TN residents", "CA residents"],
+        "International Populations": ["foreign nationals", "international travelers"],
+    },
+    "Marginalized & Intersectional Groups": {
+        "Marginalized Ethnicity Groups": ["marginalized ethnicity groups"],
+        "Low Income Minority Communities": ["low income minority communities"],
+        "Women and Marginalized Groups": ["women and girls", "marginalized ethnicity groups"],
+        "Intersectional Trans Populations": ["transgender and gender-diverse individuals", "marginalized ethnicity groups"],
+    },
+}
+
+# ---------------------------
 # 1) THEME / CSS (inject once)
 # ---------------------------
 COLOR_DISRUPTION = "#cf5442"   # New Lines red
@@ -144,37 +210,55 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Impact Chart Controls in sidebar
-st.sidebar.subheader("Population Chart Controls")
+# Population Group Filters (Cascading)
+st.sidebar.divider()
+st.sidebar.subheader("Filter by Population Group")
 
-# Reset controls callback
-def reset_impact_controls():
-    st.session_state["display_groups"] = "Top 5"
-    st.session_state["rank_by_impact"] = "Number of Developments"
+# Reset button
+if st.sidebar.button("Reset Filters", use_container_width=True):
+    st.session_state.main_population_group = 0
+    st.session_state.sub_population_group = 0
+    st.rerun()
 
-st.sidebar.button("Reset Controls", on_click=reset_impact_controls)
-
-display_groups = st.sidebar.selectbox(
-    "Population groups shown",
-    options=["Top 3", "Top 5", "Top 10", "All"],
-    index=1,
-    key="display_groups"
-)
-
-rank_by_impact = st.sidebar.selectbox(
-    "Rank groups by",
-    options=["Number of Developments", "Disruption Intensity", "Overall Policy Activity"],
+# Main group selector with "All" option
+main_group_options = ["All Population Groups"] + list(POPULATION_STRUCTURE.keys())
+main_group = st.sidebar.selectbox(
+    "Main Population Group",
+    options=main_group_options,
     index=0,
-    key="rank_by_impact"
+    key="main_population_group"
 )
 
-# Sidebar slider for visualization
-top_n_viz = st.sidebar.slider(
-    "Show top N in chart",
-    min_value=5,
-    max_value=30,
-    value=5,
-    step=1,
+# Subgroup selector (cascades based on main_group)
+if main_group == "All Population Groups":
+    subgroups = ["All Subgroups"]
+else:
+    subgroups = ["All Subgroups"] + list(POPULATION_STRUCTURE[main_group].keys())
+
+sub_group = st.sidebar.selectbox(
+    "Specific Subgroup",
+    options=subgroups,
+    key="sub_population_group"
+)
+
+# Get the terms for the selected subgroup
+if main_group == "All Population Groups":
+    # Collect all terms from all groups and subgroups
+    selected_terms = []
+    for group_dict in POPULATION_STRUCTURE.values():
+        for term_list in group_dict.values():
+            selected_terms.extend(term_list)
+elif sub_group == "All Subgroups":
+    # Collect all terms from all subgroups in the selected main group
+    selected_terms = []
+    for term_list in POPULATION_STRUCTURE[main_group].values():
+        selected_terms.extend(term_list)
+else:
+    selected_terms = POPULATION_STRUCTURE[main_group][sub_group]
+
+# Display selected focus
+st.sidebar.info(
+    f"📊 Showing data for **{main_group}** → **{sub_group}**"
 )
 
 # Forecast Direction
@@ -208,9 +292,52 @@ st.write(
     "Explore which population groups are most targeted by gender policy developments in the U.S."
 )
 
+# Display all available groups and subgroups
+with st.expander("📋 View all Population Groups & Subgroups", expanded=False):
+    for main_group_name, subgroups_dict in POPULATION_STRUCTURE.items():
+        st.subheader(main_group_name)
+        for subgroup_name, keywords in subgroups_dict.items():
+            st.markdown(f"**{subgroup_name}**")
+            # Display keywords as a comma-separated list
+            keywords_str = ", ".join([f"_{kw}_" for kw in keywords])
+            st.markdown(f"{keywords_str}", unsafe_allow_html=True)
+
 st.divider()
 
 IMPACT_COL = "Who is impacted?"
+
+# Filter data by selected main population group category
+# Create a filter that checks if any of the selected terms appear in the IMPACT_COL
+import re
+
+def filter_by_terms(df, terms):
+    """Filter dataframe rows where any of the provided terms appear in IMPACT_COL using word boundary matching"""
+    # Sort terms by length (longest first) to match more specific terms first
+    sorted_terms = sorted(terms, key=len, reverse=True)
+    
+    def matches_any_term(text):
+        if not isinstance(text, str):
+            return False
+        text_lower = text.lower()
+        for term in sorted_terms:
+            # Use word boundary regex for accurate matching
+            pattern = r'\b' + re.escape(term.lower()) + r'\b'
+            if re.search(pattern, text_lower):
+                return True
+        return False
+    
+    mask = df[IMPACT_COL].fillna('').apply(matches_any_term)
+    return df[mask].copy()
+
+df_filtered = filter_by_terms(df, selected_terms)
+
+st.markdown(f"**Filtering by:** {main_group} → {sub_group}")
+
+if df_filtered.empty:
+    st.warning(f"No data available for: {main_group} → {sub_group}")
+    st.stop()
+
+df = df_filtered  # Use filtered data for all subsequent analysis
 
 def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=None):
     """Extract top N contributing developments for a given population group.
@@ -220,8 +347,10 @@ def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=No
     if data_df.empty:
         return []
     
+    # Use word boundary matching for group_name to avoid false positives
+    pattern = r'\b' + re.escape(group_name.lower()) + r'\b'
     filtered = data_df[
-        (data_df[IMPACT_COL].str.contains(group_name, na=False, case=False)) & 
+        (data_df[IMPACT_COL].fillna('').str.lower().apply(lambda x: bool(re.search(pattern, x)))) & 
         (data_df["Development"].notna())
     ]
     
@@ -266,40 +395,85 @@ def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=No
     
     return top_developments
 
-# Compute initial metrics for Key Insights
-df_initial = df.copy()
+# Compute metrics based on current filter selection
+df_initial = df.copy()  # Use filtered data for metrics
 df_initial["Weighted Disruption"] = np.where(df_initial["Slider Score"] > 0, df_initial["Slider Score"], 0)
 df_initial["Weighted Progression"] = np.where(df_initial["Slider Score"] < 0, -df_initial["Slider Score"], 0)
 df_initial["Absolute Intensity"] = df_initial["Slider Score"].abs()
 
-# Extract and count impact groups
-impact_groups = []
-for idx, row in df_initial.iterrows():
-    if pd.notna(row[IMPACT_COL]):
-        groups = [g.strip() for g in str(row[IMPACT_COL]).split(",")]
-        impact_groups.extend(groups)
-
-impact_counts = {}
-for group in impact_groups:
-    impact_counts[group] = impact_counts.get(group, 0) + 1
-
-impact_counts_df = pd.DataFrame(
-    list(impact_counts.items()),
-    columns=[IMPACT_COL, "Event_Count"]
-)
-
-# Calculate metrics per impact group
+# Determine what level to display metrics at
 impact_metrics_initial = []
-for group in impact_counts_df[IMPACT_COL]:
-    group_df = df_initial[[group in str(row) for row in df_initial[IMPACT_COL]]]
+
+if main_group == "All Population Groups":
+    # Show metrics per main group
+    all_main_groups = list(POPULATION_STRUCTURE.keys())
     
-    if len(group_df) > 0:
+    for main_group_name in all_main_groups:
+        # Get all keywords for this main group
+        main_group_keywords = []
+        for subgroup_terms in POPULATION_STRUCTURE[main_group_name].values():
+            main_group_keywords.extend(subgroup_terms)
+        
+        sorted_keywords = sorted(main_group_keywords, key=len, reverse=True)
+        
+        def group_matches(text):
+            if not isinstance(text, str):
+                return False
+            text_lower = text.lower()
+            for keyword in sorted_keywords:
+                pattern = r'\b' + re.escape(keyword.lower()) + r'\b'
+                if re.search(pattern, text_lower):
+                    return True
+            return False
+        
+        group_df = df_initial[df_initial[IMPACT_COL].fillna('').apply(group_matches)]
+        
+        if len(group_df) > 0:
+            impact_metrics_initial.append({
+                IMPACT_COL: main_group_name,
+                "Weighted Disruption": group_df["Weighted Disruption"].sum(),
+                "Weighted Progression": group_df["Weighted Progression"].sum(),
+                "Absolute Intensity": group_df["Absolute Intensity"].sum(),
+                "Event_Count": len(group_df)
+            })
+
+elif sub_group == "All Subgroups":
+    # Show metrics per subgroup within the selected main group
+    subgroups_in_group = POPULATION_STRUCTURE[main_group]
+    
+    for subgroup_name, keywords in subgroups_in_group.items():
+        sorted_keywords = sorted(keywords, key=len, reverse=True)
+        
+        def subgroup_matches(text):
+            if not isinstance(text, str):
+                return False
+            text_lower = text.lower()
+            for keyword in sorted_keywords:
+                pattern = r'\b' + re.escape(keyword.lower()) + r'\b'
+                if re.search(pattern, text_lower):
+                    return True
+            return False
+        
+        subgroup_df = df_initial[df_initial[IMPACT_COL].fillna('').apply(subgroup_matches)]
+        
+        if len(subgroup_df) > 0:
+            impact_metrics_initial.append({
+                IMPACT_COL: subgroup_name,
+                "Weighted Disruption": subgroup_df["Weighted Disruption"].sum(),
+                "Weighted Progression": subgroup_df["Weighted Progression"].sum(),
+                "Absolute Intensity": subgroup_df["Absolute Intensity"].sum(),
+                "Event_Count": len(subgroup_df)
+            })
+
+else:
+    # Show metrics for the specific subgroup - summarize the filtered data
+    if len(df_initial) > 0:
         impact_metrics_initial.append({
-            IMPACT_COL: group,
-            "Weighted Disruption": group_df["Weighted Disruption"].sum(),
-            "Weighted Progression": group_df["Weighted Progression"].sum(),
-            "Absolute Intensity": group_df["Absolute Intensity"].sum(),
-            "Event_Count": len(group_df)
+            IMPACT_COL: sub_group,
+            "Weighted Disruption": df_initial["Weighted Disruption"].sum(),
+            "Weighted Progression": df_initial["Weighted Progression"].sum(),
+            "Absolute Intensity": df_initial["Absolute Intensity"].sum(),
+            "Event_Count": len(df_initial)
         })
 
 impact_metrics_initial = pd.DataFrame(impact_metrics_initial) if impact_metrics_initial else pd.DataFrame(columns=[IMPACT_COL, "Weighted Disruption", "Weighted Progression", "Absolute Intensity", "Event_Count"])
@@ -308,7 +482,8 @@ impact_metrics_initial = pd.DataFrame(impact_metrics_initial) if impact_metrics_
 insights = []
 insights_devs = {}
 
-if not impact_metrics_initial.empty:
+# Only generate detailed insights when showing all Population Groups
+if not impact_metrics_initial.empty and main_group == "All Population Groups":
     # Insight 1: Highest Absolute Intensity
     most_impacted = impact_metrics_initial.loc[impact_metrics_initial["Absolute Intensity"].idxmax()]
     insights.append(f"<strong>{most_impacted[IMPACT_COL]}</strong> experiences the highest total intensity of impact ({most_impacted['Absolute Intensity']:.1f})")
@@ -354,23 +529,10 @@ if not impact_metrics_initial.empty:
 # Determine number of unique groups
 num_groups = impact_metrics_initial.shape[0] if not impact_metrics_initial.empty else 0
 
-# Use sidebar controls to determine display settings
-if display_groups == "Top 3":
-    top_n_rank = 3
-elif display_groups == "Top 5":
-    top_n_rank = 5
-elif display_groups == "Top 10":
-    top_n_rank = 10
-else:  # "All"
-    top_n_rank = num_groups
-
-# Map rank_by selection to column name
-if rank_by_impact == "Number of Developments":
-    sort_col = "Event_Count"
-elif rank_by_impact == "Disruption Intensity":
-    sort_col = "Weighted Disruption"
-else:
-    sort_col = "Absolute Intensity"
+# Set default display settings
+top_n_rank = num_groups  # Show all groups by default
+sort_col = "Event_Count"  # Sort by number of developments
+top_n_viz = min(10, num_groups)  # Show top 10 in chart visualization
 
 # Use pre-computed metrics
 impact_metrics = impact_metrics_initial.copy()
@@ -385,16 +547,9 @@ min_height_per_group = 80  # pixels per group minimum (increased for wrapped lab
 base_height = 100  # base padding
 chart_height = max(400, len(impact_metrics) * min_height_per_group + base_height) if not impact_metrics.empty else 250
 
-# Map sort_col to display titles
-if sort_col == "Event_Count":
-    x_field = "Event_Count:Q"
-    x_title = "Number of Developments"
-elif sort_col == "Weighted Disruption":
-    x_field = "Weighted Disruption:Q"
-    x_title = "Disruption Intensity"
-else:  # "Absolute Intensity"
-    x_field = "Absolute Intensity:Q"
-    x_title = "Overall Policy Activity"
+# Chart shows main groups ranked by development count
+x_field = "Event_Count:Q"
+x_title = "Number of Developments"
 
 # Enhanced chart
 if not impact_metrics.empty:
@@ -420,13 +575,9 @@ else:
 # How to Interpret This Chart section
 with st.expander("How to Interpret This Chart", expanded=False):
     st.markdown("""
-**Number of Developments:** The total number of gender policy developments affecting each population group. Higher counts indicate groups experiencing more frequent policy impact.
+**Number of Developments:** The total number of gender policy developments affecting each population group. Higher counts indicate groups experiencing more frequent policy impact when filtered by your selected subgroup.
 
-**Disruption Intensity:** The cumulative impact of constraints, restrictions, and disruptive policy changes on each group. Higher values indicate groups facing greater institutional pressure.
-
-**Overall Policy Activity:** The combined magnitude of policy change affecting each group regardless of direction. This metric highlights which groups are experiencing the greatest volume of policy activity.
-
-**Interpretation:** Taken together, these metrics help distinguish between groups under sustained pressure (high frequency + high disruption) versus those in transition (high activity but mixed directional impact).
+**How it works:** The chart shows all 7 main population groups, but only counts developments that match your selected subgroup. For example, if you select "Women and Girls" → "Pregnant Women", the chart will show how many developments mentioning pregnant women affect each of the 7 main population groups.
 """)
 
 # Key Insights section
@@ -506,17 +657,10 @@ st.divider()
 # Recent Developments Panel
 st.subheader("Recent Developments by Population Group")
 
-available_groups = sorted([g.strip() for g in impact_counts.keys()]) if impact_counts else []
-selected_group = st.selectbox(
-    "Select Population Group:",
-    available_groups,
-    index=0 if available_groups else None,
-    key="group_selector"
-)
-
-if selected_group:
-    # Get all developments affecting the selected group
-    all_group_data = df[[selected_group in str(row) for row in df[IMPACT_COL]]].sort_values("Date", ascending=False)
+# Use the selected main_group and sub_group
+if sub_group:
+    # Get all developments affecting the selected group using the filtered data
+    all_group_data = df.sort_values("Date", ascending=False)
     
     if not all_group_data.empty:
         # Calculate context metrics
@@ -535,7 +679,7 @@ if selected_group:
         
         # Display context summary
         st.markdown(f"""
-**{selected_group}**  
+**{main_group} → {sub_group}**  
 {total_devs} developments {date_range_str}  
 {disruption_count} Disruption | {neutral_count} Neutral | {progression_count} Progression
         """)
@@ -594,7 +738,7 @@ if selected_group:
             
             st.markdown(card_html, unsafe_allow_html=True)
     else:
-        st.info(f"No developments recorded for {selected_group}")
+        st.info(f"No developments recorded for {main_group} → {sub_group}")
 
 st.divider()
 

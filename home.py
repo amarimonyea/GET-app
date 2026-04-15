@@ -158,7 +158,7 @@ st.markdown("""
             At a Glance
         </p>
         <p style="color: #f8f8f8; font-size: 16px; margin: 0; line-height: 1.6; font-weight: 400;">
-            Gender-related developments in the United States since January 2025 forecast a trajectory of social and political repression primarily driven by federal executive and state-level policy actions. These policies most consistently target women, transgender and gender-diverse individuals, and racially and ethnically marginalized groups.
+            The Gender Equality Tracker analyzes gender-related developments in federal, executive, and state level policy actions to develop forecasts of trajectories of ongoing political, security, economic, and social shifts.
         </p>
     </div>
 </div>

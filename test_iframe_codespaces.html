@@ -74,26 +74,48 @@
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Streamlit iframe Test - Codespaces</h1>
+        <h1>🚀 Streamlit iframe Test - Private Port</h1>
         
         <div class="info">
-            <p><strong>Configuration:</strong> Using GitHub Codespaces public URL</p>
-            <p><strong>Source URL:</strong> https://fluffy-trout-4jpq67xj6x5w2q4j5-8501.app.github.dev</p>
+            <p><strong>Configuration:</strong> Private Codespaces environment (localhost only)</p>
+            <p><strong>Source URL:</strong> http://localhost:8502</p>
         </div>
         
         <div class="success">
-            <p>✅ This URL can be embedded on any website to pull your live dashboard!</p>
+            <p>✅ This setup uses a private port. The iframe only works within the Codespaces container.</p>
+            <p><strong>To test:</strong> Use test_iframe_nosandbox.html or test_iframe.html for localhost testing.</p>
         </div>
     </div>
     
     <div class="iframe-wrapper">
         <iframe
-            src="https://fluffy-trout-4jpq67xj6x5w2q4j5-8501.app.github.dev"
+            id="streamlit-iframe"
+            src="http://localhost:8502"
             title="GET-app Dashboard"
-            width="100%"
-            height="900"
-            style="border:none;">
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentations"
+            style="width: 100%; height: 100%; border: none;">
         </iframe>
     </div>
+    
+    <script>
+        // Monitor iframe status and log useful debugging info
+        const iframe = document.getElementById('streamlit-iframe');
+        
+        iframe.addEventListener('load', function() {
+            console.log('✅ Streamlit iframe loaded successfully from Codespaces');
+            console.log('iframe origin:', iframe.origin);
+        });
+        
+        iframe.addEventListener('error', function(e) {
+            console.error('❌ iframe failed to load:', e);
+        });
+        
+        // Detect if user has network/CORS issues
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'streamlit') {
+                console.log('📨 Message from Streamlit iframe:', event.data);
+            }
+        });
+    </script>
 </body>
 </html>

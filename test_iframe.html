@@ -87,7 +87,7 @@
         
         <div class="info">
             <p><strong>Test Purpose:</strong> Verify if the GET-app Streamlit application can be embedded in an iframe</p>
-            <p><strong>Source URL:</strong> http://localhost:8501</p>
+            <p><strong>Source URL:</strong> http://localhost:8502</p>
             <p><strong>Status:</strong> <span id="status">Testing...</span></p>
         </div>
         
@@ -101,35 +101,55 @@
     
     <div class="iframe-wrapper">
         <iframe 
-            src="https://fluffy-trout-4jpq67xj6x5w2q4j5-8501.app.github.dev/?embed=true" 
-            title="GET-app Dashboard">
+            id="streamlit-iframe"
+            src="http://localhost:8502" 
+            title="GET-app Dashboard"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentations"
+            style="width: 100%; height: 100%; border: none;">
         </iframe>
     </div>
     
     <script>
         // Check if iframe loaded successfully
-        const iframe = document.querySelector('iframe');
+        const iframe = document.getElementById('streamlit-iframe');
         const statusElement = document.getElementById('status');
+        let isLoaded = false;
+        
+        // Listen for messages from iframe (optional, for future integration)
+        window.addEventListener('message', function(event) {
+            console.log('Message from iframe:', event.data);
+        });
         
         iframe.addEventListener('load', function() {
+            isLoaded = true;
             statusElement.textContent = '✅ iframe loaded successfully';
             statusElement.parentElement.style.backgroundColor = '#e8f5e9';
             statusElement.parentElement.style.color = '#2e7d32';
+            console.log('✅ Streamlit iframe loaded');
         });
         
-        iframe.addEventListener('error', function() {
+        iframe.addEventListener('error', function(e) {
             statusElement.textContent = '❌ Failed to load iframe - check console (F12)';
             statusElement.parentElement.style.backgroundColor = '#ffebee';
             statusElement.parentElement.style.color = '#c62828';
+            console.error('❌ iframe error:', e);
         });
         
         // Timeout check
         setTimeout(function() {
-            if (statusElement.textContent === 'Testing...') {
-                statusElement.textContent = '⏱️ Still loading... (make sure Streamlit is running)';
+            if (!isLoaded && statusElement.textContent === 'Testing...') {
+                statusElement.textContent = '⏱️ Still loading... (make sure Streamlit is running on port 8501)';
                 statusElement.parentElement.style.backgroundColor = '#fff3cd';
+                statusElement.parentElement.style.color = '#856404';
             }
-        }, 3000);
+        }, 5000);
+        
+        // Final fallback status
+        setTimeout(function() {
+            if (!isLoaded) {
+                console.warn('⚠️ iframe did not load within 10 seconds. Ensure Streamlit is running with proper CORS settings.');
+            }
+        }, 10000);
     </script>
 </body>
 </html>

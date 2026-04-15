@@ -90,7 +90,7 @@
         
         <div class="info">
             <p><strong>Configuration:</strong> This version removes sandbox restrictions</p>
-            <p><strong>Source URL:</strong> http://localhost:8501</p>
+            <p><strong>Source URL:</strong> http://localhost:8502</p>
         </div>
         
         <div class="debug-steps">
@@ -106,10 +106,25 @@
     
     <div class="iframe-wrapper">
         <iframe 
-            src="http://localhost:8501" 
+            id="streamlit-iframe"
+            src="http://localhost:8502" 
             title="GET-app Streamlit Dashboard"
-            allow="camera; microphone; geolocation">
+            allow="camera; microphone; geolocation"
+            style="width: 100%; height: 100%; border: none;">
         </iframe>
     </div>
+    
+    <script>
+        // Monitor iframe status
+        const iframe = document.getElementById('streamlit-iframe');
+        
+        iframe.addEventListener('load', function() {
+            console.log('✅ Streamlit iframe loaded successfully (local)');
+        });
+        
+        iframe.addEventListener('error', function(e) {
+            console.error('❌ iframe failed to load:', e);
+        });
+    </script>
 </body>
 </html>
