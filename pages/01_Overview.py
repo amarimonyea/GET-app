@@ -770,9 +770,11 @@ if "Latest Link" in forecast_points.columns:
             dict(zip(latest_all[FORECAST_COL], latest_all["Latest Link"]))
         )
 
-# Format Latest Date Str
+# Format Latest Date Str - handle NaN values properly
 if "Latest Date" in forecast_points.columns:
-    forecast_points["Latest Date Str"] = forecast_points["Latest Date"].dt.strftime("%b %d, %Y") if pd.api.types.is_datetime64_ns_dtype(forecast_points["Latest Date"]) else "No data"
+    forecast_points["Latest Date Str"] = forecast_points["Latest Date"].apply(
+        lambda x: pd.Timestamp(x).strftime("%b %d, %Y") if pd.notna(x) else "No data"
+    )
 else:
     forecast_points["Latest Date Str"] = "No data"
 
