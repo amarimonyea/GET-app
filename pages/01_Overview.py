@@ -727,19 +727,28 @@ forecast_points = quad.groupby(FORECAST_COL, as_index=False)[["Prog", "Disr"]].s
 forecast_points["Cumulative Intensity"] = forecast_points["Prog"] + forecast_points["Disr"]
 forecast_points["Net Direction"] = forecast_points["Disr"] - forecast_points["Prog"]
 
-# Calculate percentage breakdown
-forecast_points["Deterioration Pct"] = (
-    (forecast_points["Disr"] / forecast_points["Cumulative Intensity"] * 100)
+# Extract forecast domain/prefix (e.g., "Social" from "Social Deteriorating")
+forecast_points["Forecast_Prefix"] = forecast_points[FORECAST_COL].str.split().str[0]
+
+# Calculate category-level totals (all forecasts within same prefix measured against each other)
+category_totals = forecast_points.groupby("Forecast_Prefix")[["Disr", "Prog"]].transform("sum")
+forecast_points["Category_Total_Disr"] = category_totals["Disr"]
+forecast_points["Category_Total_Prog"] = category_totals["Prog"]
+forecast_points["Category_Total_Intensity"] = forecast_points["Category_Total_Disr"] + forecast_points["Category_Total_Prog"]
+
+# Calculate percentage breakdown relative to category totals
+forecast_points["Deterioration_Pct_Category"] = (
+    (forecast_points["Category_Total_Disr"] / forecast_points["Category_Total_Intensity"] * 100)
     .round(0)
     .fillna(0)
     .astype(int)
 )
-forecast_points["Improvement Pct"] = 100 - forecast_points["Deterioration Pct"]
+forecast_points["Improvement_Pct_Category"] = 100 - forecast_points["Deterioration_Pct_Category"]
 
-# Create breakdown label for tooltip
+# Create breakdown label for tooltip (using category-level percentages)
 forecast_points["Breakdown"] = forecast_points.apply(
-    lambda row: f"Activity split: {row['Deterioration Pct']:.0f}% deteriorating / {row['Improvement Pct']:.0f}% improving" 
-    if row["Cumulative Intensity"] > 0 
+    lambda row: f"Activity split: {row['Deterioration_Pct_Category']:.0f}% deteriorating / {row['Improvement_Pct_Category']:.0f}% improving" 
+    if row["Category_Total_Intensity"] > 0 
     else "No activity",
     axis=1
 )
