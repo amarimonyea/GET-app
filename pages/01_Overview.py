@@ -727,6 +727,13 @@ forecast_points = quad.groupby(FORECAST_COL, as_index=False)[["Prog", "Disr"]].s
 forecast_points["Cumulative Intensity"] = forecast_points["Prog"] + forecast_points["Disr"]
 forecast_points["Net Direction"] = forecast_points["Disr"] - forecast_points["Prog"]
 
+# Add display name for forecast that replaces old terminology
+def transform_forecast_name(name):
+    """Transform forecast names from old terminology to new terminology"""
+    return name.replace("Disruption", "Deteriorating").replace("Progression", "Improving")
+
+forecast_points["Forecast Display"] = forecast_points[FORECAST_COL].apply(transform_forecast_name)
+
 # Get latest event per forecast from filtered data first
 if not df_filtered.empty:
     latest_by_forecast = df_filtered.sort_values("Date", ascending=False).groupby(FORECAST_COL, as_index=False).first()
@@ -842,9 +849,9 @@ else:
         legend=None
     ),
     tooltip=[
-    alt.Tooltip(f"{FORECAST_COL}:N", title="Forecast"),
-    alt.Tooltip("Prog:Q", title="Cumulative Progression", format=".1f"),
-    alt.Tooltip("Disr:Q", title="Cumulative Disruption", format=".1f"),
+    alt.Tooltip("Forecast Display:N", title="Forecast"),
+    alt.Tooltip("Prog:Q", title="Cumulative Improvement", format=".1f"),
+    alt.Tooltip("Disr:Q", title="Cumulative Deterioration", format=".1f"),
     alt.Tooltip("Cumulative Intensity:Q", title="Cumulative Intensity", format=".1f"),
     alt.Tooltip("Net Direction:Q", title="Net Direction", format=".1f"),
     alt.Tooltip("Latest Date Str:N", title="Latest Event Date"),
@@ -868,7 +875,7 @@ else:
     .encode(
         x="Cumulative Intensity:Q",
         y="Net Direction:Q",
-        text=alt.condition(hover, alt.Text(f"{FORECAST_COL}:N"), alt.value("")),
+        text=alt.condition(hover, alt.Text("Forecast Display:N"), alt.value("")),
     )
 )
 
