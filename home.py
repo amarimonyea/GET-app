@@ -7,6 +7,72 @@ import pandas as pd
 st.set_page_config(page_title="U.S. Gender Equality Tracker", layout="wide")
 
 # ---------------------------
+# POPULATION GROUP HIERARCHY (for grouping)
+# ---------------------------
+POPULATION_STRUCTURE = {
+    "Women and Girls": {
+        "All Women": ["women and girls", "women"],
+        "Pregnant Women": ["pregnant women"],
+        "Texas Women": ["texas women", "women in TX"],
+        "Women Servicemembers or Veterans": ["women servicemembers", "women veterans", "female servicemembers", "female veterans"],
+    },
+    "Transgender & Gender-Diverse Individuals": {
+        "Transgender Individuals and Nonbinary People": ["transgender individuals", "transgender and gender-diverse individuals", "nonbinary people"],
+        "Trans and Gender-Diverse Community": ["trans and gender-diverse community", "trans and gender diverse community"],
+        "UK Trans and Gender Diverse Community": ["UK trans", "trans and gender diverse community"],
+        "People with Gender Dysphoria": ["gender dysphoria"],
+    },
+    "Transgender & Gender-Diverse Youth": {
+        "Transgender and Gender-Diverse Youth": ["transgender and gender-diverse youth", "trans and non-binary youth"],
+        "Trans Youth": ["trans youth", "transgender youth"],
+        "Trans Youth in Public Schools": ["trans youth in public schools", "transgender youth in public schools"],
+        "Transgender Youth in Arkansas": ["transgender youth in arkansas"],
+        "LGBTQ+ Youth": ["LGBTQ+ youth"],
+    },
+    "LGBTQ+ Individuals": {
+        "LGBTQ+ Individuals": ["LGBTQ+ individuals"],
+        "Women and LGBTQ+ Beneficiaries": ["women and LGBTQ+ beneficiaries"],
+        "LGBTQ+ Individuals and Advocates": ["LGBTQ+ individuals", "human rights advocates", "activists"],
+    },
+    "Patients & Beneficiaries": {
+        "Reproductive Healthcare Patients": ["reproductive healthcare patients", "abortion patients", "planned parenthood"],
+        "Beneficiaries of Federal Programs": ["beneficiaries of federal programs", "SNAP recipients", "WIC recipients", "medicaid recipients"],
+        "International Aid Recipients": ["international aid recipients", "international gender rights organizations"],
+        "US-Funded Civil Society Organizations": ["US-funded civil society organizations"],
+    },
+    "Practitioners & Researchers": {
+        "Healthcare Practitioners": ["healthcare practitioners", "healthcare providers", "pediatric healthcare providers", "healthcare agencies"],
+        "Legal Practitioners": ["legal practitioners"],
+        "Education Practitioners": ["education practitioners", "educators", "educator workforce", "public school districts"],
+        "California and Oklahoma Educators": ["california public school districts", "oklahoma public education system"],
+        "Academic and Public Health Researchers": ["academic researchers", "public health researchers", "researchers"],
+    },
+    "Workforce & Institutional Personnel": {
+        "Federal Workforce": ["federal workforce", "trans and non-binary federal workforce", "trans federal workforce"],
+        "Trans and Gender-Diverse Workforce": ["trans and gender-diverse workforce"],
+        "Trans Military Personnel": ["trans military personnel", "trans service members", "experienced U.S. Navy personnel"],
+        "Women Servicemembers or Veterans": ["women servicemembers", "women veterans"],
+        "Elected Officials and State Governments": ["elected officials", "state governments"],
+    },
+    "Justice & Detention Populations": {
+        "Trans and Non-Binary Inmates": ["trans and non-binary inmates", "incarcerated trans community"],
+        "Kentucky Incarcerated Trans Community": ["kentucky incarcerated trans community"],
+        "Survivors of Violence": ["survivors of sexual violence", "victims of GBV"],
+    },
+    "General / Community Populations": {
+        "Local Residents": ["local residents", "chicago residents", "FL residents", "florida residents", "indiana residents"],
+        "State Residents": ["DMV residents", "IL residents", "TN residents", "CA residents"],
+        "International Populations": ["foreign nationals", "international travelers"],
+    },
+    "Marginalized & Intersectional Groups": {
+        "Marginalized Ethnicity Groups": ["marginalized ethnicity groups"],
+        "Low Income Minority Communities": ["low income minority communities"],
+        "Women and Marginalized Groups": ["women and girls", "marginalized ethnicity groups"],
+        "Intersectional Trans Populations": ["transgender and gender-diverse individuals", "marginalized ethnicity groups"],
+    },
+}
+
+# ---------------------------
 # 1) THEME / CSS (inject once)
 # ---------------------------
 COLOR_DISRUPTION = "#cf5442"   # New Lines red
@@ -129,7 +195,7 @@ st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 
 st.title("🌎 U.S. Gender Equality Tracker")
 st.write("**How to use the tracker:** Use the sidebar to explore sector impacts, human impacts, and the indicators shaping the forecast.")
-st.write("The U.S. Gender Equality Tracker (GET) is an early-warning system that tracks gender-related policies and forecasts their broader political, social, and security impacts.")
+st.write("Since January 2025, the gender landscape in the United States has experienced significant rollbacks, prompting the development of the U.S. Gender Equality Tracker (GET) to better anticipate major shifts.")
 
 # Video placeholder
 st.markdown("---")
@@ -146,11 +212,11 @@ st.markdown("""
 st.markdown("---")
 st.markdown("""
 <div style="
-    background: linear-gradient(135deg, #cf5442 0%, #b83f2e 100%);
+    background: linear-gradient(135deg, #bfa359 0%, #a08a42 100%);
     padding: 30px;
     border-radius: 12px;
-    border-left: 6px solid #8b2e1f;
-    box-shadow: 0 4px 12px rgba(207, 84, 66, 0.3);
+    border-left: 6px solid #8b7835;
+    box-shadow: 0 4px 12px rgba(191, 163, 89, 0.3);
     margin-bottom: 20px;
 ">
     <div>
@@ -163,45 +229,11 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-st.subheader("Current Risk Outlook")
-st.write("Overview of principal forecasts and risk trajectories:")
+st.subheader("Current Outlook")
+st.write("Directional trajectory and severity by domain")
 st.caption("Updated: March 2026")
 
-# Create columns for forecast cards
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown("""
-    <div style="background-color: #cf5442; padding: 20px; border-radius: 8px; text-align: center; height: 100%;">
-        <p style="color: #ffffff; font-size: 16px; margin: 0 0 10px 0; font-weight: 400;">Political Disruption Risk</p>
-        <p style="color: #ffffff; font-size: 32px; margin: 10px 0; font-weight: 700;">Elevated</p>
-        <p style="color: #ffffff; font-size: 16px; margin: 10px 0 0 0; opacity: 0.9;">Based on policy and discourse trends</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown("""
-    <div style="background-color: #bfa359; padding: 20px; border-radius: 8px; text-align: center; height: 100%;">
-        <p style="color: #1b1725; font-size: 16px; margin: 0 0 10px 0; font-weight: 400;">Economic Impact Forecast</p>
-        <p style="color: #1b1725; font-size: 32px; margin: 10px 0; font-weight: 700;">Moderate</p>
-        <p style="color: #1b1725; font-size: 16px; margin: 10px 0 0 0; opacity: 0.85;">Gender-related economic trajectories</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col3:
-    st.markdown("""
-    <div style="background-color: #3b668c; padding: 20px; border-radius: 8px; text-align: center; height: 100%;">
-        <p style="color: #ffffff; font-size: 16px; margin: 0 0 10px 0; font-weight: 400;">Security Considerations</p>
-        <p style="color: #ffffff; font-size: 32px; margin: 10px 0; font-weight: 700;">Emerging</p>
-        <p style="color: #ffffff; font-size: 16px; margin: 10px 0 0 0; opacity: 0.9;">Emerging security implications</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-# Most Targeted Institutions and Population Groups
-st.markdown("---")
-st.subheader("Most Targeted Institutions & Groups")
-
-# Load data
+# Load data first
 @st.cache_data
 def load_data():
     df = pd.read_csv("data/Monitor - Gender Equality - GET 2025 (1).csv", skiprows=1)
@@ -210,6 +242,195 @@ def load_data():
 
 df = load_data()
 
+# Function to extract net direction scores
+@st.cache_data
+def calculate_domain_scores(data_df):
+    """
+    Calculate net direction scores for each core domain.
+    net score = cumulative disruption score - cumulative progression score
+    Only pure forecasts (no hybrids, status quo, or diplomatic).
+    """
+    domain_scores = {
+        "Political": {"disruption": 0, "progression": 0, "count": 0},
+        "Social": {"disruption": 0, "progression": 0, "count": 0},
+        "Economic": {"disruption": 0, "progression": 0, "count": 0},
+        "Security": {"disruption": 0, "progression": 0, "count": 0},
+    }
+    
+    for idx, row in data_df.iterrows():
+        forecast = str(row["Forecast"]).strip()
+        slider_score = pd.to_numeric(row["Slider Score"], errors="coerce")
+        
+        # Skip if slider_score is invalid
+        if pd.isna(slider_score):
+            continue
+        
+        # Skip invalid forecast types (hybrid, status quo, diplomatic)
+        if any(x in forecast for x in ["Hybrid", "Status Quo", "Diplomatic"]):
+            continue
+        
+        # Check if this is a pure core forecast
+        for domain in ["Political", "Social", "Economic", "Security"]:
+            if domain in forecast:
+                if "Disruption" in forecast:
+                    domain_scores[domain]["disruption"] += slider_score
+                    domain_scores[domain]["count"] += 1
+                elif "Progression" in forecast:
+                    domain_scores[domain]["progression"] += slider_score
+                    domain_scores[domain]["count"] += 1
+                break
+    
+    # Calculate net score, average intensity, and direction for each domain
+    for domain in domain_scores:
+        disruption = domain_scores[domain]["disruption"]
+        progression = domain_scores[domain]["progression"]
+        net = disruption - progression
+        count = domain_scores[domain]["count"]
+        
+        domain_scores[domain]["net"] = net
+        
+        # Calculate average intensity per development (0-10 scale)
+        if count > 0:
+            average_per_dev = net / count
+            # Map to 0-10 scale: normalize based on typical range
+            # Assuming average typically ranges from -4 to +4, map to 0-10
+            intensity_10_scale = ((average_per_dev + 4) / 8) * 10
+            # Clamp to 0-10
+            intensity_10_scale = max(0, min(10, intensity_10_scale))
+        else:
+            average_per_dev = 0
+            intensity_10_scale = 5  # neutral
+        
+        domain_scores[domain]["average_per_dev"] = average_per_dev
+        domain_scores[domain]["intensity_10"] = intensity_10_scale
+        
+        # Determine direction label based on net score
+        if net > 10:
+            domain_scores[domain]["direction"] = "Deteriorating"
+        elif net < -10:
+            domain_scores[domain]["direction"] = "Improving"
+        else:
+            domain_scores[domain]["direction"] = "Mixed"
+    
+    return domain_scores
+
+def score_to_grade(intensity_10_scale):
+    """
+    Convert intensity (0-10 scale) to A-F grade:
+    A = strong progression (0-1.5)
+    B = moderate progression (1.5-3.5)
+    C = mixed (3.5-6.5)
+    D = moderate disruption (6.5-8.5)
+    F = strong disruption (8.5-10)
+    """
+    if intensity_10_scale < 1.5:
+        return "A"
+    elif intensity_10_scale < 3.5:
+        return "B"
+    elif intensity_10_scale < 6.5:
+        return "C"
+    elif intensity_10_scale < 8.5:
+        return "D"
+    else:
+        return "F"
+
+def get_card_color(grade):
+    """Get card background color based on grade"""
+    colors = {
+        "F": "#cf5442",  # Red - strong disruption
+        "D": "#e67e5a",  # Orange-red - moderate disruption
+        "C": "#bfa359",  # Gold - mixed
+        "B": "#88b379",  # Light green - moderate progression
+        "A": "#62af44",  # Green - strong progression
+    }
+    return colors.get(grade, "#bfa359")
+
+def get_text_color(grade):
+    """Get text color based on grade for readability"""
+    if grade in ["F", "D"]:
+        return "#ffffff"
+    elif grade == "C":
+        return "#1b1725"
+    else:
+        return "#ffffff"
+
+# Calculate scores
+domain_scores = calculate_domain_scores(df)
+
+# Create columns for forecast cards (2x2 grid)
+col1, col2 = st.columns(2)
+col3, col4 = st.columns(2)
+columns = [
+    (col1, "Political"),
+    (col2, "Social"),
+    (col3, "Economic"),
+    (col4, "Security"),
+]
+
+for col, domain in columns:
+    with col:
+        score_data = domain_scores[domain]
+        net_score = score_data["net"]
+        intensity_10 = score_data["intensity_10"]
+        grade = score_to_grade(intensity_10)
+        direction = score_data["direction"]
+        dev_count = score_data["count"]
+        bg_color = get_card_color(grade)
+        text_color = get_text_color(grade)
+        
+        sign = "+" if net_score > 0 else ""
+        
+        st.markdown(f"""
+        <div style="background-color: {bg_color}; padding: 24px; border-radius: 8px; text-align: center; height: 100%; border: 2px solid {text_color};">
+            <p style="color: {text_color}; font-size: 14px; margin: 0 0 12px 0; font-weight: 400; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.5px;">{domain} Outlook</p>
+            <p style="color: {text_color}; font-size: 36px; margin: 0 0 12px 0; font-weight: 700;">{grade}</p>
+            <p style="color: {text_color}; font-size: 13px; margin: 0 0 12px 0; font-weight: 500; opacity: 0.9;">{intensity_10:.1f} / 10</p>
+            <p style="color: {text_color}; font-size: 14px; margin: 0; font-weight: 500;">{direction}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+# Explanation
+with st.expander("How are these grades calculated?", expanded=False):
+    st.markdown("""
+    **Grades reflect severity per development, while direction reflects overall trajectory.**
+    
+    ---
+    
+    **What the grades mean:**
+    - **A** = Strong improvement (0–1.5)
+    - **B** = Moderate improvement (1.5–3.5)
+    - **C** = Mixed or contested (3.5–6.5)
+    - **D** = Moderate deterioration (6.5–8.5)
+    - **F** = Strong deterioration (8.5–10)
+    
+    **How it is calculated:**
+    - Net score = deterioration − improvement
+    - Average per development = net score ÷ number of developments
+    - Severity (0–10) = normalized average
+    
+    **Direction labels:**
+    - **Deteriorating** = overall negative trajectory
+    - **Improving** = overall positive trajectory
+    - **Mixed** = contested or unclear direction
+    
+    **Pattern tags** describe the type of change driving the forecast (e.g., erosion, regression, suppression) and are used for interpretation only. They do not affect scores or grades.
+    
+    **How to interpret:**
+    - Grades show how concentrated deterioration or improvement is
+    - Direction shows overall directional momentum
+    - Severity (0–10) indicates the intensity of change
+    
+    **Example:**
+    - Political: D (5.8) = broad, sustained deterioration
+    - Security: F (8.6) = concentrated, high-severity deterioration
+    
+    **Scope**: Only core forecasts (Political, Social, Economic, Security deteriorations & improvements) are included. Hybrid forecasts, status quo, and diplomatic actions are excluded.
+    """)
+
+# Most Targeted Institutions and Population Groups
+st.markdown("---")
+st.subheader("Most Targeted Institutions & Groups")
+
 # Get date range
 date_min = df["Date"].min()
 date_max = df["Date"].max()
@@ -217,9 +438,82 @@ date_range_str = f"{date_min.strftime('%B %d, %Y')} to {date_max.strftime('%B %d
 
 st.caption(f"Based on developments tracked from {date_range_str}")
 
-# Get top 3 sectors and groups
+# Function to map specific group values to broader labels
+def map_to_broader_group(specific_group):
+    """Map a specific subgroup to its broader parent category.
+    
+    Handles:
+    - Case insensitivity
+    - Multiple groups in one entry (comma-separated) - returns ALL applicable groups
+    - Substring matching to find best fit
+    
+    Returns: List of broader groups that apply
+    """
+    if pd.isna(specific_group):
+        return []
+    
+    specific_group_str = str(specific_group).strip()
+    mapped_groups = set()  # Use set to avoid duplicates
+    
+    # If multiple groups present (comma-separated), map EACH one separately
+    groups_to_check = [g.strip() for g in specific_group_str.split(",")]
+    
+    for group_term in groups_to_check:
+        group_lower = group_term.lower()
+        found = False
+        
+        # First, try exact match for all terms
+        for main_group, subgroups_dict in POPULATION_STRUCTURE.items():
+            for subgroup_name, terms_list in subgroups_dict.items():
+                for term in terms_list:
+                    if term.lower() == group_lower:
+                        mapped_groups.add(main_group)
+                        found = True
+                        break
+                if found:
+                    break
+            if found:
+                break
+        
+        # If no exact match, try substring matching (more flexible)
+        if not found:
+            for main_group, subgroups_dict in POPULATION_STRUCTURE.items():
+                for subgroup_name, terms_list in subgroups_dict.items():
+                    for term in terms_list:
+                        # Check if term appears in the group value (substring match)
+                        if term.lower() in group_lower or group_lower in term.lower():
+                            mapped_groups.add(main_group)
+                            found = True
+                            break
+                    if found:
+                        break
+                if found:
+                    break
+        
+        # If still no match, add the original term
+        if not found:
+            mapped_groups.add(group_term)
+    
+    return list(mapped_groups)
+
+# Get top 3 sectors and groups (grouped by broader labels)
 top_sectors = df["Sector Impacted"].value_counts().head(3)
-top_groups = df["Who is impacted?"].value_counts().head(3)
+
+# Map specific groups to broader labels and count
+# Each entry can map to multiple broader groups (when comma-separated)
+df_with_broader_groups = df.copy()
+df_with_broader_groups["Broader Groups"] = df_with_broader_groups["Who is impacted?"].apply(map_to_broader_group)
+
+# Expand rows with multiple groups so each group is counted
+expanded_rows = []
+for idx, row in df_with_broader_groups.iterrows():
+    broader_groups = row["Broader Groups"]
+    if broader_groups:  # Only if there are mapped groups
+        for group in broader_groups:
+            expanded_rows.append({**row.to_dict(), "Broader Group": group})
+
+df_expanded = pd.DataFrame(expanded_rows) if expanded_rows else pd.DataFrame(columns=list(df.columns) + ["Broader Group"])
+top_groups = df_expanded["Broader Group"].value_counts().head(3) if len(df_expanded) > 0 else pd.Series()
 
 targeted_col1, targeted_col2, targeted_col3 = st.columns(3)
 

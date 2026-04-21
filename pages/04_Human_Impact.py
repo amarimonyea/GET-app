@@ -267,11 +267,11 @@ st.sidebar.markdown("""
 <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #cf5442; border-radius: 3px;"></div>
-    <span style="color: #ffffff;"><strong>Disruption</strong> — Challenges to gender equity</span>
+    <span style="color: #ffffff;"><strong>Deteriorating</strong> — Challenges to gender equity</span>
   </div>
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #62af44; border-radius: 3px;"></div>
-    <span style="color: #ffffff;"><strong>Progression</strong> — Advances in gender equity</span>
+    <span style="color: #ffffff;"><strong>Improving</strong> — Advances in gender equity</span>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -342,7 +342,7 @@ df = df_filtered  # Use filtered data for all subsequent analysis
 def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=None):
     """Extract top N contributing developments for a given population group.
     
-    score_filter: None (all), 'disruption' (positive scores), or 'progression' (negative scores)
+    score_filter: None (all), 'deterioration' (positive scores), or 'improvement' (negative scores)
     """
     if data_df.empty:
         return []
@@ -355,9 +355,9 @@ def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=No
     ]
     
     # Apply score filter if specified
-    if score_filter == "disruption":
+    if score_filter == "deterioration":
         filtered = filtered[filtered["Slider Score"] > 0]
-    elif score_filter == "progression":
+    elif score_filter == "improvement":
         filtered = filtered[filtered["Slider Score"] < 0]
     
     if filtered.empty:
@@ -397,8 +397,8 @@ def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=No
 
 # Compute metrics based on current filter selection
 df_initial = df.copy()  # Use filtered data for metrics
-df_initial["Weighted Disruption"] = np.where(df_initial["Slider Score"] > 0, df_initial["Slider Score"], 0)
-df_initial["Weighted Progression"] = np.where(df_initial["Slider Score"] < 0, -df_initial["Slider Score"], 0)
+df_initial["Weighted Deterioration"] = np.where(df_initial["Slider Score"] > 0, df_initial["Slider Score"], 0)
+df_initial["Weighted Improvement"] = np.where(df_initial["Slider Score"] < 0, -df_initial["Slider Score"], 0)
 df_initial["Absolute Intensity"] = df_initial["Slider Score"].abs()
 
 # Determine what level to display metrics at
@@ -431,8 +431,8 @@ if main_group == "All Population Groups":
         if len(group_df) > 0:
             impact_metrics_initial.append({
                 IMPACT_COL: main_group_name,
-                "Weighted Disruption": group_df["Weighted Disruption"].sum(),
-                "Weighted Progression": group_df["Weighted Progression"].sum(),
+                "Weighted Deterioration": group_df["Weighted Deterioration"].sum(),
+                "Weighted Improvement": group_df["Weighted Improvement"].sum(),
                 "Absolute Intensity": group_df["Absolute Intensity"].sum(),
                 "Event_Count": len(group_df)
             })
@@ -459,8 +459,8 @@ elif sub_group == "All Subgroups":
         if len(subgroup_df) > 0:
             impact_metrics_initial.append({
                 IMPACT_COL: subgroup_name,
-                "Weighted Disruption": subgroup_df["Weighted Disruption"].sum(),
-                "Weighted Progression": subgroup_df["Weighted Progression"].sum(),
+                "Weighted Deterioration": subgroup_df["Weighted Deterioration"].sum(),
+                "Weighted Improvement": subgroup_df["Weighted Improvement"].sum(),
                 "Absolute Intensity": subgroup_df["Absolute Intensity"].sum(),
                 "Event_Count": len(subgroup_df)
             })
@@ -470,13 +470,13 @@ else:
     if len(df_initial) > 0:
         impact_metrics_initial.append({
             IMPACT_COL: sub_group,
-            "Weighted Disruption": df_initial["Weighted Disruption"].sum(),
-            "Weighted Progression": df_initial["Weighted Progression"].sum(),
+            "Weighted Deterioration": df_initial["Weighted Deterioration"].sum(),
+            "Weighted Improvement": df_initial["Weighted Improvement"].sum(),
             "Absolute Intensity": df_initial["Absolute Intensity"].sum(),
             "Event_Count": len(df_initial)
         })
 
-impact_metrics_initial = pd.DataFrame(impact_metrics_initial) if impact_metrics_initial else pd.DataFrame(columns=[IMPACT_COL, "Weighted Disruption", "Weighted Progression", "Absolute Intensity", "Event_Count"])
+impact_metrics_initial = pd.DataFrame(impact_metrics_initial) if impact_metrics_initial else pd.DataFrame(columns=[IMPACT_COL, "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"])
 
 # Generate Key Insights with development examples
 insights = []
@@ -493,34 +493,34 @@ if not impact_metrics_initial.empty and main_group == "All Population Groups":
     }
     
     # Insight 2: Most Disrupted (different group if possible)
-    most_disrupted = impact_metrics_initial.loc[impact_metrics_initial["Weighted Disruption"].idxmax()]
-    if most_disrupted["Weighted Disruption"] > 0:
+    most_disrupted = impact_metrics_initial.loc[impact_metrics_initial["Weighted Deterioration"].idxmax()]
+    if most_disrupted["Weighted Deterioration"] > 0:
         # If same as most_impacted, try to get the 2nd most disrupted
         if most_disrupted[IMPACT_COL] == most_impacted[IMPACT_COL] and len(impact_metrics_initial) > 1:
-            most_disrupted = impact_metrics_initial.nlargest(2, "Weighted Disruption").iloc[1]
+            most_disrupted = impact_metrics_initial.nlargest(2, "Weighted Deterioration").iloc[1]
         
-        insights.append(f"<strong>{most_disrupted[IMPACT_COL]}</strong> is most affected by disruption (weighted disruption score: {most_disrupted['Weighted Disruption']:.1f})")
+        insights.append(f"<strong>{most_disrupted[IMPACT_COL]}</strong> is most affected by deterioration (weighted deterioration score: {most_disrupted['Weighted Deterioration']:.1f})")
         insights_devs["disruption"] = {
             "group": most_disrupted[IMPACT_COL],
             "devs": get_top_developments_for_group(df_initial, most_disrupted[IMPACT_COL], top_n=1, score_filter="disruption")
         }
     
     # Insight 3: Most Progressed (different group from impact and disruption if possible)
-    most_progressed = impact_metrics_initial.loc[impact_metrics_initial["Weighted Progression"].idxmax()]
-    if most_progressed["Weighted Progression"] > 0:
+    most_progressed = impact_metrics_initial.loc[impact_metrics_initial["Weighted Improvement"].idxmax()]
+    if most_progressed["Weighted Improvement"] > 0:
         # Try to get a different group
         used_groups = {most_impacted[IMPACT_COL]}
         if "disruption" in insights_devs:
             used_groups.add(insights_devs["disruption"]["group"])
         
-        # Find first progression entry not in used_groups
-        progression_sorted = impact_metrics_initial.nlargest(len(impact_metrics_initial), "Weighted Progression")
-        for idx, row in progression_sorted.iterrows():
+        # Find first improvement entry not in used_groups
+        improvement_sorted = impact_metrics_initial.nlargest(len(impact_metrics_initial), "Weighted Improvement")
+        for idx, row in improvement_sorted.iterrows():
             if row[IMPACT_COL] not in used_groups:
                 most_progressed = row
                 break
         
-        insights.append(f"<strong>{most_progressed[IMPACT_COL]}</strong> shows the most progression (weighted progression score: {most_progressed['Weighted Progression']:.1f})")
+        insights.append(f"<strong>{most_progressed[IMPACT_COL]}</strong> shows the most improvement (weighted improvement score: {most_progressed['Weighted Improvement']:.1f})")
         insights_devs["progression"] = {
             "group": most_progressed[IMPACT_COL],
             "devs": get_top_developments_for_group(df_initial, most_progressed[IMPACT_COL], top_n=1, score_filter="progression")
@@ -610,7 +610,7 @@ with col1:
 
 with col2:
     if "disruption" in insights_devs and insights_devs["disruption"]["devs"]:
-        with st.expander("Disruption Examples"):
+        with st.expander("Deterioration Examples"):
             st.caption(f"From: {insights_devs['disruption']['group']}")
             for short_text, full_text, url, score in insights_devs["disruption"]["devs"]:
                 st.write(f"**{short_text}**")
@@ -621,7 +621,7 @@ with col2:
 
 with col3:
     if "progression" in insights_devs and insights_devs["progression"]["devs"]:
-        with st.expander("Progression Examples"):
+        with st.expander("Improvement Examples"):
             st.caption(f"From: {insights_devs['progression']['group']}")
             for short_text, full_text, url, score in insights_devs["progression"]["devs"]:
                 st.write(f"**{short_text}**")
@@ -636,13 +636,13 @@ st.divider()
 with st.expander("View Detailed Population Group Metrics", expanded=False):
     if not impact_metrics_initial.empty:
         # Reorder columns for display
-        display_columns = [IMPACT_COL, "Weighted Disruption", "Weighted Progression", "Absolute Intensity", "Event_Count"]
+        display_columns = [IMPACT_COL, "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"]
         st.dataframe(
             impact_metrics_initial[display_columns].sort_values(sort_col, ascending=False),
             column_config={
                 IMPACT_COL: st.column_config.TextColumn(label="Population Group"),
-                "Weighted Disruption": st.column_config.NumberColumn(label="Disruption Intensity", format="%d"),
-                "Weighted Progression": st.column_config.NumberColumn(label="Progression Intensity", format="%d"),
+                "Weighted Deterioration": st.column_config.NumberColumn(label="Deterioration Intensity", format="%d"),
+                "Weighted Improvement": st.column_config.NumberColumn(label="Improvement Intensity", format="%d"),
                 "Absolute Intensity": st.column_config.NumberColumn(label="Overall Policy Activity", format="%d"),
                 "Event_Count": st.column_config.NumberColumn(label="Number of Developments", format="%d"),
             },

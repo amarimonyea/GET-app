@@ -152,11 +152,11 @@ with st.expander("**Key Metrics & Scoring**", expanded=False):
 
 Each policy development is assigned a **Slider Score** ranging from **-4 to +4**:
 
-- **Negative scores (-4 to -1)**: Represent **progressions**
+- **Negative scores (-4 to -1)**: Represent **improvements**
   - Policy actions that establish, reinstate, or expand gender, reproductive, or LGBTQ+ protections
   - Examples: State legislation protecting reproductive rights, hate crime law expansions
 
-- **Positive scores (+1 to +4)**: Represent **disruptions**
+- **Positive scores (+1 to +4)**: Represent **deteriorations**
   - Legislative or executive actions restricting gender, reproductive, or workplace rights
   - Defunding of protections, institutional rollbacks, or service denials
   
@@ -165,22 +165,22 @@ Each policy development is assigned a **Slider Score** ranging from **-4 to +4**
 
 ### Analytic Dimensions
 
-Each development is evaluated across **four analytic dimensions**. Scores range from **-1 (progression)** to **+1 (disruption)**, with **0 indicating neutrality**. These dimensions combine to form the final slider score.
+Each development is evaluated across **four analytic dimensions**. Scores range from **-1 (improvement)** to **+1 (deterioration)**, with **0 indicating neutrality**. These dimensions combine to form the final slider score.
 
-| Dimension | +1 (Disruption) | 0 (Neutral) | -1 (Progression) |
+| Dimension | +1 (Deterioration) | 0 (Neutral) | -1 (Improvement) |
 |-----------|---|---|---|
-| **Monitoring Indicator Alignment** | Reinforces an existing monitoring indicator | No relation | Contradicts an existing monitoring indicator |
-| **Driver Alignment** | Advances or accelerates an existing scenario driver | Neutral | Opposes or slows a scenario driver |
+| **Monitoring Indicator Alignment** | Reinforces a monitoring indicator of deterioration | No relation | Contradicts a deterioration indicator |
+| **Driver Alignment** | Advances or accelerates a deterioration scenario driver | Neutral | Opposes or slows a deterioration scenario driver |
 | **Core Indicator Influence** | Reinforces attitudinal, democratic, legislative, narrative, or gendered economic deterioration | No effect | Reinforces stabilizing or protective indicator trends |
-| **Impact on Scenario Probability** | Increases the likelihood of a disruption scenario | No measurable probability change | Decreases the likelihood of a disruption scenario |
+| **Impact on Scenario Probability** | Increases the likelihood of a deterioration scenario | No measurable probability change | Decreases the likelihood of a deterioration scenario |
 
 *Note: Status quo developments can have low positive or negative scores depending on their alignment with these dimensions.*
 
 ### Weighted Analysis
 
-- **Weighted Disruption** = Sum of all positive slider scores
-- **Weighted Progression** = Sum of absolute values of negative slider scores
-- **Net Trend** = Disruption - Progression direction
+- **Weighted Deterioration** = Sum of all positive slider scores
+- **Weighted Improvement** = Sum of absolute values of negative slider scores
+- **Net Trend** = Deterioration - Improvement direction
 
 """)
 
@@ -190,27 +190,27 @@ with st.expander("**Score Aggregation: Computing Key Indicators**", expanded=Fal
     st.markdown("""
 The dashboard aggregates individual slider scores across forecasts to compute four key indicators:
 
-#### **Cumulative Disruption**
+#### **Cumulative Deterioration**
 Sum of all **positive slider scores** for a given forecast:
-- Represents the total magnitude of restrictive or disruptive policy developments
-- Higher values indicate more severe or numerous disruptions targeting gender equality or LGBTQ+ rights
+- Represents the total magnitude of restrictive or deteriorating policy developments
+- Higher values indicate more severe or numerous deteriorations targeting gender equality or LGBTQ+ rights
 
-#### **Cumulative Progression**
+#### **Cumulative Improvement**
 Sum of the absolute values of all **negative slider scores** for a given forecast:
 - Represents the total magnitude of protective or progressive policy developments  
 - Higher values indicate more substantial expansions of gender equality or LGBTQ+ protections
 
 #### **Cumulative Intensity**
-Sum of the absolute values of **all slider scores** (disruptive + progressive):
+Sum of the absolute values of **all slider scores** (deteriorations + improvements):
 - Measures the overall volume and concentration of policy developments
 - Indicates how active or dynamic a particular forecast trend is—regardless of direction
 - Higher values show more intense or frequent policy activity
 
 #### **Net Direction**
-Calculated as **Cumulative Disruption − Cumulative Progression**:
-- Ranges from negative (more progression) to positive (more disruption)
+Calculated as **Cumulative Deterioration − Cumulative Improvement**:
+- Ranges from negative (more improvement) to positive (more deterioration)
 - Provides a directional indicator of whether developments lean toward expanding or restricting gender equality
-- Shown on the y-axis of the Disruption and Progression Momentum chart
+- Shown on the y-axis of the Deterioration and Improvement Momentum chart
 
 These aggregations are computed at multiple levels:
 - By individual **Forecast** (showing trajectory within a specific policy scenario)

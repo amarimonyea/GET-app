@@ -164,7 +164,7 @@ display_sectors = st.sidebar.selectbox(
 
 rank_by = st.sidebar.selectbox(
     "Rank sectors by",
-    options=["Number of Developments", "Disruption Intensity", "Overall Policy Activity"],
+    options=["Number of Developments", "Deterioration Intensity", "Overall Policy Activity"],
     index=0,
     key="rank_by"
 )
@@ -175,11 +175,11 @@ st.sidebar.markdown("""
 <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #cf5442; border-radius: 3px;"></div>
-    <span style="color: #ffffff;"><strong>Disruption</strong> — Challenges to gender equity</span>
+    <span style="color: #ffffff;"><strong>Deteriorating</strong> — Challenges to gender equity</span>
   </div>
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #62af44; border-radius: 3px;"></div>
-    <span style="color: #ffffff;"><strong>Progression</strong> — Advances in gender equity</span>
+    <span style="color: #ffffff;"><strong>Improving</strong> — Advances in gender equity</span>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -260,8 +260,8 @@ def get_top_developments_for_sector(data_df, sector_name, top_n=1, score_filter=
 
 # Compute initial metrics for Key Insights
 df_initial = df.copy()
-df_initial["Weighted Disruption"] = np.where(df_initial["Slider Score"] > 0, df_initial["Slider Score"], 0)
-df_initial["Weighted Progression"] = np.where(df_initial["Slider Score"] < 0, -df_initial["Slider Score"], 0)
+df_initial["Weighted Deterioration"] = np.where(df_initial["Slider Score"] > 0, df_initial["Slider Score"], 0)
+df_initial["Weighted Improvement"] = np.where(df_initial["Slider Score"] < 0, -df_initial["Slider Score"], 0)
 df_initial["Absolute Intensity"] = df_initial["Slider Score"].abs()
 
 sector_counts_initial = df_initial[SECTOR_COL].value_counts().reset_index()
@@ -270,8 +270,8 @@ sector_counts_initial.columns = [SECTOR_COL, "Event_Count"]
 sector_metrics_initial = (
     df_initial.groupby(SECTOR_COL, as_index=False)
     .agg({
-        "Weighted Disruption": "sum",
-        "Weighted Progression": "sum",
+        "Weighted Deterioration": "sum",
+        "Weighted Improvement": "sum",
         "Absolute Intensity": "sum",
     })
 )
@@ -291,34 +291,34 @@ if not sector_metrics_initial.empty:
     }
     
     # Insight 2: Most Disrupted (different sector if possible)
-    most_disrupted = sector_metrics_initial.loc[sector_metrics_initial["Weighted Disruption"].idxmax()]
-    if most_disrupted["Weighted Disruption"] > 0:
+    most_disrupted = sector_metrics_initial.loc[sector_metrics_initial["Weighted Deterioration"].idxmax()]
+    if most_disrupted["Weighted Deterioration"] > 0:
         # If same as most_impacted, try to get the 2nd most disrupted
         if most_disrupted[SECTOR_COL] == most_impacted[SECTOR_COL] and len(sector_metrics_initial) > 1:
-            most_disrupted = sector_metrics_initial.nlargest(2, "Weighted Disruption").iloc[1]
+            most_disrupted = sector_metrics_initial.nlargest(2, "Weighted Deterioration").iloc[1]
         
-        insights.append(f"<strong>{most_disrupted[SECTOR_COL]}</strong> is most affected by disruption (weighted disruption score: {most_disrupted['Weighted Disruption']:.1f})")
+        insights.append(f"<strong>{most_disrupted[SECTOR_COL]}</strong> is most affected by deterioration (weighted deterioration score: {most_disrupted['Weighted Deterioration']:.1f})")
         insights_devs["disruption"] = {
             "sector": most_disrupted[SECTOR_COL],
             "devs": get_top_developments_for_sector(df_initial, most_disrupted[SECTOR_COL], top_n=1, score_filter="disruption")
         }
     
     # Insight 3: Most Progressed (different sector from impact and disruption if possible)
-    most_progressed = sector_metrics_initial.loc[sector_metrics_initial["Weighted Progression"].idxmax()]
-    if most_progressed["Weighted Progression"] > 0:
+    most_progressed = sector_metrics_initial.loc[sector_metrics_initial["Weighted Improvement"].idxmax()]
+    if most_progressed["Weighted Improvement"] > 0:
         # Try to get a different sector
         used_sectors = {most_impacted[SECTOR_COL]}
         if "disruption" in insights_devs:
             used_sectors.add(insights_devs["disruption"]["sector"])
         
         # Find first progression entry not in used_sectors
-        progression_sorted = sector_metrics_initial.nlargest(len(sector_metrics_initial), "Weighted Progression")
+        progression_sorted = sector_metrics_initial.nlargest(len(sector_metrics_initial), "Weighted Improvement")
         for idx, row in progression_sorted.iterrows():
             if row[SECTOR_COL] not in used_sectors:
                 most_progressed = row
                 break
         
-        insights.append(f"<strong>{most_progressed[SECTOR_COL]}</strong> shows the most progression (weighted progression score: {most_progressed['Weighted Progression']:.1f})")
+        insights.append(f"<strong>{most_progressed[SECTOR_COL]}</strong> shows the most improvement (weighted improvement score: {most_progressed['Weighted Improvement']:.1f})")
         insights_devs["progression"] = {
             "sector": most_progressed[SECTOR_COL],
             "devs": get_top_developments_for_sector(df_initial, most_progressed[SECTOR_COL], top_n=1, score_filter="progression")
@@ -340,8 +340,8 @@ else:  # "All"
 # Map rank_by selection to column name
 if rank_by == "Number of Developments":
     sort_col = "Event_Count"
-elif rank_by == "Disruption Intensity":
-    sort_col = "Weighted Disruption"
+elif rank_by == "Deterioration Intensity":
+    sort_col = "Weighted Deterioration"
 else:
     sort_col = "Absolute Intensity"
 
@@ -362,9 +362,9 @@ chart_height = max(250, top_n * 35 + 50)  # ~35px per bar plus padding
 if sort_col == "Event_Count":
     x_field = "Event_Count:Q"
     x_title = "Number of Developments"
-elif sort_col == "Weighted Disruption":
-    x_field = "Weighted Disruption:Q"
-    x_title = "Disruption Intensity"
+elif sort_col == "Weighted Deterioration":
+    x_field = "Weighted Deterioration:Q"
+    x_title = "Deterioration Intensity"
 else:  # "Absolute Intensity"
     x_field = "Absolute Intensity:Q"
     x_title = "Overall Policy Activity"
@@ -392,11 +392,11 @@ with st.expander("How to Interpret This Chart", expanded=False):
     st.markdown("""
 **Number of Developments:** The total count of gender policy developments recorded in each sector. Higher counts indicate sectors experiencing more frequent policy change.
 
-**Disruption Intensity:** The cumulative impact of constraints, restrictions, and disruptive policy changes. Higher values indicate sectors facing greater institutional pressure.
+**Deterioration Intensity:** The cumulative impact of constraints, restrictions, and deteriorating policy changes. Higher values indicate sectors facing greater institutional pressure.
 
 **Overall Policy Activity:** The combined magnitude of policy change regardless of direction. This metric highlights which sectors are experiencing the greatest volume of institutional change.
 
-**Interpretation:** Taken together, these metrics help distinguish between sectors under sustained pressure (high frequency + high disruption) versus those in transition (high activity but mixed directional impact).
+**Interpretation:** Taken together, these metrics help distinguish between sectors under sustained pressure (high frequency + high deterioration) versus those in transition (high activity but mixed directional impact).
 """)
 
 # Key Insights section
@@ -429,7 +429,7 @@ with col1:
 
 with col2:
     if "disruption" in insights_devs and insights_devs["disruption"]["devs"]:
-        with st.expander("Disruption Examples"):
+        with st.expander("Deterioration Examples"):
             st.caption(f"From: {insights_devs['disruption']['sector']}")
             for short_text, full_text, url, score in insights_devs["disruption"]["devs"]:
                 st.write(f"**{short_text}**")
@@ -440,7 +440,7 @@ with col2:
 
 with col3:
     if "progression" in insights_devs and insights_devs["progression"]["devs"]:
-        with st.expander("Progression Examples"):
+        with st.expander("Improvement Examples"):
             st.caption(f"From: {insights_devs['progression']['sector']}")
             for short_text, full_text, url, score in insights_devs["progression"]["devs"]:
                 st.write(f"**{short_text}**")
@@ -453,13 +453,13 @@ st.divider()
 
 with st.expander("View Detailed Sector Metrics", expanded=False):
     # Reorder columns for display
-    display_columns = [SECTOR_COL, "Weighted Disruption", "Weighted Progression", "Absolute Intensity", "Event_Count"]
+    display_columns = [SECTOR_COL, "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"]
     st.dataframe(
         sector_metrics[display_columns].sort_values(sort_col, ascending=False),
         column_config={
             SECTOR_COL: st.column_config.TextColumn(label="Sector"),
-            "Weighted Disruption": st.column_config.NumberColumn(label="Disruption Intensity", format="%d"),
-            "Weighted Progression": st.column_config.NumberColumn(label="Progression Intensity", format="%d"),
+            "Weighted Deterioration": st.column_config.NumberColumn(label="Deterioration Intensity", format="%d"),
+            "Weighted Improvement": st.column_config.NumberColumn(label="Improvement Intensity", format="%d"),
             "Absolute Intensity": st.column_config.NumberColumn(label="Overall Policy Activity", format="%d"),
             "Event_Count": st.column_config.NumberColumn(label="Number of Developments", format="%d"),
         },
@@ -503,7 +503,7 @@ if selected_sector:
         st.markdown(f"""
 **{selected_sector}**  
 {total_devs} developments {date_range_str}  
-{disruption_count} Disruption | {neutral_count} Neutral | {progression_count} Progression
+{disruption_count} Deteriorating | {neutral_count} Neutral | {progression_count} Improving
         """)
         
         # Display recent developments (top 5)

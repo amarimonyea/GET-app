@@ -4,8 +4,9 @@ showErrorDetails = true
 
 [server]
 address = "0.0.0.0"
-enableCORS = false
-enableXsrfProtection = false
+port = 8501
+enableCORS = true
+enableXsrfProtection = true
 headless = true
 
 [logger]

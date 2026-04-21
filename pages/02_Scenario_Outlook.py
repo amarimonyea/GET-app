@@ -138,7 +138,7 @@ PROB_RANK = {"Low": 1, "Low–Medium": 2, "Medium": 3, "Medium–High": 4, "High
 FORECAST_CARDS = [
     {
         "name": "Political",
-        "direction": "Progression",
+        "direction": "Improving",
         "probability": "Low/Medium (25-40%)",
         "summary": "This forecast envisions a reversal in which policy actions at state and federal levels establish, reinstate, or expand protections for gender, reproductive, and LGBTQ+ rights. Through institutional checks and pragmatic governance, rights fragmentation reverses and equity outcomes strengthen.",
         "monitoring_indicators": ["State or federal policy actions that establish, reinstate, or expand gender, reproductive, or LGBTQ+ protections", "Judicial rulings or injunctions that reinforce, expand, or affirm gender, reproductive, or LGBTQ+ rights"],
@@ -146,7 +146,7 @@ FORECAST_CARDS = [
     },
     {
         "name": "Political", 
-        "direction": "Disruption",
+        "direction": "Deteriorating",
         "probability": "Medium/High (60-75%)",
         "summary": "This forecast illustrates how concentrated executive authority and heightened political polarization can drive accelerated disruption within the gender policy landscape. As institutional checks erode, policy volatility and rights fragmentation become more likely.",
         "monitoring_indicators": ["Legislative or executive actions restricting reproductive, gender, or workplace rights", "Politicization or repurposing of protective institutions for political objectives"],
@@ -154,7 +154,7 @@ FORECAST_CARDS = [
     },
     {
         "name": "Diplomatic", 
-        "direction": "Disruption",
+        "direction": "Deteriorating",
         "probability": "Low/Medium (25-40%)",
         "summary": "This forecast illustrates how withdrawal from international gender frameworks and defunding of multilateral organizations undermines the US's ability to shape global gender policy. The resulting loss of soft power diminishes US credibility and accelerates global adoption of restrictive gender policies.",
         "monitoring_indicators": ["Adoption of US aligned conservative gender policies by foreign governments", "US withdrawal from or defunding of international organizations advancing gender, LGBTQ+, or reproductive rights"],
@@ -162,7 +162,7 @@ FORECAST_CARDS = [
     },
     {
         "name": "Diplomatic", 
-        "direction": "Progression",
+        "direction": "Improving",
         "probability": "Low (5-25%)",
         "summary": "This forecast envisions renewed US commitment to international gender equality frameworks and restored funding for organizations advancing reproductive, LGBTQ+, and gender rights. Strengthened multilateral engagement rebuilds US credibility and increases global access to gender-affirming support systems.",
         "monitoring_indicators": ["Reaffirming support of international organizations supporting gender, LGBTQ+, and reproductive rights"],
@@ -170,14 +170,14 @@ FORECAST_CARDS = [
     },
      {
         "name": "Economic", 
-        "direction": "Progression",
+        "direction": "Improving",
         "probability": "Low (5-25%)",
         "summary": "This forecast reflects increased investment in evidence-based research, public universities, and workforce development programs that advance gender equity and economic inclusion. Strengthened institutional commitment to equitable economic participation expands opportunities for marginalized communities and drives broader economic resilience.",
         "implications": ["Implications coming soon"]
     },
      {
         "name": "Economic", 
-        "direction": "Disruption",
+        "direction": "Deteriorating",
         "probability": "Low/Medium (25-40%)",
         "summary": "This forecast illustrates how cuts to federal research funding and defunding of equity-focused institutions disrupts workforce diversity initiatives and limits economic opportunities for marginalized communities. Reduced evidence-based policymaking weakens institutional capacity to address gender-driven economic inequities.",
         "monitoring_indicators": ["Cuts or divestments in federal scientific, evidence-based research, or mass media related to equity, gender, or social policy", "Decreased funding for public universities focused on social science research"],
@@ -185,7 +185,7 @@ FORECAST_CARDS = [
     },
      {
         "name": "Social", 
-        "direction": "Disruption",
+        "direction": "Deteriorating",
         "probability": "Medium/High (60-75%)",
         "summary": "This forecast illustrates how restrictive abortion policies create medical and ethical crises while anticipatory fear drives healthcare providers to withdraw services from vulnerable populations. The compounding effects of institutional pauses, discrimination escalation, and global human rights impacts reshape social landscapes.",
         "monitoring_indicators": ["Medical and ethical crises emerging from restrictive abortion policies", "Service withdrawal or denial driven by anticipated legal, financial, or political retaliation"],
@@ -193,7 +193,7 @@ FORECAST_CARDS = [
     },
       {
         "name": "Social", 
-        "direction": "Progression",
+        "direction": "Improving",
         "probability": "Low (5-25%)",
         "summary": "This forecast envisions the establishment or reinstatement of gender-conscious protection programs and the restoration of reproductive and gender-affirming services following periods of institutional pause. Strengthened social commitment to equity outcomes reverses discrimination trends and rebuilds community trust.",
         "monitoring_indicators": ["Establishment or reinstatement of gender-conscious or equity-oriented protection programs", "Restoration of reproductive and gender-affirming services following institutional pause"],
@@ -201,7 +201,7 @@ FORECAST_CARDS = [
     },
           {
         "name": "Security", 
-        "direction": "Progression",
+        "direction": "Improving",
         "probability": "Low (5-25%)",
         "summary": "This forecast reflects rollback of national security laws targeting gender identity and increased inclusion of diverse voices in security policymaking. Institutional recognition of intersectional security vulnerabilities strengthens national resilience and protects marginalized communities.",
         "monitoring_indicators": ["Rollback of national laws targeting gender identity and based on sex", "Inclusion of diverse voices in national security policymaking spaces"],
@@ -209,7 +209,7 @@ FORECAST_CARDS = [
     },
         {
         "name": "Security", 
-        "direction": "Disruption",
+        "direction": "Deteriorating",
         "probability": "Medium (40-60%)",
         "summary": "This forecast illustrates how national security laws that target gender identity and that expand surveillance on women's and LGBTQ+ rights organizations criminalize vulnerable populations and limit civic participation.",
         "monitoring_indicators": ["National security laws targeting gender identity", "Expansion of state surveillance on women's and LGBTQ+ rights organizations"],
@@ -217,7 +217,7 @@ FORECAST_CARDS = [
     },
      {
         "name": "Hybrid Political/Security", 
-        "direction": "Disruption",
+        "direction": "Deteriorating",
         "probability": "Medium (40-60%)",
         "summary": "This forecast illustrates how political decisions drive removal of qualified personnel from defense and security sectors based on sexual orientation or gender identity while expanding surveillance of healthcare providers and advocacy organizations. The intersection of political purges and security-based criminalization creates cascading vulnerabilities for LGBTQ+ populations.",
         "monitoring_indicators": ["Removal of qualified civil servants and service members in national security sectors due to sexual orientation or gender identity", "Increased state surveillance and criminalization of healthcare providers offering gender-affirming services"],
@@ -225,7 +225,7 @@ FORECAST_CARDS = [
     },
       {
         "name": "Hybrid Political/Social", 
-        "direction": "Disruption",
+        "direction": "Deteriorating",
         "probability": "Medium (40-60%)",
         "summary": "This forecast illustrates how political decisions reduce legal protections against gender-based violence while simultaneously erasing gender-affirming care and related institutional support systems. The policy convergence around erasure and vulnerability creates compounding harms for women, trans, and gender-diverse populations.",
         "monitoring_indicators": ["Reduction of protections against gender-based violence", "Political and policy decisions resulting in the erasure of gender-affirming care and related protections"],
@@ -244,8 +244,8 @@ FORECAST_CARDS = [
 FEATURED_DEEP_DIVES = [
     {
         "headline": "SAVE Act Implementation: Implications for Gender Equity and Vulnerable Populations",
-        "forecast": "Forecasted Political Disruption",
-        "direction": "disruption",
+        "forecast": "Forecasted Political Deterioration",
+        "direction": "deteriorating",
         "analysis": "The Safeguard Voter Eligibility (SAVE) Act which passed in the House <a href=\"https://www.brennancenter.org/our-work/analysis-opinion/house-passes-save-act-brennan-center-reacts\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">last year</a>, an updated version in <a href=\"https://rules.house.gov/bill/119/s-1383#:~:text=Revises%20the%20effective%20date%20of,rather%20than%202027%20or%20later.&text=Revised%20Prohibits%20federal%20funds%20from,the%20militarization%20of%20polling%20places.\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">February</a>, and is likely to pass in the Senate within the next few months would dramatically change the way voting is conducted in the United States right before midterm elections. President Trump has uttered support for this Act and has said he would refuse to sign <a href=\"https://www.theguardian.com/us-news/2026/mar/13/explainer-save-america-act\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">any other bills until it is passed</a>.\n\nIf passed the SAVE Act would impose strict voter ID regulations requiring voters to produce proof of citizenship and introduces <a href=\"https://campaignlegal.org/document/fact-sheet-save-act-threatens-all-voters\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">criminal liability</a> for election officials who fail to register voters without proper documentation and allows them to be sued to by private citizens. Moreover, the Trump Administration has challenged the validity of <a href=\"https://thehill.com/homenews/senate/5786819-save-america-act-absentee-voting/\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">absentee ballots</a>, which could negatively impact rural and elderly Americans.\n\nPassing the SAVE Act before the midterms will cause confusion and chaos among voters and election precincts, also with provisions built in with <a href=\"https://www.pbs.org/newshour/politics/watch-live-senate-begins-consideration-of-save-america-act\" target=\"_blank\" style=\"color: #3b668c; text-decoration: underline;\">Department of Homeland Security Oversight</a> it challenges the integrity of federal elections, undermining democratic processes.\n\nThe SAVE Act impacts all voters, but it specifically harms women, marginalized communities, and trans and non-binary communities. Several of these vulnerable populations do not have their personal documentation readily available and have financial barriers or social stigmas from obtaining new ones.",
         "analysis_by": "Amari Jones, Associate Analyst",
         "source_url": "https://www.congress.gov/bill/119th-congress/house-bill/22",
@@ -279,8 +279,8 @@ FEATURED_DEEP_DIVES = [
     {
         "headline": "Corporate Diversity Programs Under Increased Legal Scrutiny",
         "date": "March 10, 2025",
-        "forecast": "Political Disruption",
-        "direction": "disruption",
+        "forecast": "Political Deterioration",
+        "direction": "deteriorating",
         "analysis": "Multiple lawsuits targeting DEI initiatives and affirmative action programs suggest sustained legal challenges to gender equity mechanisms. The Supreme Court's recent standing decisions lower barriers for plaintiffs. Legal uncertainty may prompt corporations to pause or restructure programs, creating short-term disruption in institutional commitments to gender parity.",
         "source_url": "https://www.scotus.gov",
         "articles": [
@@ -640,26 +640,26 @@ details[open] summary::before {{
    ACCENTS (minimal use)
    ========================= */
 
-/* Disruption = red accent */
-.deck-card.disruption {{
+/* Deteriorating = red accent */
+.deck-card.deteriorating {{
   border-top-color: var(--nl-red) !important;
 }}
-.deck-card.disruption .deck-title::before {{
+.deck-card.deteriorating .deck-title::before {{
   background: var(--nl-red) !important;
 }}
-.deck-card.disruption .prob-fill {{
+.deck-card.deteriorating .prob-fill {{
   background: var(--nl-red) !important;
 }}
 
-/* Progression = blue accent */
-.deck-card.progression {{
-  border-top-color: var(--nl-blue) !important;
+/* Improving = green accent */
+.deck-card.improving {{
+  border-top-color: #62af44 !important;
 }}
-.deck-card.progression .deck-title::before {{
-  background: var(--nl-blue) !important;
+.deck-card.improving .deck-title::before {{
+  background: #62af44 !important;
 }}
-.deck-card.progression .prob-fill {{
-  background: var(--nl-blue) !important;
+.deck-card.improving .prob-fill {{
+  background: #62af44 !important;
 }}
 
 /* Status quo = muted slate */
@@ -739,12 +739,12 @@ details[open] summary::before {{
   flex: 1;
 }}
 
-.spotlight-main.disruption {{
+.spotlight-main.deteriorating {{
   border-top-color: #cf5442;
 }}
 
-.spotlight-main.progression {{
-  border-top-color: #3b668c;
+.spotlight-main.improving {{
+  border-top-color: #62af44;
 }}
 
 .spotlight-main.hybrid {{
@@ -784,14 +784,14 @@ details[open] summary::before {{
   letter-spacing: 0.05em;
 }}
 
-.spotlight-badge.disruption {{
+.spotlight-badge.deteriorating {{
   background-color: rgba(207, 84, 66, 0.1);
   color: #cf5442;
 }}
 
-.spotlight-badge.progression {{
-  background-color: rgba(59, 102, 140, 0.1);
-  color: #3b668c;
+.spotlight-badge.improving {{
+  background-color: rgba(98, 175, 68, 0.1);
+  color: #62af44;
 }}
 
 .spotlight-analysis {{
@@ -946,10 +946,10 @@ def direction_class(direction: str, name: str = "") -> str:
     d = (direction or "").strip().lower()
     if "hybrid" in n or "hybrid" in d:
         return "hybrid"
-    if "disruption" in d:
-        return "disruption"
-    if "progression" in d:
-        return "progression"
+    if "deteriorating" in d:
+        return "deteriorating"
+    if "improving" in d:
+        return "improving"
     if "status" in d:
         return "statusquo"
     return "statusquo"
@@ -991,7 +991,7 @@ cards_sorted = sorted(
 )
 
 # Group cards by direction (excluding Status Quo)
-cards_by_direction = {"Disruption": [], "Hybrid Disruption": [], "Progression": []}
+cards_by_direction = {"Deteriorating": [], "Hybrid Deteriorating": [], "Improving": []}
 status_quo_card = None
 
 for c in cards_sorted:
@@ -999,9 +999,9 @@ for c in cards_sorted:
     # Separate Status Quo for its own section
     if direction == "Status Quo":
         status_quo_card = c
-    # Separate hybrid disruption cards into their own column
-    elif direction == "Disruption" and "Hybrid" in c.get("name", ""):
-        cards_by_direction["Hybrid Disruption"].append(c)
+    # Separate hybrid deteriorating cards into their own column
+    elif direction == "Deteriorating" and "Hybrid" in c.get("name", ""):
+        cards_by_direction["Hybrid Deteriorating"].append(c)
     elif direction not in cards_by_direction:
         cards_by_direction[direction] = []
         cards_by_direction[direction].append(c)
@@ -1134,7 +1134,7 @@ if FEATURED_DEEP_DIVES:
 cards_html += '<div class="scenario-cards-container"><div class="deck">'
 
 # Create three piles
-for pile_direction in ["Disruption", "Hybrid Disruption", "Progression"]:
+for pile_direction in ["Deteriorating", "Hybrid Deteriorating", "Improving"]:
     direction_lower = pile_direction.lower().replace(" ", "")
     cards_html += f'<div class="deck-pile deck-pile-{direction_lower}">'
     cards_html += f'<div class="deck-pile-header">{pile_direction}</div>'

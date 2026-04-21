@@ -676,11 +676,11 @@ st.sidebar.markdown("""
 <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #cf5442; border-radius: 3px;"></div>
-    <span style="color: #ffffff;"><strong>Disruption</strong> — Challenges to gender equity</span>
+    <span style="color: #ffffff;"><strong>Deteriorating</strong> — Challenges to gender equity</span>
   </div>
   <div style="display: flex; align-items: center; gap: 0.5rem;">
     <div style="width: 20px; height: 20px; background-color: #62af44; border-radius: 3px;"></div>
-    <span style="color: #ffffff;"><strong>Progression</strong> — Advances in gender equity</span>
+    <span style="color: #ffffff;"><strong>Improving</strong> — Advances in gender equity</span>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1172,8 +1172,8 @@ else:
             ),
             tooltip=[
                 alt.Tooltip(f"{DOMAIN_COL}:N", title="Domain"),
-                alt.Tooltip("Disr:Q", title="Weighted Disruption", format=".1f"),
-                alt.Tooltip("Prog:Q", title="Weighted Progression", format=".1f"),
+                alt.Tooltip("Disr:Q", title="Weighted Deterioration", format=".1f"),
+                alt.Tooltip("Prog:Q", title="Weighted Improvement", format=".1f"),
                 alt.Tooltip("Net Direction:Q", title="Net Direction", format=".1f"),
             ],
         )
