@@ -1353,8 +1353,8 @@ monthly_forecast_counts = (
 direction_click = alt.selection_point(fields=["Direction"], bind="legend")
 
 # Top level chart: Direction (Improving, Status Quo, Deteriorating)
-    direction_colors = alt.Scale(
-        domain=["Improving", "Status Quo", "Deteriorating"],
+direction_colors = alt.Scale(
+    domain=["Improving", "Status Quo", "Deteriorating"],
     range=[COLOR_PROGRESSION, "#3b668c", COLOR_DISRUPTION]
 )
 
