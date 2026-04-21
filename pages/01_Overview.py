@@ -457,12 +457,12 @@ def get_top_developments_for_domain(data_df, domain_name, top_n=2):
 
 def get_top_developments_for_direction(data_df, direction, top_n=2):
     """
-    Extract top N contributing developments for a given direction (Disruption, Progression, Status Quo).
+    Extract top N contributing developments for a given direction (Deteriorating, Improving, Status Quo).
     Selects by highest score magnitude first, recency as tiebreaker.
     
     Args:
         data_df: Filtered data containing all developments
-        direction: Direction to filter by ("Disruption", "Progression", "Status Quo")
+        direction: Direction to filter by ("Deteriorating", "Improving", "Status Quo")
         top_n: Number of developments to return (default: 2)
     
     Returns:
@@ -472,9 +472,9 @@ def get_top_developments_for_direction(data_df, direction, top_n=2):
         return []
     
     # Filter based on direction using Slider Score
-    if direction == "Disruption":
+    if direction == "Deteriorating":
         filtered = data_df[(data_df["Slider Score"] > 0) & (data_df["Development Short"].notna())]
-    elif direction == "Progression":
+    elif direction == "Improving":
         filtered = data_df[(data_df["Slider Score"] < 0) & (data_df["Development Short"].notna())]
     else:  # Status Quo
         filtered = data_df[(data_df["Slider Score"] == 0) & (data_df["Development Short"].notna())]
@@ -514,12 +514,12 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
     
     insights = []
     
-    # Insight 1: Highest cumulative disruption
+    # Insight 1: Highest cumulative deterioration
     max_disr_idx = forecast_points_df["Disr"].idxmax()
     max_disr_name = forecast_points_df.loc[max_disr_idx, forecast_col]
     max_disr_score = forecast_points_df.loc[max_disr_idx, "Disr"]
     
-    insight_text = f"<strong>Highest cumulative disruption:</strong> {max_disr_name} ({max_disr_score:.1f})"
+    insight_text = f"<strong>Highest cumulative deterioration:</strong> {max_disr_name} ({max_disr_score:.1f})"
     
     # Add development-based examples if data available
     if data_df is not None and not data_df.empty:
@@ -718,7 +718,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown("**Cumulative intensity (emerging → accelerating) vs net direction (progression ↓ | disruption ↑).**")
+st.markdown("**Cumulative intensity (emerging → accelerating) vs net direction (Improving ↓ | Deteriorating ↑).**")
 quad = df.copy()
 quad["Prog"] = np.where(quad["Slider Score"] < 0, -quad["Slider Score"], 0)
 quad["Disr"] = np.where(quad["Slider Score"] > 0,  quad["Slider Score"], 0)
@@ -819,9 +819,9 @@ else:
         if "Status Quo" in str(row[FORECAST_COL]):
             return "Status Quo"
         elif row["Net Direction"] > 0:
-            return "Disruption"
+            return "Deteriorating"
         else:
-            return "Progression"
+            return "Improving"
     
     forecast_points["Color Category"] = forecast_points.apply(get_color_category, axis=1)
 
@@ -836,7 +836,7 @@ else:
     color=alt.Color(
         "Color Category:N",
         scale=alt.Scale(
-            domain=["Status Quo", "Disruption", "Progression"],
+            domain=["Status Quo", "Deteriorating", "Improving"],
             range=["#3b668c", "#cf5442", "#62af44"]
         ),
         legend=None
@@ -904,11 +904,11 @@ else:
     <div style="display: flex; gap: 20px; margin-bottom: 15px; font-size: 0.9rem;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <div style="width: 16px; height: 16px; background-color: #cf5442; border-radius: 2px;"></div>
-        <span>Disruption</span>
+        <span>Deteriorating</span>
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <div style="width: 16px; height: 16px; background-color: #62af44; border-radius: 2px;"></div>
-        <span>Progression</span>
+        <span>Improving</span>
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <div style="width: 16px; height: 16px; background-color: #3b668c; border-radius: 2px;"></div>
@@ -921,14 +921,14 @@ else:
     # How to Interpret This Chart section (directly after chart)
     with st.expander("How to Interpret This Chart", expanded=False):
         st.markdown("""
-The Disruption and Progression Momentum graph plots cumulative forecast intensity against net directional movement of tracked developments. The horizontal positioning of cumulative intensity reflects the volume and concentration of forecasted developments within a domain (emerging → accelerating), while the vertical positioning of Net Direction distinguishes between disruptive and progressive trajectories. The quadrant framework highlights which issue areas are early-stage signals versus accelerating structural shifts.
+The Deteriorating and Improving Momentum graph plots cumulative forecast intensity against net directional movement of tracked developments. The horizontal positioning of cumulative intensity reflects the volume and concentration of forecasted developments within a domain (emerging → accelerating), while the vertical positioning of Net Direction distinguishes between deteriorating and improving trajectories. The quadrant framework highlights which issue areas are early-stage signals versus accelerating structural shifts.
 """)
     
     # Statistics below chart
     st.markdown(f"""
-**Highest cumulative disruption observed to date:** {max_disr_name} (cumulative disruption score: {max_disr_score:.1f})
+**Highest cumulative deterioration observed to date:** {max_disr_name} (cumulative deterioration score: {max_disr_score:.1f})
 
-**Highest cumulative progression observed to date:** {max_prog_name} (cumulative progression score: {max_prog_score:.1f})
+**Highest cumulative improvement observed to date:** {max_prog_name} (cumulative improvement score: {max_prog_score:.1f})
 
 **Data current as of:** {date_str}
 """)
@@ -1149,7 +1149,7 @@ else:
 
     # color by direction (NL colors)
     dom_top["Direction Label"] = np.where(
-        dom_top["Net Direction"] > 0, "Disruption", np.where(dom_top["Net Direction"] < 0, "Progression", "Neutral")
+        dom_top["Net Direction"] > 0, "Deteriorating", np.where(dom_top["Net Direction"] < 0, "Improving", "Neutral")
     )
 
     # nicer ordering for horizontal bars
@@ -1161,18 +1161,18 @@ else:
         .mark_bar()
         .encode(
             y=alt.Y(f"{DOMAIN_COL}:N", sort=None, title="Domain of Assessment", axis=alt.Axis(labelLimit=300, labelPadding=15)),
-            x=alt.X("Net Direction:Q", title="Net Direction Score (Progression ← 0 → Disruption)"),
+            x=alt.X("Net Direction:Q", title="Net Direction Score (Improving ← 0 → Deteriorating)"),
             color=alt.Color(
                 "Direction Label:N",
                 scale=alt.Scale(
-                    domain=["Progression", "Disruption", "Neutral"],
+                    domain=["Improving", "Deteriorating", "Neutral"],
                     range=[COLOR_PROGRESSION, COLOR_DISRUPTION, COLOR_NEUTRAL],
                 ),
                 legend=alt.Legend(title=None),
             ),
             tooltip=[
                 alt.Tooltip(f"{DOMAIN_COL}:N", title="Domain"),
-                alt.Tooltip("Disr:Q", title="Weighted Deterioration", format=".1f"),
+                alt.Tooltip("Disr:Q", title="Weighted Deteriorating", format=".1f"),
                 alt.Tooltip("Prog:Q", title="Weighted Improvement", format=".1f"),
                 alt.Tooltip("Net Direction:Q", title="Net Direction", format=".1f"),
             ],
@@ -1326,10 +1326,10 @@ def get_direction(forecast_name):
     forecast_name = str(forecast_name).lower()
     if "status quo" in forecast_name:
         return "Status Quo"
-    elif any(word in forecast_name for word in ["disruption"]):
-        return "Disruption"
-    else:  # Contains "progression" or other
-        return "Progression"
+    elif any(word in forecast_name for word in ["disruption", "deteriorating"]):
+        return "Deteriorating"
+    else:  # Contains "progression", "improving" or other
+        return "Improving"
 
 df_filtered["Direction"] = df_filtered[FORECAST_COL].apply(get_direction)
 
@@ -1352,9 +1352,9 @@ monthly_forecast_counts = (
 # Interactive selection on direction
 direction_click = alt.selection_point(fields=["Direction"], bind="legend")
 
-# Top level chart: Direction (Progression, Status Quo, Disruption)
-direction_colors = alt.Scale(
-    domain=["Progression", "Status Quo", "Disruption"],
+# Top level chart: Direction (Improving, Status Quo, Deteriorating)
+    direction_colors = alt.Scale(
+        domain=["Improving", "Status Quo", "Deteriorating"],
     range=[COLOR_PROGRESSION, "#3b668c", COLOR_DISRUPTION]
 )
 
@@ -1485,7 +1485,7 @@ if not monthly_forecast_counts.empty:
     
     with st.expander("How to Interpret This Chart", expanded=False):
         st.markdown("""
-These charts show how forecast developments are distributed over time. The top chart displays the total number of developments grouped by direction (disruption, status quo, and progression). The lower chart breaks those developments down by forecast type. Selecting a direction in the top chart filters the lower chart to highlight the associated forecasts.
+These charts show how forecast developments are distributed over time. The top chart displays the total number of developments grouped by direction (deteriorating, status quo, and improving). The lower chart breaks those developments down by forecast type. Selecting a direction in the top chart filters the lower chart to highlight the associated forecasts.
 """)
     
     # Key Insights for Forecast Composition
