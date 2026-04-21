@@ -738,7 +738,7 @@ forecast_points["Improvement Pct"] = 100 - forecast_points["Deterioration Pct"]
 
 # Create breakdown label for tooltip
 forecast_points["Breakdown"] = forecast_points.apply(
-    lambda row: f"{row['Deterioration Pct']:.0f}% Deteriorating / {row['Improvement Pct']:.0f}% Improving" 
+    lambda row: f"Activity split: {row['Deterioration Pct']:.0f}% deteriorating / {row['Improvement Pct']:.0f}% improving" 
     if row["Cumulative Intensity"] > 0 
     else "No activity",
     axis=1
