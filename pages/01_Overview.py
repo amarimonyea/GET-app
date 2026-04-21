@@ -711,7 +711,7 @@ st.markdown(
             Developments are real-world policy actions tracked by the Gender Equality Tracker. Each development is categorized by forecast (for example, deteriorating or improving) and assigned a score based on its scale, impact, and institutional significance. Scores reflect the magnitude and direction of change using publicly reported policy, legal, and institutional developments.
         </p>
         <p style="margin: 6px 0 0 0; font-size: 0.88rem; color: #7a7a7a; font-style: italic; line-height: 1.4;">
-            Example: Political Deteriorating (+3) — Executive branch pressure on the judiciary/intimidation of judges
+            Example: Political Deteriorating Conditions (+3) — Executive branch pressure on the judiciary/intimidation of judges
         </p>
     </div>
     """,
