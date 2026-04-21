@@ -855,7 +855,6 @@ else:
     alt.Tooltip("Prog:Q", title="Cumulative Improvement", format=".1f"),
     alt.Tooltip("Disr:Q", title="Cumulative Deterioration", format=".1f"),
     alt.Tooltip("Cumulative Intensity:Q", title="Cumulative Intensity", format=".1f"),
-    alt.Tooltip("Net Direction:Q", title="Net Direction", format=".1f"),
     alt.Tooltip("Latest Date Str:N", title="Latest Event Date"),
     alt.Tooltip("Latest Development:N", title="Latest Event"),
     alt.Tooltip("Latest Slider Score:Q", title="Latest Event Score", format=".1f"),
