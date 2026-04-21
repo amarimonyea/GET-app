@@ -519,7 +519,7 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
     max_disr_name = forecast_points_df.loc[max_disr_idx, forecast_col]
     max_disr_score = forecast_points_df.loc[max_disr_idx, "Disr"]
     
-    insight_text = f"<strong>Highest cumulative deterioration:</strong> {max_disr_name} ({max_disr_score:.1f})"
+    insight_text = f"{max_disr_name} shows the highest cumulative deterioration (+{max_disr_score:.1f})"
     
     # Add development-based examples if data available
     if data_df is not None and not data_df.empty:
@@ -556,7 +556,7 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
     max_prog_name = forecast_points_df.loc[max_prog_idx, forecast_col]
     max_prog_score = forecast_points_df.loc[max_prog_idx, "Prog"]
     
-    insight_text = f"<strong>Highest cumulative progression:</strong> {max_prog_name} ({max_prog_score:.1f})"
+    insight_text = f"{max_prog_name} shows the highest cumulative improvement (–{max_prog_score:.1f})"
     
     # Add development-based examples if data available
     if data_df is not None and not data_df.empty:
@@ -591,13 +591,13 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
     # Insight 3: Status Quo forecasts count
     status_quo_count = len(forecast_points_df[forecast_points_df["Color Category"] == "Status Quo"])
     status_quo_pct = (status_quo_count / len(forecast_points_df) * 100) if len(forecast_points_df) > 0 else 0
-    insights.append(f"<strong>Status Quo forecasts:</strong> {status_quo_count} forecast(s) ({status_quo_pct:.0f}% of total)")
+    insights.append(f"{status_quo_count} forecast(s) ({status_quo_pct:.0f}% of total) show stable conditions.")
     
     # Insight 4: Most concentrated forecast intensity
     max_intensity_idx = forecast_points_df["Cumulative Intensity"].idxmax()
     max_intensity_name = forecast_points_df.loc[max_intensity_idx, forecast_col]
     max_intensity_score = forecast_points_df.loc[max_intensity_idx, "Cumulative Intensity"]
-    insights.append(f"<strong>Most concentrated forecast intensity:</strong> {max_intensity_name} ({max_intensity_score:.1f})")
+    insights.append(f"{max_intensity_name} shows the most recorded policy activity ({max_intensity_score:.1f} total).")
     
     return insights
 
@@ -1241,8 +1241,8 @@ Net direction indicates whether developments within each domain are trending tow
         # Build insights with expandable development examples
         domain_insights_list = []
         
-        # Insight 1: Most disruption-oriented domain
-        insight1_text = f"<strong>Most disruption-oriented domain:</strong> {max_disruption_domain} (net direction: {max_disruption_value:.1f})"
+        # Insight 1: Domain with highest deterioration
+        insight1_text = f"{max_disruption_domain} shows the highest cumulative deterioration (+{max_disruption_value:.1f})"
         if not df_filtered.empty:
             top_developments = get_top_developments_for_domain(df_filtered, max_disruption_domain, top_n=2)
             if top_developments:
@@ -1269,8 +1269,8 @@ Net direction indicates whether developments within each domain are trending tow
                 insight1_text += examples_html
         domain_insights_list.append(insight1_text)
         
-        # Insight 2: Most progression-oriented domain
-        insight2_text = f"<strong>Most progression-oriented domain:</strong> {min_disruption_domain} (net direction: {min_disruption_value:.1f})"
+        # Insight 2: Domain with highest improvement
+        insight2_text = f"{min_disruption_domain} shows the highest cumulative improvement (–{abs(min_disruption_value):.1f})"
         if not df_filtered.empty:
             top_developments = get_top_developments_for_domain(df_filtered, min_disruption_domain, top_n=2)
             if top_developments:
@@ -1298,7 +1298,7 @@ Net direction indicates whether developments within each domain are trending tow
         domain_insights_list.append(insight2_text)
         
         # Insight 3: Most balanced domain
-        insight3_text = f"<strong>Most balanced domain:</strong> {most_balanced_domain} (net direction: {most_balanced_value:.1f})"
+        insight3_text = f"{most_balanced_domain} shows the most balanced mix (net: {most_balanced_value:.1f})"
         if not df_filtered.empty:
             top_developments = get_top_developments_for_domain(df_filtered, most_balanced_domain, top_n=2)
             if top_developments:
