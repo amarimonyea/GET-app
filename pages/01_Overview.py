@@ -692,9 +692,9 @@ st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 st.divider()
 
 # ---------------------------
-# 8) DISRUPTION AND PROGRESSION MOMENTUM (cleaner)
+# 8) DETERIORATING AND IMPROVING MOMENTUM (cleaner)
 # ---------------------------
-st.subheader("Disruption and Progression Momentum")
+st.subheader("Deteriorating and Improving Momentum")
 
 # Lightweight explanatory block
 st.markdown(
@@ -1187,7 +1187,7 @@ else:
 
     with st.expander("How to Interpret This Chart", expanded=False):
         st.markdown("""
-Net direction indicates whether developments within each domain are trending towards disruption or progression. The value reflects the difference between cumulative disruption and progression based on the currently selected forecast type, sector, and group filters. Higher values indicate domains where disruptive developments trend higher, while values closer to zero indicate a more balanced mix of disruption and progression.
+Net direction indicates whether developments within each domain are trending towards deterioration or improvement. The value reflects the difference between cumulative deterioration and improvement based on the currently selected forecast type, sector, and group filters. Higher values indicate domains where deteriorating developments trend higher, while values closer to zero indicate a more balanced mix of deteriorating and improving developments.
 """)
 
     # Key Insights for Domain Assessment (only if data exists)
