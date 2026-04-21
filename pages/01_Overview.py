@@ -727,6 +727,23 @@ forecast_points = quad.groupby(FORECAST_COL, as_index=False)[["Prog", "Disr"]].s
 forecast_points["Cumulative Intensity"] = forecast_points["Prog"] + forecast_points["Disr"]
 forecast_points["Net Direction"] = forecast_points["Disr"] - forecast_points["Prog"]
 
+# Calculate percentage breakdown
+forecast_points["Deterioration Pct"] = (
+    (forecast_points["Disr"] / forecast_points["Cumulative Intensity"] * 100)
+    .round(0)
+    .fillna(0)
+    .astype(int)
+)
+forecast_points["Improvement Pct"] = 100 - forecast_points["Deterioration Pct"]
+
+# Create breakdown label for tooltip
+forecast_points["Breakdown"] = forecast_points.apply(
+    lambda row: f"{row['Deterioration Pct']:.0f}% Deteriorating / {row['Improvement Pct']:.0f}% Improving" 
+    if row["Cumulative Intensity"] > 0 
+    else "No activity",
+    axis=1
+)
+
 # Add display name for forecast that replaces old terminology
 def transform_forecast_name(name):
     """Transform forecast names from old terminology to new terminology"""
@@ -852,12 +869,11 @@ else:
     ),
     tooltip=[
     alt.Tooltip("Forecast Display:N", title="Forecast"),
-    alt.Tooltip("Prog:Q", title="Cumulative Improvement", format=".1f"),
     alt.Tooltip("Disr:Q", title="Cumulative Deterioration", format=".1f"),
-    alt.Tooltip("Cumulative Intensity:Q", title="Cumulative Intensity", format=".1f"),
+    alt.Tooltip("Prog:Q", title="Cumulative Improvement", format=".1f"),
+    alt.Tooltip("Breakdown:N", title="Breakdown"),
     alt.Tooltip("Latest Date Str:N", title="Latest Event Date"),
     alt.Tooltip("Latest Development:N", title="Latest Event"),
-    alt.Tooltip("Latest Slider Score:Q", title="Latest Event Score", format=".1f"),
 ] 
 ).add_params(hover)
 
