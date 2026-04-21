@@ -518,7 +518,7 @@ if selected_sector:
             # Determine direction color
             score = row["Slider Score"]
             direction_color = COLOR_DISRUPTION if score > 0 else COLOR_PROGRESSION if score < 0 else "#999"
-            direction_label = "Disruption" if score > 0 else "Progression" if score < 0 else "Neutral"
+            direction_label = "Deteriorating" if score > 0 else "Improving" if score < 0 else "Neutral"
             
             # Format development text (truncate if too long)
             dev_text = str(row["Development"])
