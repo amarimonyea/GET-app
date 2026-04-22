@@ -1081,6 +1081,8 @@ The Deteriorating and Improving Momentum graph plots cumulative forecast intensi
                 
                 for idx, row in latest_events_display.iterrows():
                     forecast_name = html.escape(str(row["Forecast"]))
+                    # Transform forecast name from old to new terminology
+                    forecast_name = transform_forecast_name(forecast_name)
                     date_str = html.escape(str(row["Date"]))
                     title = html.escape(str(row["Development Title"]))
                     full_text = html.escape(str(row["Full Development"])) if pd.notna(row["Full Development"]) else ""
