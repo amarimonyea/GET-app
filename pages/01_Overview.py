@@ -512,14 +512,20 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
     if forecast_points_df.empty:
         return ["No insights available for the selected filters."]
     
+    # Transform forecast names from old to new terminology
+    def transform_forecast_name(name):
+        """Transform forecast names from old terminology to new terminology"""
+        return name.replace("Disruption", "Deteriorating").replace("Progression", "Improving")
+    
     insights = []
     
     # Insight 1: Highest cumulative deterioration
     max_disr_idx = forecast_points_df["Disr"].idxmax()
     max_disr_name = forecast_points_df.loc[max_disr_idx, forecast_col]
+    max_disr_name_display = transform_forecast_name(max_disr_name)
     max_disr_score = forecast_points_df.loc[max_disr_idx, "Disr"]
     
-    insight_text = f"{max_disr_name} shows the highest cumulative deterioration (+{max_disr_score:.1f})"
+    insight_text = f"{max_disr_name_display} shows the highest cumulative deterioration (+{max_disr_score:.1f})"
     
     # Add development-based examples if data available
     if data_df is not None and not data_df.empty:
@@ -554,9 +560,10 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
     # Insight 2: Highest cumulative progression
     max_prog_idx = forecast_points_df["Prog"].idxmax()
     max_prog_name = forecast_points_df.loc[max_prog_idx, forecast_col]
+    max_prog_name_display = transform_forecast_name(max_prog_name)
     max_prog_score = forecast_points_df.loc[max_prog_idx, "Prog"]
     
-    insight_text = f"{max_prog_name} shows the highest cumulative improvement (–{max_prog_score:.1f})"
+    insight_text = f"{max_prog_name_display} shows the highest cumulative improvement (–{max_prog_score:.1f})"
     
     # Add development-based examples if data available
     if data_df is not None and not data_df.empty:
@@ -596,8 +603,9 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
     # Insight 4: Most concentrated forecast intensity
     max_intensity_idx = forecast_points_df["Cumulative Intensity"].idxmax()
     max_intensity_name = forecast_points_df.loc[max_intensity_idx, forecast_col]
+    max_intensity_name_display = transform_forecast_name(max_intensity_name)
     max_intensity_score = forecast_points_df.loc[max_intensity_idx, "Cumulative Intensity"]
-    insights.append(f"{max_intensity_name} shows the most recorded policy activity ({max_intensity_score:.1f} total).")
+    insights.append(f"{max_intensity_name_display} shows the most recorded policy activity ({max_intensity_score:.1f} total).")
     
     return insights
 
