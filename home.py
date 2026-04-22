@@ -194,7 +194,7 @@ st.sidebar.divider()
 st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 
 st.title("🌎 U.S. Gender Equality Tracker")
-st.write("**How to use the tracker:** Use the sidebar to explore sector impacts, human impacts, and the indicators shaping the forecast.")
+st.write("**How to use the tracker:** Use the sidebar to explore institutional impacts, population group impacts, and the indicators shaping the forecast.")
 st.write("Since January 2025, the gender landscape in the United States has experienced significant rollbacks, prompting the development of the U.S. Gender Equality Tracker (GET) to better anticipate major shifts.")
 
 # Video placeholder
