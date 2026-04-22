@@ -598,7 +598,7 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
     # Insight 3: Status Quo forecasts count
     status_quo_count = len(forecast_points_df[forecast_points_df["Color Category"] == "Status Quo"])
     status_quo_pct = (status_quo_count / len(forecast_points_df) * 100) if len(forecast_points_df) > 0 else 0
-    insights.append(f"{status_quo_count} forecast(s) ({status_quo_pct:.0f}% of total) show stable conditions.")
+    insights.append(f"{status_quo_count} forecast(s) ({status_quo_pct:.0f}% of total) show Status Quo conditions.")
     
     # Insight 4: Most concentrated forecast intensity
     max_intensity_idx = forecast_points_df["Cumulative Intensity"].idxmax()
