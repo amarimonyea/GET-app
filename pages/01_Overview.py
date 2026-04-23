@@ -665,6 +665,22 @@ domain_options = options_with_all(df[DOMAIN_COL])
 sector_options = options_with_all(df[SECTOR_COL])
 
 selected_forecast = st.sidebar.multiselect("Forecast", forecast_options, key="forecast_filter")
+
+# Forecast Conditions Legend
+st.sidebar.caption("Forecast Conditions:")
+st.sidebar.markdown("""
+<div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem; margin-bottom: 1rem;">
+  <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <div style="width: 16px; height: 16px; background-color: #cf5442; border-radius: 2px; flex-shrink: 0;"></div>
+    <span style="color: #ffffff;"><strong>Deteriorating</strong> — Challenges to gender equity</span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <div style="width: 16px; height: 16px; background-color: #62af44; border-radius: 2px; flex-shrink: 0;"></div>
+    <span style="color: #ffffff;"><strong>Improving</strong> — Advances in gender equity</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
 selected_domain = st.sidebar.multiselect("Domain of Assessment", domain_options, key="domain_filter")
 selected_sector = st.sidebar.multiselect("Sector Impacted", sector_options, key="sector_filter")
 
@@ -677,21 +693,6 @@ if selected_sector:
     df_filtered = df_filtered[df_filtered[SECTOR_COL].astype(str).isin(selected_sector)]
 
 st.sidebar.caption(f"Showing {len(df_filtered)} of {len(df)} developments")
-
-# Forecast Direction
-st.sidebar.subheader("Forecast Direction")
-st.sidebar.markdown("""
-<div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
-  <div style="display: flex; align-items: center; gap: 0.5rem;">
-    <div style="width: 20px; height: 20px; background-color: #cf5442; border-radius: 3px;"></div>
-    <span style="color: #ffffff;"><strong>Deteriorating</strong> — Challenges to gender equity</span>
-  </div>
-  <div style="display: flex; align-items: center; gap: 0.5rem;">
-    <div style="width: 20px; height: 20px; background-color: #62af44; border-radius: 3px;"></div>
-    <span style="color: #ffffff;"><strong>Improving</strong> — Advances in gender equity</span>
-  </div>
-</div>
-""", unsafe_allow_html=True)
 
 # Logo at bottom of sidebar
 st.sidebar.divider()
