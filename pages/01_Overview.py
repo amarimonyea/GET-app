@@ -664,7 +664,21 @@ forecast_options = options_with_all(df[FORECAST_COL])
 domain_options = options_with_all(df[DOMAIN_COL])
 sector_options = options_with_all(df[SECTOR_COL])
 
-selected_forecast = st.sidebar.multiselect("Forecast", forecast_options, key="forecast_filter")
+# Transform forecast labels: Disruption -> Deteriorating, Progression -> Improving
+def transform_forecast_label(label):
+    """Transform forecast labels for display"""
+    label = str(label).replace("Disruption", "Deteriorating").replace("Progression", "Improving")
+    return label
+
+forecast_options_display = [transform_forecast_label(f) for f in forecast_options]
+
+# Reverse mapping for filtering
+forecast_mapping = {transform_forecast_label(f): f for f in forecast_options}
+
+selected_forecast_display = st.sidebar.multiselect("Forecast", forecast_options_display, key="forecast_filter")
+
+# Convert back to original names for filtering
+selected_forecast = [forecast_mapping[f] for f in selected_forecast_display]
 
 # Forecast Conditions Legend
 st.sidebar.caption("Forecast Conditions:")
