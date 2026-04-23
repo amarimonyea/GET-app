@@ -152,11 +152,11 @@ with st.expander("**Key Metrics & Scoring**", expanded=False):
 
 Each policy development is assigned a **Slider Score** ranging from **-4 to +4**:
 
-- **Negative scores (-4 to -1)**: Represent **improvements**
+- **Negative scores (-4 to -1)**: Represent **improving** conditions
   - Policy actions that establish, reinstate, or expand gender, reproductive, or LGBTQ+ protections
   - Examples: State legislation protecting reproductive rights, hate crime law expansions
 
-- **Positive scores (+1 to +4)**: Represent **deteriorations**
+- **Positive scores (+1 to +4)**: Represent **deteriorating** conditions
   - Legislative or executive actions restricting gender, reproductive, or workplace rights
   - Defunding of protections, institutional rollbacks, or service denials
   
@@ -175,6 +175,34 @@ Each development is evaluated across **four analytic dimensions**. Scores range 
 | **Impact on Scenario Probability** | Increases the likelihood of a deterioration scenario | No measurable probability change | Decreases the likelihood of a deterioration scenario |
 
 *Note: Status quo developments can have low positive or negative scores depending on their alignment with these dimensions.*
+
+### Letter Grades (A-F System)
+
+Each forecast domain and overall intensity is expressed as a letter grade reflecting the severity and concentration of policy activity:
+
+| Grade | Intensity Range | Meaning |
+|-------|---|---|
+| **A** | 0–1.5 | Strong improvement trajectory |
+| **B** | 1.5–3.5 | Moderate improvement trajectory |
+| **C** | 3.5–6.5 | Mixed or contested developments |
+| **D** | 6.5–8.5 | Moderate deterioration trajectory |
+| **F** | 8.5–10 | Strong deterioration trajectory |
+
+**How Grades Are Calculated:**
+- **Net Score** = Cumulative Deterioration − Cumulative Improvement
+- **Average per Development** = Net Score ÷ Number of Developments
+- **Severity (0–10 Scale)** = Normalized average converted to 0–10 scale
+- **Letter Grade** = Assigned based on severity range above
+
+**Direction Labels (in addition to grades):**
+- **Deteriorating** = Overall negative trajectory (net score > +10)
+- **Improving** = Overall positive trajectory (net score < -10)
+- **Mixed** = Contested or unclear direction (net score between -10 and +10)
+
+**How to Interpret:**
+- Grades show **how concentrated** deterioration or improvement is
+- Direction shows **overall momentum** and trajectory
+- Severity indicates the **intensity of change**
 
 ### Weighted Analysis
 
@@ -197,7 +225,7 @@ Sum of all **positive slider scores** for a given forecast:
 
 #### **Cumulative Improvement**
 Sum of the absolute values of all **negative slider scores** for a given forecast:
-- Represents the total magnitude of protective or progressive policy developments  
+- Represents the total magnitude of protective or improving policy developments  
 - Higher values indicate more substantial expansions of gender equality or LGBTQ+ protections
 
 #### **Cumulative Intensity**
@@ -212,12 +240,19 @@ Calculated as **Cumulative Deterioration − Cumulative Improvement**:
 - Provides a directional indicator of whether developments lean toward expanding or restricting gender equality
 - Shown on the y-axis of the Deterioration and Improvement Momentum chart
 
+#### **Severity Grade (A-F)**
+The cumulative intensity is converted to a letter grade (A through F) to provide an intuitive assessment:
+- **A grades** indicate predominantly improving trends with minimal disruption
+- **F grades** indicate predominantly deteriorating trends with significant disruption
+- **C grades** indicate mixed signals and contested developments
+
 These aggregations are computed at multiple levels:
 - By individual **Forecast** (showing trajectory within a specific policy scenario)
 - By **Domain of Assessment** (showing directional trends across institutional types)
 - By **Sector** (showing which industries or institutions are experiencing the most activity)
 
 """)
+
 
 st.divider()
 
@@ -242,7 +277,7 @@ Each core indicator is assigned a **direction value** that reflects trends:
 
 | Direction | Meaning | Interpretation |
 |-----------|---------|-----------------|
-| **+1** | Worsening conditions | Deteriorating status or restrictive trends |
+| **+1** | Deteriorating conditions | Worsening status or restrictive trends |
 | **0** | Neutral / mixed | No clear direction or mixed signals |
 | **-1** | Improving conditions | Progressive developments or protective trends |
 
