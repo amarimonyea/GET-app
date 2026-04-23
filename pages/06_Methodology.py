@@ -277,7 +277,7 @@ Each core indicator is assigned a **direction value** that reflects trends:
 
 | Direction | Meaning | Interpretation |
 |-----------|---------|-----------------|
-| **+1** | Deteriorating conditions | Worsening status or restrictive trends |
+| **+1** | Worsening conditions | Deteriorating status or restrictive trends |
 | **0** | Neutral / mixed | No clear direction or mixed signals |
 | **-1** | Improving conditions | Progressive developments or protective trends |
 
