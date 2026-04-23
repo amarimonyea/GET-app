@@ -551,10 +551,15 @@ def get_best_development_for_forecast(data_df, forecast_name, used_indices=None)
 
 def get_key_insights(forecast_points_df, forecast_col, data_df=None):
     """
-    Generate clean, dynamic key insights with one representative example per insight.
+    Generate clean, dynamic key insights with three distinct analytical takeaways.
+    
+    Three insights per section:
+    - Insight 1: Highest cumulative deterioration
+    - Insight 2: Highest cumulative improvement
+    - Insight 3: Overall pattern (deterioration vs improvement skew)
     
     Requirements:
-    - Each insight is one concise sentence
+    - Each insight is one concise sentence with natural language phrasing
     - One plain-text example per insight (not styled or expandable)
     - Examples are deterministically selected (not random)
     - No examples are repeated across insights
@@ -582,7 +587,8 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
         max_disr_name_display = transform_forecast_name(max_disr_name)
         max_disr_score = forecast_points_df.loc[max_disr_idx, "Disr"]
         
-        insight_text = f"{max_disr_name_display} shows the highest cumulative deterioration (+{max_disr_score:.1f})."
+        # Use natural language: "{forecast} developments show..." instead of "{forecast} Deteriorating shows..."
+        insight_text = f"{max_disr_name_display} developments show the highest cumulative deterioration (+{max_disr_score:.1f})."
         
         # Get representative example for this forecast
         if data_df is not None and not data_df.empty:
@@ -601,7 +607,8 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
         max_prog_name_display = transform_forecast_name(max_prog_name)
         max_prog_score = forecast_points_df.loc[max_prog_idx, "Prog"]
         
-        insight_text = f"{max_prog_name_display} shows the highest cumulative improvement (–{max_prog_score:.1f})."
+        # Use natural language "also account for" to show this is the counterpoint to deterioration
+        insight_text = f"{max_prog_name_display} developments also account for the largest cumulative improvement (–{max_prog_score:.1f})."
         
         # Get representative example for this forecast
         if data_df is not None and not data_df.empty:
@@ -613,31 +620,35 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
         
         insights.append(insight_text)
     
-    # Insight 3: Most policy activity (intensity)
-    if "Cumulative Intensity" in forecast_points_df.columns and forecast_points_df["Cumulative Intensity"].max() > 0:
-        max_intensity_idx = forecast_points_df["Cumulative Intensity"].idxmax()
-        max_intensity_name = forecast_points_df.loc[max_intensity_idx, forecast_col]
-        max_intensity_name_display = transform_forecast_name(max_intensity_name)
-        max_intensity_score = forecast_points_df.loc[max_intensity_idx, "Cumulative Intensity"]
+    # Insight 3: Overall pattern (deterioration vs improvement skew)
+    total_disr = forecast_points_df["Disr"].sum() if "Disr" in forecast_points_df.columns else 0
+    total_prog = forecast_points_df["Prog"].sum() if "Prog" in forecast_points_df.columns else 0
+    
+    if total_disr > 0 or total_prog > 0:
+        # Describe the overall skew/imbalance pattern
+        if total_disr > total_prog:
+            skew_insight = f"Overall, activity is heavily skewed toward deterioration (+{total_disr:.1f}) rather than improvement (–{total_prog:.1f})."
+        else:
+            skew_insight = f"Overall, activity shows meaningful improvement (–{total_prog:.1f}), outweighing deterioration (+{total_disr:.1f})."
         
-        insight_text = f"{max_intensity_name_display} shows the most recorded policy activity ({max_intensity_score:.1f} total)."
-        
-        # Get representative example for this forecast
+        # Get a representative example that illustrates the overall pattern
         if data_df is not None and not data_df.empty:
-            dev_info = get_best_development_for_forecast(data_df, max_intensity_name, used_development_indices)
+            # Try to find an example from the highest deterioration forecast if deterioration dominates
+            if total_disr > total_prog and "Disr" in forecast_points_df.columns:
+                max_disr_idx = forecast_points_df["Disr"].idxmax()
+                max_disr_name = forecast_points_df.loc[max_disr_idx, forecast_col]
+                dev_info = get_best_development_for_forecast(data_df, max_disr_name, used_development_indices)
+            else:
+                max_prog_idx = forecast_points_df["Prog"].idxmax()
+                max_prog_name = forecast_points_df.loc[max_prog_idx, forecast_col]
+                dev_info = get_best_development_for_forecast(data_df, max_prog_name, used_development_indices)
+            
             if dev_info:
                 short_text, score, dev_idx = dev_info
                 used_development_indices.add(dev_idx)
-                insight_text += f"\nExample: {short_text}"
+                skew_insight += f"\nExample: {short_text}"
         
-        insights.append(insight_text)
-    
-    # Insight 4: Status Quo count (if Status Quo exists in data)
-    if "Color Category" in forecast_points_df.columns:
-        status_quo_count = len(forecast_points_df[forecast_points_df["Color Category"] == "Status Quo"])
-        if status_quo_count > 0:
-            status_quo_pct = (status_quo_count / len(forecast_points_df) * 100) if len(forecast_points_df) > 0 else 0
-            insights.append(f"{status_quo_count} forecast(s) ({status_quo_pct:.0f}% of total) show status quo conditions with no clear directional trend.")
+        insights.append(skew_insight)
     
     return insights if insights else ["No significant patterns detected in the selected data."]
 
@@ -1314,7 +1325,7 @@ Net direction indicates whether developments within each domain are trending tow
         used_development_indices = set()
         
         # Insight 1: Domain with highest deterioration
-        insight1_text = f"{max_disruption_domain} shows the highest cumulative deterioration (+{max_disruption_value:.1f})."
+        insight1_text = f"{max_disruption_domain} developments show the highest cumulative deterioration (+{max_disruption_value:.1f})."
         if not df_filtered.empty:
             # Filter to developments in this domain
             domain_data = df_filtered[df_filtered[DOMAIN_COL].astype(str) == max_disruption_domain].copy()
@@ -1330,7 +1341,7 @@ Net direction indicates whether developments within each domain are trending tow
         domain_insights_list.append(insight1_text)
         
         # Insight 2: Domain with highest improvement
-        insight2_text = f"{min_disruption_domain} shows the highest cumulative improvement (–{abs(min_disruption_value):.1f})."
+        insight2_text = f"{min_disruption_domain} developments also account for the largest cumulative improvement (–{abs(min_disruption_value):.1f})."
         if not df_filtered.empty:
             domain_data = df_filtered[df_filtered[DOMAIN_COL].astype(str) == min_disruption_domain].copy()
             if not domain_data.empty:
@@ -1345,7 +1356,7 @@ Net direction indicates whether developments within each domain are trending tow
         domain_insights_list.append(insight2_text)
         
         # Insight 3: Most balanced domain
-        insight3_text = f"{most_balanced_domain} shows the most balanced mix of developments (net: {most_balanced_value:.1f})."
+        insight3_text = f"{most_balanced_domain} shows the most balanced mix of developments, with activity nearly evenly distributed between deterioration and improvement."
         if not df_filtered.empty:
             domain_data = df_filtered[df_filtered[DOMAIN_COL].astype(str) == most_balanced_domain].copy()
             if not domain_data.empty:
@@ -1676,8 +1687,9 @@ These charts show how forecast developments are distributed over time. The top c
         composition_insights_list = []
         used_development_indices = set()
         
-        # Insight 1: Most represented direction
-        insight1_text = f"Most represented direction is {most_represented_direction} ({most_represented_count} developments)."
+        # Insight 1: Most represented direction with proportion
+        pct_count = (most_represented_count / total_developments * 100) if total_developments > 0 else 0
+        insight1_text = f"Developments are primarily {most_represented_direction} ({most_represented_count} of {total_developments}, or {pct_count:.0f}%)."
         if not df_filtered.empty:
             # Filter to developments with this direction
             direction_data = df_filtered[df_filtered["Direction"].astype(str) == most_represented_direction].copy()
@@ -1693,7 +1705,7 @@ These charts show how forecast developments are distributed over time. The top c
         composition_insights_list.append(insight1_text)
         
         # Insight 2: Most represented forecast type
-        insight2_text = f"Most represented forecast type is {most_represented_forecast} ({most_represented_forecast_count} developments)."
+        insight2_text = f"By forecast type, {most_represented_forecast} accounts for the largest share ({most_represented_forecast_count} developments)."
         if not df_filtered.empty:
             forecast_data = df_filtered[df_filtered[FORECAST_COL].astype(str) == most_represented_forecast].copy()
             if not forecast_data.empty:
@@ -1707,8 +1719,18 @@ These charts show how forecast developments are distributed over time. The top c
                     insight2_text += f"\nExample: {short_text}"
         composition_insights_list.append(insight2_text)
         
-        # Insight 3: Total developments (no example needed)
-        composition_insights_list.append(f"Total of {total_developments} developments are tracked in the selected time period.")
+        # Insight 3: Overall composition pattern
+        # Determine if deterioration or improvement dominates
+        deteriorating_count = direction_totals.get("Deteriorating", 0)
+        improving_count = direction_totals.get("Improving", 0)
+        status_quo_count = direction_totals.get("Status Quo", 0)
+        
+        if deteriorating_count > improving_count:
+            insight3_text = f"Overall, deteriorating developments ({deteriorating_count}) substantially outnumber improving ones ({improving_count})."
+        else:
+            insight3_text = f"Overall, improving developments ({improving_count}) substantively match or exceed deteriorating ones ({deteriorating_count})."
+        
+        composition_insights_list.append(insight3_text)
         
         composition_insights_html = ""
         for insight in composition_insights_list:
