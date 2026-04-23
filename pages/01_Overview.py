@@ -501,113 +501,145 @@ def get_top_developments_for_direction(data_df, direction, top_n=2):
     
     return top_developments
 
+def get_best_development_for_forecast(data_df, forecast_name, used_indices=None):
+    """
+    Get the best representative development for a forecast using deterministic ranking.
+    
+    Ranking criteria:
+    - Highest absolute score magnitude (impact)
+    - Most recent (by date) as tiebreaker
+    
+    Args:
+        data_df: Filtered development data
+        forecast_name: Name of the forecast to filter
+        used_indices: Set of already-used index values to avoid repetition
+    
+    Returns:
+        Tuple of (short_text, score) or None if no qualifying development found
+    """
+    if data_df is None or data_df.empty:
+        return None
+    
+    used_indices = used_indices or set()
+    
+    # Filter to matching forecast
+    forecast_data = data_df[data_df["Forecast"].astype(str) == forecast_name].copy()
+    
+    if forecast_data.empty:
+        return None
+    
+    # Remove already-used developments
+    forecast_data = forecast_data[~forecast_data.index.isin(used_indices)]
+    
+    if forecast_data.empty:
+        return None
+    
+    # Rank by absolute score (magnitude), then by date (recency)
+    forecast_data["Abs Score"] = forecast_data["Slider Score"].abs()
+    forecast_data = forecast_data.sort_values(
+        by=["Abs Score", "Date"],
+        ascending=[False, False]
+    )
+    
+    # Get the top development
+    best_row = forecast_data.iloc[0]
+    short_text = best_row["Development Short"]
+    score = best_row["Slider Score"]
+    idx = best_row.name
+    
+    return (short_text, score, idx)
+
 def get_key_insights(forecast_points_df, forecast_col, data_df=None):
-    """Generate key insights from forecast_points dataframe including Status Quo.
+    """
+    Generate clean, dynamic key insights with one representative example per insight.
+    
+    Requirements:
+    - Each insight is one concise sentence
+    - One plain-text example per insight (not styled or expandable)
+    - Examples are deterministically selected (not random)
+    - No examples are repeated across insights
+    - Fully responsive to sidebar filters
     
     Args:
         forecast_points_df: Aggregated forecast data
         forecast_col: Forecast column name
-        data_df: Original detailed data (optional, used for development extraction)
+        data_df: Original detailed data (used for development extraction)
     """
     if forecast_points_df.empty:
         return ["No insights available for the selected filters."]
     
-    # Transform forecast names from old to new terminology
     def transform_forecast_name(name):
         """Transform forecast names from old terminology to new terminology"""
-        return name.replace("Disruption", "Deteriorating").replace("Progression", "Improving")
+        return str(name).replace("Disruption", "Deteriorating").replace("Progression", "Improving")
     
     insights = []
+    used_development_indices = set()  # Track used examples to avoid repetition
     
     # Insight 1: Highest cumulative deterioration
-    max_disr_idx = forecast_points_df["Disr"].idxmax()
-    max_disr_name = forecast_points_df.loc[max_disr_idx, forecast_col]
-    max_disr_name_display = transform_forecast_name(max_disr_name)
-    max_disr_score = forecast_points_df.loc[max_disr_idx, "Disr"]
+    if "Disr" in forecast_points_df.columns and forecast_points_df["Disr"].max() > 0:
+        max_disr_idx = forecast_points_df["Disr"].idxmax()
+        max_disr_name = forecast_points_df.loc[max_disr_idx, forecast_col]
+        max_disr_name_display = transform_forecast_name(max_disr_name)
+        max_disr_score = forecast_points_df.loc[max_disr_idx, "Disr"]
+        
+        insight_text = f"{max_disr_name_display} shows the highest cumulative deterioration (+{max_disr_score:.1f})."
+        
+        # Get representative example for this forecast
+        if data_df is not None and not data_df.empty:
+            dev_info = get_best_development_for_forecast(data_df, max_disr_name, used_development_indices)
+            if dev_info:
+                short_text, score, dev_idx = dev_info
+                used_development_indices.add(dev_idx)
+                insight_text += f"\nExample: {short_text}"
+        
+        insights.append(insight_text)
     
-    insight_text = f"{max_disr_name_display} shows the highest cumulative deterioration (+{max_disr_score:.1f})"
+    # Insight 2: Highest cumulative improvement
+    if "Prog" in forecast_points_df.columns and forecast_points_df["Prog"].max() > 0:
+        max_prog_idx = forecast_points_df["Prog"].idxmax()
+        max_prog_name = forecast_points_df.loc[max_prog_idx, forecast_col]
+        max_prog_name_display = transform_forecast_name(max_prog_name)
+        max_prog_score = forecast_points_df.loc[max_prog_idx, "Prog"]
+        
+        insight_text = f"{max_prog_name_display} shows the highest cumulative improvement (–{max_prog_score:.1f})."
+        
+        # Get representative example for this forecast
+        if data_df is not None and not data_df.empty:
+            dev_info = get_best_development_for_forecast(data_df, max_prog_name, used_development_indices)
+            if dev_info:
+                short_text, score, dev_idx = dev_info
+                used_development_indices.add(dev_idx)
+                insight_text += f"\nExample: {short_text}"
+        
+        insights.append(insight_text)
     
-    # Add development-based examples if data available
-    if data_df is not None and not data_df.empty:
-        top_developments = get_top_developments_for_forecast(data_df, max_disr_name, top_n=2)
-        if top_developments:
-            examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples include:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
-            for short_text, full_text, source_url, score in top_developments:
-                # Create expandable details
-                source_domain = "Source unknown"
-                if source_url:
-                    try:
-                        from urllib.parse import urlparse
-                        domain = urlparse(source_url).netloc
-                        source_domain = domain.replace("www.", "")
-                    except:
-                        pass
-                
-                details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
-<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
-<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
-<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
-<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
-<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
-</div>
-</details>"""
-                examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
-            examples_html += "</ul>"
-            insight_text += examples_html
+    # Insight 3: Most policy activity (intensity)
+    if "Cumulative Intensity" in forecast_points_df.columns and forecast_points_df["Cumulative Intensity"].max() > 0:
+        max_intensity_idx = forecast_points_df["Cumulative Intensity"].idxmax()
+        max_intensity_name = forecast_points_df.loc[max_intensity_idx, forecast_col]
+        max_intensity_name_display = transform_forecast_name(max_intensity_name)
+        max_intensity_score = forecast_points_df.loc[max_intensity_idx, "Cumulative Intensity"]
+        
+        insight_text = f"{max_intensity_name_display} shows the most recorded policy activity ({max_intensity_score:.1f} total)."
+        
+        # Get representative example for this forecast
+        if data_df is not None and not data_df.empty:
+            dev_info = get_best_development_for_forecast(data_df, max_intensity_name, used_development_indices)
+            if dev_info:
+                short_text, score, dev_idx = dev_info
+                used_development_indices.add(dev_idx)
+                insight_text += f"\nExample: {short_text}"
+        
+        insights.append(insight_text)
     
-    insights.append(insight_text)
+    # Insight 4: Status Quo count (if Status Quo exists in data)
+    if "Color Category" in forecast_points_df.columns:
+        status_quo_count = len(forecast_points_df[forecast_points_df["Color Category"] == "Status Quo"])
+        if status_quo_count > 0:
+            status_quo_pct = (status_quo_count / len(forecast_points_df) * 100) if len(forecast_points_df) > 0 else 0
+            insights.append(f"{status_quo_count} forecast(s) ({status_quo_pct:.0f}% of total) show status quo conditions with no clear directional trend.")
     
-    # Insight 2: Highest cumulative progression
-    max_prog_idx = forecast_points_df["Prog"].idxmax()
-    max_prog_name = forecast_points_df.loc[max_prog_idx, forecast_col]
-    max_prog_name_display = transform_forecast_name(max_prog_name)
-    max_prog_score = forecast_points_df.loc[max_prog_idx, "Prog"]
-    
-    insight_text = f"{max_prog_name_display} shows the highest cumulative improvement (–{max_prog_score:.1f})"
-    
-    # Add development-based examples if data available
-    if data_df is not None and not data_df.empty:
-        top_developments = get_top_developments_for_forecast(data_df, max_prog_name, top_n=2)
-        if top_developments:
-            examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples include:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
-            for short_text, full_text, source_url, score in top_developments:
-                # Create expandable details
-                source_domain = "Source unknown"
-                if source_url:
-                    try:
-                        from urllib.parse import urlparse
-                        domain = urlparse(source_url).netloc
-                        source_domain = domain.replace("www.", "")
-                    except:
-                        pass
-                
-                details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
-<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
-<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
-<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
-<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
-<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
-</div>
-</details>"""
-                examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
-            examples_html += "</ul>"
-            insight_text += examples_html
-    
-    insights.append(insight_text)
-    
-    # Insight 3: Status Quo forecasts count
-    status_quo_count = len(forecast_points_df[forecast_points_df["Color Category"] == "Status Quo"])
-    status_quo_pct = (status_quo_count / len(forecast_points_df) * 100) if len(forecast_points_df) > 0 else 0
-    insights.append(f"{status_quo_count} forecast(s) ({status_quo_pct:.0f}% of total) show Status Quo conditions.")
-    
-    # Insight 4: Most concentrated forecast intensity
-    max_intensity_idx = forecast_points_df["Cumulative Intensity"].idxmax()
-    max_intensity_name = forecast_points_df.loc[max_intensity_idx, forecast_col]
-    max_intensity_name_display = transform_forecast_name(max_intensity_name)
-    max_intensity_score = forecast_points_df.loc[max_intensity_idx, "Cumulative Intensity"]
-    insights.append(f"{max_intensity_name_display} shows the most recorded policy activity ({max_intensity_score:.1f} total).")
-    
-    return insights
+    return insights if insights else ["No significant patterns detected in the selected data."]
 
 def image_to_base64(image_path):
     """Convert image file to base64 data URI."""
@@ -991,7 +1023,21 @@ The Deteriorating and Improving Momentum graph plots cumulative forecast intensi
     
     # Key Insights Strip
     insights_list = get_key_insights(forecast_points, FORECAST_COL, data_df=df_filtered)
-    insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in insights_list])
+    
+    # Format insights with examples as plain text
+    insights_html = ""
+    for insight in insights_list:
+        # Split insight into statement and example (if present)
+        parts = insight.split("\nExample: ")
+        statement = parts[0]
+        example = f"Example: {parts[1]}" if len(parts) > 1 else None
+        
+        # Build li content
+        li_content = f"<strong>{statement}</strong>"
+        if example:
+            li_content += f"<br><span style='font-size: 0.9em; color: #555; margin-top: 0.25rem; display: block;'>{html.escape(example)}</span>"
+        
+        insights_html += f"<li style='margin-bottom: 0.75rem; color: #1b1725; font-size: 1rem; line-height: 1.5;'>{li_content}</li>"
     
     st.markdown(f"""
     <div style="background-color: #f1f0ec; border-left: 4px solid #bfa359; padding: 1rem; margin: 1.5rem 0; border-radius: 2px; box-shadow: 0 1px 3px rgba(27, 23, 37, 0.08);">
@@ -1350,7 +1396,19 @@ Net direction indicates whether developments within each domain are trending tow
                 insight3_text += examples_html
         domain_insights_list.append(insight3_text)
         
-        domain_insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in domain_insights_list])
+        domain_insights_html = ""
+        for insight in domain_insights_list:
+            # Handle both old format (with HTML tags) and new format (plain text with Example:)
+            # Split on newline if Example is present
+            if "\nExample: " in insight:
+                parts = insight.split("\nExample: ")
+                statement = parts[0]
+                example = f"Example: {parts[1]}"
+                li_content = f"<strong>{statement}</strong><br><span style='font-size: 0.9em; color: #555; margin-top: 0.25rem; display: block;'>{html.escape(example)}</span>"
+            else:
+                # Old format (with HTML tags) - keep as is
+                li_content = insight
+            domain_insights_html += f"<li style='margin-bottom: 0.75rem; color: #1b1725; font-size: 1rem; line-height: 1.5;'>{li_content}</li>"
         
         st.markdown(f"""
         <div style="background-color: #f1f0ec; border-left: 4px solid #bfa359; padding: 1rem; margin: 1.5rem 0; border-radius: 2px; box-shadow: 0 1px 3px rgba(27, 23, 37, 0.08);">
@@ -1623,7 +1681,18 @@ These charts show how forecast developments are distributed over time. The top c
         # Insight 3: Total developments (no examples needed)
         composition_insights_list.append(f"<strong>Total developments tracked:</strong> {total_developments} developments")
         
-        composition_insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in composition_insights_list])
+        composition_insights_html = ""
+        for insight in composition_insights_list:
+            # Handle both old format (with HTML tags) and new format (plain text with Example:)
+            if "\nExample: " in insight:
+                parts = insight.split("\nExample: ")
+                statement = parts[0]
+                example = f"Example: {parts[1]}"
+                li_content = f"<strong>{statement}</strong><br><span style='font-size: 0.9em; color: #555; margin-top: 0.25rem; display: block;'>{html.escape(example)}</span>"
+            else:
+                # Old format (with HTML tags or simple text) - keep as is
+                li_content = insight
+            composition_insights_html += f"<li style='margin-bottom: 0.75rem; color: #1b1725; font-size: 1rem; line-height: 1.5;'>{li_content}</li>"
         
         st.markdown(f"""
         <div style="background-color: #f1f0ec; border-left: 4px solid #bfa359; padding: 1rem; margin: 1.5rem 0; border-radius: 2px; box-shadow: 0 1px 3px rgba(27, 23, 37, 0.08);">
