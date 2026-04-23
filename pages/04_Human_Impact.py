@@ -280,7 +280,7 @@ st.sidebar.markdown("""
 st.sidebar.divider()
 st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 
-st.title("Human Impact Analysis")
+st.title("Population Group Impact Analysis")
 
 # Load and prepare data
 df = pd.read_csv("data/Monitor - Gender Equality - GET 2025 (1).csv", skiprows=1)
