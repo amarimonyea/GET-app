@@ -1482,59 +1482,77 @@ if not monthly_forecast_counts.empty:
         lambda x: str(x).replace("Disruption", "Deteriorating").replace("Progression", "Improving")
     )
     
-    # Get unique forecast values from data to map colors consistently (use transformed names)
+    # ============================================================================
+    # REFINED DIRECTIONAL COLOR SYSTEM
+    # ============================================================================
+    # Primary principle: Direction is the main visual signal (red/green/blue)
+    # Forecast type is secondary (subtle variation within each directional family)
+    # ============================================================================
+    
     forecast_categories_display = sorted(monthly_forecast_counts["Forecast Display"].unique().tolist())
     
-    # NEW COLOR SYSTEM: Directional color families
-    # Organize colors by direction (deteriorating = reds, improving = greens, status quo = neutral)
-    # Reduces saturation and variation within each family for visual clarity
-    
-    # Red family (Deteriorating) - from light to dark
-    red_palette = [
-        "#f4a8a1",  # Very light red
-        "#e89b8f",  # Light red
-        "#dc8e7d",  # Medium-light red
-        "#d0816b",  # Medium red
-        "#c47459",  # Medium-dark red
-        "#b86747",  # Dark red
-    ]
-    
-    # Green family (Improving) - from light to dark
-    green_palette = [
-        "#a8e6c0",  # Very light green
-        "#8fddb0",  # Light green
-        "#76d4a0",  # Medium-light green
-        "#5dcb90",  # Medium green
-        "#44c280",  # Medium-dark green
-        "#2bb970",  # Dark green
-    ]
-    
-    # Neutral family (Status Quo) - muted tones
-    neutral_palette = ["#7a8ba3"]  # Muted blue-gray
-    
-    # Build custom color mapping organized by direction
-    deteriorating_forecasts = [f for f in forecast_categories_display if "Deteriorating" in f]
-    improving_forecasts = [f for f in forecast_categories_display if "Improving" in f]
+    # Identify forecast types by direction
+    deteriorating_forecasts = sorted([f for f in forecast_categories_display if "Deteriorating" in f])
+    improving_forecasts = sorted([f for f in forecast_categories_display if "Improving" in f])
     status_quo_forecasts = [f for f in forecast_categories_display if "Status Quo" in f]
     
+    # ----
+    # RED FAMILY (Deteriorating) - Muted, cohesive reds
+    # Darker reds for major policy domains, lighter reds for others
+    # ----
+    red_family = {
+        "Political Deteriorating": "#8b3a3a",          # Dark red (major domain)
+        "Economic Deteriorating": "#a84d42",           # Medium-dark red
+        "Social Deteriorating": "#c4614f",             # Medium red
+        "Diplomatic Deteriorating": "#d97257",         # Medium-light red
+        "Hybrid Political/Security Deteriorating": "#da8277",  # Light red
+        "Hybrid Political/Social Deteriorating": "#e5999f",    # Very light red
+    }
+    
+    # ----
+    # GREEN FAMILY (Improving) - Muted, cohesive greens
+    # Darker greens for major policy domains, lighter greens for others
+    # ----
+    green_family = {
+        "Political Improving": "#2d5a3d",          # Dark green (major domain)
+        "Social Improving": "#3d7149",             # Medium-dark green
+        "Economic Improving": "#4d8f56",           # Medium green
+        "Diplomatic Improving": "#6aad7f",         # Medium-light green
+        "Hybrid Political/Security Improving": "#7ec194",      # Light green
+        "Hybrid Political/Social Improving": "#9cd4ad",        # Very light green
+    }
+    
+    # ----
+    # BLUE FAMILY (Status Quo) - Muted, desaturated blue
+    # Single neutral tone for all status quo developments
+    # ----
+    blue_family = {
+        "Status Quo": "#5a7a90",  # Steel blue (muted, secondary signal)
+    }
+    
+    # Build unified color mapping
     custom_colors = {}
+    custom_colors.update(red_family)
+    custom_colors.update(green_family)
+    custom_colors.update(blue_family)
     
-    # Assign red palette to deteriorating forecasts
-    for idx, forecast in enumerate(sorted(deteriorating_forecasts)):
-        color_idx = min(idx, len(red_palette) - 1)
-        custom_colors[forecast] = red_palette[color_idx]
+    # Create color range for all forecast categories
+    color_range = [custom_colors.get(cat, "#888888") for cat in forecast_categories_display]
     
-    # Assign green palette to improving forecasts
-    for idx, forecast in enumerate(sorted(improving_forecasts)):
-        color_idx = min(idx, len(green_palette) - 1)
-        custom_colors[forecast] = green_palette[color_idx]
+    forecast_color_scale = alt.Scale(domain=forecast_categories_display, range=color_range)
     
-    # Assign neutral palette to status quo forecasts
-    for forecast in status_quo_forecasts:
-        custom_colors[forecast] = neutral_palette[0]
+    # ============================================================================
+    # ENHANCED LEGEND
+    # ============================================================================
+    # Legend is restructured to reinforce directional grouping while maintaining
+    # clarity about forecast type breakdown
+    # ============================================================================
     
-    # Build color range using the directional color mapping
-    color_range = [custom_colors.get(cat, "#999999") for cat in forecast_categories_display]
+    # Creates labels that hint at directional grouping in the legend
+    # Altair doesn't support grouped legends natively, so we use visual ordering
+    # and consistent naming to guide user interpretation
+    
+    legend_title = "Forecast Type Breakdown\n(Red = Deteriorating, Green = Improving, Blue = Stable)"
     
     forecast_color_scale = alt.Scale(domain=forecast_categories_display, range=color_range)
     
@@ -1545,7 +1563,19 @@ if not monthly_forecast_counts.empty:
     breakdown_chart = alt.Chart(monthly_forecast_counts).mark_bar().encode(
         x=alt.X("MonthLabel:N", title="Month", sort=breakdown_month_sort, axis=alt.Axis(labelAngle=0), scale=alt.Scale(paddingInner=0.3)),
         y=alt.Y("Count:Q", title="Number of Developments", stack="zero"),
-        color=alt.Color("Forecast Display:N", scale=forecast_color_scale, legend=alt.Legend(title="Forecast Type", orient="bottom", direction="horizontal", titleFontSize=12, labelFontSize=10, columns=4)),
+        color=alt.Color(
+            "Forecast Display:N", 
+            scale=forecast_color_scale,
+            legend=alt.Legend(
+                title=legend_title,
+                orient="bottom",
+                direction="horizontal",
+                titleFontSize=12,
+                labelFontSize=10,
+                columns=6,
+                titleLimit=200
+            )
+        ),
         opacity=alt.condition(
             direction_click,
             alt.value(1.0),
