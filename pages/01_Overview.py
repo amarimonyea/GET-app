@@ -1477,31 +1477,36 @@ direction_chart_with_totals = (direction_chart + total_text).properties(height=3
 if not monthly_forecast_counts.empty:
     st.markdown("**Breakdown by Forecast Type** — Click a direction in the Forecast Direction legend above to highlight only that direction's forecast types")
     
+    # Transform forecast labels for display (Disruption -> Deteriorating, Progression -> Improving)
+    monthly_forecast_counts["Forecast Display"] = monthly_forecast_counts[FORECAST_COL].apply(
+        lambda x: str(x).replace("Disruption", "Deteriorating").replace("Progression", "Improving")
+    )
+    
     # Extended color palette for forecast categories
     SECONDARY_COLORS = ["#1b1725", "#bfa359", "#f1f0ec", "#62af44", "#cf5442", "#773344", "#e1bb4b", "#fade82", "#93b5c3", "#dca465", "#3b668c"]
     
-    # Get unique forecast values from data to map colors consistently
-    forecast_categories = sorted(monthly_forecast_counts[FORECAST_COL].unique().tolist())
+    # Get unique forecast values from data to map colors consistently (use transformed names)
+    forecast_categories_display = sorted(monthly_forecast_counts["Forecast Display"].unique().tolist())
     
-    # Custom color mapping for all forecast types - each with distinct color
+    # Custom color mapping for all forecast types - each with distinct color (using transformed names)
     custom_colors = {
-        "Diplomatic Disruption": "#d97e7a",           # Light red
-        "Diplomatic Progression": "#5081a3",          # Deep blue
-        "Economic Disruption": "#c94b3a",             # Dark red
-        "Economic Progression": "#7fa3c0",            # Light blue
-        "Hybrid Political/Security Disruption": "#8b4453",   # Burgundy
-        "Hybrid Political/Social Disruption": "#6b9d7d",     # Sage green
-        "Political Disruption": "#e85c52",            # Bright red-orange
-        "Political Progression": "#2d5375",           # Navy blue
-        "Social Disruption": "#f4896f",               # Coral
-        "Social Progression": "#4a95d8",              # Sky blue
-        "Status Quo": "#3b668c"                       # Blue
+        "Diplomatic Deteriorating": "#d97e7a",           # Light red
+        "Diplomatic Improving": "#5081a3",               # Deep blue
+        "Economic Deteriorating": "#c94b3a",             # Dark red
+        "Economic Improving": "#7fa3c0",                 # Light blue
+        "Hybrid Political/Security Deteriorating": "#8b4453",   # Burgundy
+        "Hybrid Political/Social Deteriorating": "#6b9d7d",     # Sage green
+        "Political Deteriorating": "#e85c52",            # Bright red-orange
+        "Political Improving": "#2d5375",                # Navy blue
+        "Social Deteriorating": "#f4896f",               # Coral
+        "Social Improving": "#4a95d8",                   # Sky blue
+        "Status Quo": "#3b668c"                          # Blue
     }
     
     # Build color range: use custom colors for specified types, fill rest with SECONDARY_COLORS
     color_range = []
     used_secondary_colors = []
-    for cat in forecast_categories:
+    for cat in forecast_categories_display:
         if cat in custom_colors:
             color_range.append(custom_colors[cat])
         else:
@@ -1513,7 +1518,7 @@ if not monthly_forecast_counts.empty:
             else:
                 color_range.append(SECONDARY_COLORS[0])
     
-    forecast_color_scale = alt.Scale(domain=forecast_categories, range=color_range)
+    forecast_color_scale = alt.Scale(domain=forecast_categories_display, range=color_range)
     
     # Calculate monthly totals for breakdown chart
     monthly_breakdown_totals = monthly_forecast_counts.groupby("MonthLabel")["Count"].sum().reset_index()
@@ -1522,7 +1527,7 @@ if not monthly_forecast_counts.empty:
     breakdown_chart = alt.Chart(monthly_forecast_counts).mark_bar().encode(
         x=alt.X("MonthLabel:N", title="Month", sort=breakdown_month_sort, axis=alt.Axis(labelAngle=0), scale=alt.Scale(paddingInner=0.3)),
         y=alt.Y("Count:Q", title="Number of Developments", stack="zero"),
-        color=alt.Color(f"{FORECAST_COL}:N", scale=forecast_color_scale, legend=alt.Legend(title="Forecast Type", orient="bottom", direction="horizontal", titleFontSize=12, labelFontSize=10, columns=4)),
+        color=alt.Color("Forecast Display:N", scale=forecast_color_scale, legend=alt.Legend(title="Forecast Type", orient="bottom", direction="horizontal", titleFontSize=12, labelFontSize=10, columns=4)),
         opacity=alt.condition(
             direction_click,
             alt.value(1.0),
@@ -1531,7 +1536,7 @@ if not monthly_forecast_counts.empty:
         tooltip=[
             alt.Tooltip("MonthLabel:N", title="Month"),
             alt.Tooltip("Direction:N", title="Direction"),
-            alt.Tooltip(f"{FORECAST_COL}:N", title="Forecast Type"),
+            alt.Tooltip("Forecast Display:N", title="Forecast Type"),
             alt.Tooltip("Count:Q", title="Developments"),
         ],
     ).properties(
