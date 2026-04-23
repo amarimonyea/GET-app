@@ -547,6 +547,13 @@ def get_best_development_for_forecast(data_df, forecast_name, used_indices=None)
     score = best_row["Slider Score"]
     idx = best_row.name
     
+    # Extract only the first sentence (up to first ., ?, or !)
+    import re
+    first_sentence = re.split(r'[.!?]', short_text)[0].strip()
+    if first_sentence:
+        first_sentence += "."  # Add period if missing
+        short_text = first_sentence
+    
     return (short_text, score, idx)
 
 def get_key_insights(forecast_points_df, forecast_col, data_df=None):
