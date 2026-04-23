@@ -1489,12 +1489,47 @@ if not monthly_forecast_counts.empty:
     # Forecast type is secondary (subtle variation within each directional family)
     # ============================================================================
     
-    forecast_categories_display = sorted(monthly_forecast_counts["Forecast Display"].unique().tolist())
+    # ============================================================================
+    # FIXED STACKING ORDER (Bottom to Top)
+    # ============================================================================
+    # Enforces consistent visual structure across all months:
+    # 1. Status Quo (blue) - bottom
+    # 2. Improving categories (greens) - middle
+    # 3. Deteriorating categories (reds) - top
+    # 
+    # Within each direction, order by domain importance:
+    # Political → Economic → Social → Security → Hybrid → Diplomatic
+    # ============================================================================
     
-    # Identify forecast types by direction
-    deteriorating_forecasts = sorted([f for f in forecast_categories_display if "Deteriorating" in f])
-    improving_forecasts = sorted([f for f in forecast_categories_display if "Improving" in f])
-    status_quo_forecasts = [f for f in forecast_categories_display if "Status Quo" in f]
+    # Define the canonical stacking order (bottom to top)
+    stacking_order = [
+        "Status Quo",
+        # Improving (greens) - middle layer
+        "Political Improving",
+        "Economic Improving",
+        "Social Improving",
+        "Security Improving",
+        "Hybrid Political/Security Improving",
+        "Hybrid Political/Social Improving",
+        "Diplomatic Improving",
+        # Deteriorating (reds) - top layer
+        "Political Deteriorating",
+        "Economic Deteriorating",
+        "Social Deteriorating",
+        "Security Deteriorating",
+        "Hybrid Political/Security Deteriorating",
+        "Hybrid Political/Social Deteriorating",
+        "Diplomatic Deteriorating",
+    ]
+    
+    # Filter to only include categories that exist in the data
+    all_forecast_categories = monthly_forecast_counts["Forecast Display"].unique().tolist()
+    ordered_forecast_categories = [cat for cat in stacking_order if cat in all_forecast_categories]
+    
+    # Add any unexpected categories at the end (for robustness)
+    for cat in sorted(all_forecast_categories):
+        if cat not in ordered_forecast_categories:
+            ordered_forecast_categories.append(cat)
     
     # ----
     # RED FAMILY (Deteriorating) - Muted, cohesive reds
@@ -1504,7 +1539,8 @@ if not monthly_forecast_counts.empty:
         "Political Deteriorating": "#8b3a3a",          # Dark red (major domain)
         "Economic Deteriorating": "#a84d42",           # Medium-dark red
         "Social Deteriorating": "#c4614f",             # Medium red
-        "Diplomatic Deteriorating": "#d97257",         # Medium-light red
+        "Security Deteriorating": "#d0814b",           # Medium-light red
+        "Diplomatic Deteriorating": "#d97257",         # Light-medium red
         "Hybrid Political/Security Deteriorating": "#da8277",  # Light red
         "Hybrid Political/Social Deteriorating": "#e5999f",    # Very light red
     }
@@ -1515,9 +1551,10 @@ if not monthly_forecast_counts.empty:
     # ----
     green_family = {
         "Political Improving": "#2d5a3d",          # Dark green (major domain)
-        "Social Improving": "#3d7149",             # Medium-dark green
         "Economic Improving": "#4d8f56",           # Medium green
-        "Diplomatic Improving": "#6aad7f",         # Medium-light green
+        "Social Improving": "#3d7149",             # Medium-dark green
+        "Security Improving": "#5aa366",           # Medium-light green
+        "Diplomatic Improving": "#6aad7f",         # Light-medium green
         "Hybrid Political/Security Improving": "#7ec194",      # Light green
         "Hybrid Political/Social Improving": "#9cd4ad",        # Very light green
     }
@@ -1536,10 +1573,11 @@ if not monthly_forecast_counts.empty:
     custom_colors.update(green_family)
     custom_colors.update(blue_family)
     
-    # Create color range for all forecast categories
-    color_range = [custom_colors.get(cat, "#888888") for cat in forecast_categories_display]
+    # Create color range using the fixed stacking order
+    color_range = [custom_colors.get(cat, "#888888") for cat in ordered_forecast_categories]
     
-    forecast_color_scale = alt.Scale(domain=forecast_categories_display, range=color_range)
+    # Color scale uses the fixed ordered list to ensure consistent stacking across all months
+    forecast_color_scale = alt.Scale(domain=ordered_forecast_categories, range=color_range)
     
     # ============================================================================
     # ENHANCED LEGEND
@@ -1552,9 +1590,7 @@ if not monthly_forecast_counts.empty:
     # Altair doesn't support grouped legends natively, so we use visual ordering
     # and consistent naming to guide user interpretation
     
-    legend_title = "Forecast Type Breakdown\n(Red = Deteriorating, Green = Improving, Blue = Stable)"
-    
-    forecast_color_scale = alt.Scale(domain=forecast_categories_display, range=color_range)
+    legend_title = "Forecast Type Breakdown (Bottom to Top: Status Quo → Improving → Deteriorating)\n(Red = Deteriorating, Green = Improving, Blue = Stable)"
     
     # Calculate monthly totals for breakdown chart
     monthly_breakdown_totals = monthly_forecast_counts.groupby("MonthLabel")["Count"].sum().reset_index()
@@ -1566,6 +1602,7 @@ if not monthly_forecast_counts.empty:
         color=alt.Color(
             "Forecast Display:N", 
             scale=forecast_color_scale,
+            sort=ordered_forecast_categories,
             legend=alt.Legend(
                 title=legend_title,
                 orient="bottom",
