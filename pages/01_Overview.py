@@ -1482,41 +1482,59 @@ if not monthly_forecast_counts.empty:
         lambda x: str(x).replace("Disruption", "Deteriorating").replace("Progression", "Improving")
     )
     
-    # Extended color palette for forecast categories
-    SECONDARY_COLORS = ["#1b1725", "#bfa359", "#f1f0ec", "#62af44", "#cf5442", "#773344", "#e1bb4b", "#fade82", "#93b5c3", "#dca465", "#3b668c"]
-    
     # Get unique forecast values from data to map colors consistently (use transformed names)
     forecast_categories_display = sorted(monthly_forecast_counts["Forecast Display"].unique().tolist())
     
-    # Custom color mapping for all forecast types - each with distinct color (using transformed names)
-    custom_colors = {
-        "Diplomatic Deteriorating": "#d97e7a",           # Light red
-        "Diplomatic Improving": "#5081a3",               # Deep blue
-        "Economic Deteriorating": "#c94b3a",             # Dark red
-        "Economic Improving": "#7fa3c0",                 # Light blue
-        "Hybrid Political/Security Deteriorating": "#8b4453",   # Burgundy
-        "Hybrid Political/Social Deteriorating": "#6b9d7d",     # Sage green
-        "Political Deteriorating": "#e85c52",            # Bright red-orange
-        "Political Improving": "#2d5375",                # Navy blue
-        "Social Deteriorating": "#f4896f",               # Coral
-        "Social Improving": "#4a95d8",                   # Sky blue
-        "Status Quo": "#3b668c"                          # Blue
-    }
+    # NEW COLOR SYSTEM: Directional color families
+    # Organize colors by direction (deteriorating = reds, improving = greens, status quo = neutral)
+    # Reduces saturation and variation within each family for visual clarity
     
-    # Build color range: use custom colors for specified types, fill rest with SECONDARY_COLORS
-    color_range = []
-    used_secondary_colors = []
-    for cat in forecast_categories_display:
-        if cat in custom_colors:
-            color_range.append(custom_colors[cat])
-        else:
-            # Use remaining colors from SECONDARY_COLORS
-            available_secondary = [c for c in SECONDARY_COLORS if c not in used_secondary_colors and c not in color_range]
-            if available_secondary:
-                color_range.append(available_secondary[0])
-                used_secondary_colors.append(available_secondary[0])
-            else:
-                color_range.append(SECONDARY_COLORS[0])
+    # Red family (Deteriorating) - from light to dark
+    red_palette = [
+        "#f4a8a1",  # Very light red
+        "#e89b8f",  # Light red
+        "#dc8e7d",  # Medium-light red
+        "#d0816b",  # Medium red
+        "#c47459",  # Medium-dark red
+        "#b86747",  # Dark red
+    ]
+    
+    # Green family (Improving) - from light to dark
+    green_palette = [
+        "#a8e6c0",  # Very light green
+        "#8fddb0",  # Light green
+        "#76d4a0",  # Medium-light green
+        "#5dcb90",  # Medium green
+        "#44c280",  # Medium-dark green
+        "#2bb970",  # Dark green
+    ]
+    
+    # Neutral family (Status Quo) - muted tones
+    neutral_palette = ["#7a8ba3"]  # Muted blue-gray
+    
+    # Build custom color mapping organized by direction
+    deteriorating_forecasts = [f for f in forecast_categories_display if "Deteriorating" in f]
+    improving_forecasts = [f for f in forecast_categories_display if "Improving" in f]
+    status_quo_forecasts = [f for f in forecast_categories_display if "Status Quo" in f]
+    
+    custom_colors = {}
+    
+    # Assign red palette to deteriorating forecasts
+    for idx, forecast in enumerate(sorted(deteriorating_forecasts)):
+        color_idx = min(idx, len(red_palette) - 1)
+        custom_colors[forecast] = red_palette[color_idx]
+    
+    # Assign green palette to improving forecasts
+    for idx, forecast in enumerate(sorted(improving_forecasts)):
+        color_idx = min(idx, len(green_palette) - 1)
+        custom_colors[forecast] = green_palette[color_idx]
+    
+    # Assign neutral palette to status quo forecasts
+    for forecast in status_quo_forecasts:
+        custom_colors[forecast] = neutral_palette[0]
+    
+    # Build color range using the directional color mapping
+    color_range = [custom_colors.get(cat, "#999999") for cat in forecast_categories_display]
     
     forecast_color_scale = alt.Scale(domain=forecast_categories_display, range=color_range)
     
