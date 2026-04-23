@@ -1309,91 +1309,54 @@ Net direction indicates whether developments within each domain are trending tow
         most_balanced_domain = dom_balance.loc[dom_balance["Balance"].idxmin(), DOMAIN_COL]
         most_balanced_value = dom_balance.loc[dom_balance["Balance"].idxmin(), "Net Direction"]
         
-        # Build insights with expandable development examples
+        # Build insights using deterministic, clean approach
         domain_insights_list = []
+        used_development_indices = set()
         
         # Insight 1: Domain with highest deterioration
-        insight1_text = f"{max_disruption_domain} shows the highest cumulative deterioration (+{max_disruption_value:.1f})"
+        insight1_text = f"{max_disruption_domain} shows the highest cumulative deterioration (+{max_disruption_value:.1f})."
         if not df_filtered.empty:
-            top_developments = get_top_developments_for_domain(df_filtered, max_disruption_domain, top_n=2)
-            if top_developments:
-                examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
-                for short_text, full_text, source_url, score in top_developments:
-                    source_domain = "Source unknown"
-                    if source_url:
-                        try:
-                            domain = urlparse(source_url).netloc
-                            source_domain = domain.replace("www.", "")
-                        except:
-                            pass
-                    
-                    details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
-<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
-<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
-<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
-<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
-<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
-</div>
-</details>"""
-                    examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
-                examples_html += "</ul>"
-                insight1_text += examples_html
+            # Filter to developments in this domain
+            domain_data = df_filtered[df_filtered[DOMAIN_COL].astype(str) == max_disruption_domain].copy()
+            if not domain_data.empty:
+                domain_data["Abs Score"] = domain_data["Slider Score"].abs()
+                domain_data = domain_data.sort_values(by=["Abs Score", "Date"], ascending=[False, False])
+                domain_data = domain_data[~domain_data.index.isin(used_development_indices)]
+                if not domain_data.empty:
+                    best_row = domain_data.iloc[0]
+                    short_text = best_row["Development Short"]
+                    used_development_indices.add(best_row.name)
+                    insight1_text += f"\nExample: {short_text}"
         domain_insights_list.append(insight1_text)
         
         # Insight 2: Domain with highest improvement
-        insight2_text = f"{min_disruption_domain} shows the highest cumulative improvement (–{abs(min_disruption_value):.1f})"
+        insight2_text = f"{min_disruption_domain} shows the highest cumulative improvement (–{abs(min_disruption_value):.1f})."
         if not df_filtered.empty:
-            top_developments = get_top_developments_for_domain(df_filtered, min_disruption_domain, top_n=2)
-            if top_developments:
-                examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
-                for short_text, full_text, source_url, score in top_developments:
-                    source_domain = "Source unknown"
-                    if source_url:
-                        try:
-                            domain = urlparse(source_url).netloc
-                            source_domain = domain.replace("www.", "")
-                        except:
-                            pass
-                    
-                    details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
-<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
-<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
-<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
-<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
-<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
-</div>
-</details>"""
-                    examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
-                examples_html += "</ul>"
-                insight2_text += examples_html
+            domain_data = df_filtered[df_filtered[DOMAIN_COL].astype(str) == min_disruption_domain].copy()
+            if not domain_data.empty:
+                domain_data["Abs Score"] = domain_data["Slider Score"].abs()
+                domain_data = domain_data.sort_values(by=["Abs Score", "Date"], ascending=[False, False])
+                domain_data = domain_data[~domain_data.index.isin(used_development_indices)]
+                if not domain_data.empty:
+                    best_row = domain_data.iloc[0]
+                    short_text = best_row["Development Short"]
+                    used_development_indices.add(best_row.name)
+                    insight2_text += f"\nExample: {short_text}"
         domain_insights_list.append(insight2_text)
         
         # Insight 3: Most balanced domain
-        insight3_text = f"{most_balanced_domain} shows the most balanced mix (net: {most_balanced_value:.1f})"
+        insight3_text = f"{most_balanced_domain} shows the most balanced mix of developments (net: {most_balanced_value:.1f})."
         if not df_filtered.empty:
-            top_developments = get_top_developments_for_domain(df_filtered, most_balanced_domain, top_n=2)
-            if top_developments:
-                examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
-                for short_text, full_text, source_url, score in top_developments:
-                    source_domain = "Source unknown"
-                    if source_url:
-                        try:
-                            domain = urlparse(source_url).netloc
-                            source_domain = domain.replace("www.", "")
-                        except:
-                            pass
-                    
-                    details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
-<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
-<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
-<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
-<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
-<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
-</div>
-</details>"""
-                    examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
-                examples_html += "</ul>"
-                insight3_text += examples_html
+            domain_data = df_filtered[df_filtered[DOMAIN_COL].astype(str) == most_balanced_domain].copy()
+            if not domain_data.empty:
+                domain_data["Abs Score"] = domain_data["Slider Score"].abs()
+                domain_data = domain_data.sort_values(by=["Abs Score", "Date"], ascending=[False, False])
+                domain_data = domain_data[~domain_data.index.isin(used_development_indices)]
+                if not domain_data.empty:
+                    best_row = domain_data.iloc[0]
+                    short_text = best_row["Development Short"]
+                    used_development_indices.add(best_row.name)
+                    insight3_text += f"\nExample: {short_text}"
         domain_insights_list.append(insight3_text)
         
         domain_insights_html = ""
@@ -1619,67 +1582,43 @@ These charts show how forecast developments are distributed over time. The top c
         # Calculate total developments
         total_developments = monthly_forecast_counts["Count"].sum()
         
-        # Build insights with expandable development examples
+        # Build insights using deterministic, clean approach
         composition_insights_list = []
+        used_development_indices = set()
         
         # Insight 1: Most represented direction
-        insight1_text = f"<strong>Most represented direction:</strong> {most_represented_direction} ({most_represented_count} developments)"
+        insight1_text = f"Most represented direction is {most_represented_direction} ({most_represented_count} developments)."
         if not df_filtered.empty:
-            top_developments = get_top_developments_for_direction(df_filtered, most_represented_direction, top_n=2)
-            if top_developments:
-                examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
-                for short_text, full_text, source_url, score in top_developments:
-                    source_domain = "Source unknown"
-                    if source_url:
-                        try:
-                            domain = urlparse(source_url).netloc
-                            source_domain = domain.replace("www.", "")
-                        except:
-                            pass
-                    
-                    details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
-<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
-<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
-<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
-<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
-<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
-</div>
-</details>"""
-                    examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
-                examples_html += "</ul>"
-                insight1_text += examples_html
+            # Filter to developments with this direction
+            direction_data = df_filtered[df_filtered["Direction"].astype(str) == most_represented_direction].copy()
+            if not direction_data.empty:
+                direction_data["Abs Score"] = direction_data["Slider Score"].abs()
+                direction_data = direction_data.sort_values(by=["Abs Score", "Date"], ascending=[False, False])
+                direction_data = direction_data[~direction_data.index.isin(used_development_indices)]
+                if not direction_data.empty:
+                    best_row = direction_data.iloc[0]
+                    short_text = best_row["Development Short"]
+                    used_development_indices.add(best_row.name)
+                    insight1_text += f"\nExample: {short_text}"
         composition_insights_list.append(insight1_text)
         
         # Insight 2: Most represented forecast type
-        insight2_text = f"<strong>Most represented forecast type:</strong> {most_represented_forecast} ({most_represented_forecast_count} developments)"
+        insight2_text = f"Most represented forecast type is {most_represented_forecast} ({most_represented_forecast_count} developments)."
         if not df_filtered.empty:
-            top_developments = get_top_developments_for_forecast(df_filtered, most_represented_forecast, top_n=2)
-            if top_developments:
-                examples_html = "<br><span style='font-size: 0.85em; color: #666; font-style: italic;'>Examples:</span><ul style='margin: 0.3rem 0 0 1.2rem; font-size: 0.85em; color: #666; padding: 0;'>"
-                for short_text, full_text, source_url, score in top_developments:
-                    source_domain = "Source unknown"
-                    if source_url:
-                        try:
-                            domain = urlparse(source_url).netloc
-                            source_domain = domain.replace("www.", "")
-                        except:
-                            pass
-                    
-                    details_html = f"""<details style="margin: 0.2rem 0; cursor: pointer;">
-<summary style="font-size: 0.85em; color: #666; text-decoration: underline; cursor: pointer;">{html.escape(short_text)}</summary>
-<div style="margin-top: 0.4rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 3px; border-left: 2px solid #bfa359; font-size: 0.8em;">
-<p style="margin: 0 0 0.3rem 0; line-height: 1.4; color: #333;"><strong>Full Development:</strong></p>
-<p style="margin: 0 0 0.5rem 0; line-height: 1.4; color: #555;">{html.escape(full_text)}</p>
-<p style="margin: 0; font-size: 0.75em; color: #888;"><strong>Source:</strong> {html.escape(source_domain)}</p>
-</div>
-</details>"""
-                    examples_html += f"<li style='margin: 0.2rem 0; line-height: 1.3;'>{details_html}</li>"
-                examples_html += "</ul>"
-                insight2_text += examples_html
+            forecast_data = df_filtered[df_filtered[FORECAST_COL].astype(str) == most_represented_forecast].copy()
+            if not forecast_data.empty:
+                forecast_data["Abs Score"] = forecast_data["Slider Score"].abs()
+                forecast_data = forecast_data.sort_values(by=["Abs Score", "Date"], ascending=[False, False])
+                forecast_data = forecast_data[~forecast_data.index.isin(used_development_indices)]
+                if not forecast_data.empty:
+                    best_row = forecast_data.iloc[0]
+                    short_text = best_row["Development Short"]
+                    used_development_indices.add(best_row.name)
+                    insight2_text += f"\nExample: {short_text}"
         composition_insights_list.append(insight2_text)
         
-        # Insight 3: Total developments (no examples needed)
-        composition_insights_list.append(f"<strong>Total developments tracked:</strong> {total_developments} developments")
+        # Insight 3: Total developments (no example needed)
+        composition_insights_list.append(f"Total of {total_developments} developments are tracked in the selected time period.")
         
         composition_insights_html = ""
         for insight in composition_insights_list:
