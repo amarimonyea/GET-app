@@ -188,7 +188,7 @@ st.sidebar.markdown("""
 st.sidebar.divider()
 st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 
-st.title("Sector Impact Analysis")
+st.title("Institutional Impact Analysis")
 
 # Load and prepare data
 df = pd.read_csv("data/Monitor - Gender Equality - GET 2025 (1).csv", skiprows=1)
@@ -197,7 +197,7 @@ df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
 df = df.dropna(subset=["Date", "Slider Score"])
 
 st.write(
-    "Explore which federal and state sectors are most targeted by gender policy developments in the U.S."
+    "Explore which federal and state institutions are most targeted by gender policy developments in the U.S."
 )
 
 st.divider()
