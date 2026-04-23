@@ -547,11 +547,14 @@ def get_best_development_for_forecast(data_df, forecast_name, used_indices=None)
     score = best_row["Slider Score"]
     idx = best_row.name
     
-    # Extract only the first sentence (up to first ., ?, or !)
+    # Remove ellipsis and truncation artifacts, then extract only the first sentence
     import re
+    short_text = short_text.replace("…", "").strip()  # Remove ellipsis character
     first_sentence = re.split(r'[.!?]', short_text)[0].strip()
     if first_sentence:
-        first_sentence += "."  # Add period if missing
+        # Only add period if it doesn't already end with punctuation
+        if not first_sentence.endswith(('.', '!', '?')):
+            first_sentence += "."
         short_text = first_sentence
     
     return (short_text, score, idx)
