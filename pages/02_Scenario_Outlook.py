@@ -172,56 +172,56 @@ FORECAST_CARDS = [
         "name": "Economic", 
         "direction": "Improving",
         "probability": "Low (5-25%)",
-        "summary": "This forecast reflects increased investment in evidence-based research, public universities, and workforce development programs that advance gender equity and economic inclusion. Strengthened institutional commitment to equitable economic participation expands opportunities for marginalized communities and drives broader economic resilience.",
-        "implications": ["Implications coming soon"]
+        "summary": "This forecast reflects increased investment in evidence-based research, public universities, and workforce development programs that advance gender equity and economic inclusion. Federal support for childcare, paid family leave, and equitable wages strengthens economic participation for women and marginalized communities. Continuity of federal programs addressing economic vulnerability ensures sustained opportunity access across marginalized populations.",
+        "implications": ["Expanded economic opportunities for women and marginalized communities", "Sustained continuity of federal support programs (childcare, workforce development)", "Strengthened institutional capacity to address gender-driven economic inequities"]
     },
      {
         "name": "Economic", 
         "direction": "Deteriorating",
         "probability": "Low/Medium (25-40%)",
-        "summary": "This forecast illustrates how cuts to federal research funding and defunding of equity-focused institutions disrupts workforce diversity initiatives and limits economic opportunities for marginalized communities. Reduced evidence-based policymaking weakens institutional capacity to address gender-driven economic inequities.",
-        "monitoring_indicators": ["Cuts or divestments in federal scientific, evidence-based research, or mass media related to equity, gender, or social policy", "Decreased funding for public universities focused on social science research"],
-        "implications": ["Reduced economic opportunities for marginalized communities", "Disruption of workforce diversity and inclusion initiatives"]
+        "summary": "This forecast illustrates how cuts to federal research funding and defunding of equity-focused institutions disrupt workforce diversity initiatives and limit economic opportunities for marginalized communities and women. Reductions or elimination of federal supports for childcare, paid leave, and income assistance programs disproportionately harm women and vulnerable families. Loss of continuity in federal programs weakens economic resilience and widens inequality.",
+        "monitoring_indicators": ["Cuts or divestments in federal scientific, evidence-based research, or mass media related to equity, gender, or social policy", "Decreased funding for public universities focused on social science research", "Reductions in federal childcare, workforce development, or income support programs"],
+        "implications": ["Reduced economic opportunities for women and marginalized communities", "Disruption of federal program continuity (childcare, SNAP, housing support)", "Disproportionate economic burden on vulnerable families"]
     },
      {
         "name": "Social", 
         "direction": "Deteriorating",
         "probability": "Medium/High (60-75%)",
-        "summary": "This forecast illustrates how restrictive abortion policies create medical and ethical crises while anticipatory fear drives healthcare providers to withdraw services from vulnerable populations. The compounding effects of institutional pauses, discrimination escalation, and global human rights impacts reshape social landscapes.",
-        "monitoring_indicators": ["Medical and ethical crises emerging from restrictive abortion policies", "Service withdrawal or denial driven by anticipated legal, financial, or political retaliation"],
-        "implications": ["Increasing discrimination towards trans and gender-diverse individuals", "Global impact on diplomacy and human rights"]
+        "summary": "This forecast illustrates how restrictive reproductive policies create medical and ethical crises affecting women's healthcare, maternal mortality, and family planning access. Reductions in federal support for preventive health services, contraception access, and healthcare continuity disproportionately harm women and marginalized communities. Service withdrawal driven by fear and institutional pauses compounds discrimination, limiting civic participation and social support for vulnerable populations.",
+        "monitoring_indicators": ["Medical and ethical crises emerging from reproductive policy restrictions", "Service withdrawal affecting women's preventive health, contraception access, or maternal care", "Reduction in federal healthcare or social support program funding", "Service denial driven by anticipated legal, financial, or political retaliation"],
+        "implications": ["Increased maternal mortality and reproductive health crises for women", "Disruption of healthcare continuity for women and marginalized communities", "Compounding discrimination affecting women, trans, and gender-diverse individuals"]
     },
       {
         "name": "Social", 
         "direction": "Improving",
         "probability": "Low (5-25%)",
-        "summary": "This forecast envisions the establishment or reinstatement of gender-conscious protection programs and the restoration of reproductive and gender-affirming services following periods of institutional pause. Strengthened social commitment to equity outcomes reverses discrimination trends and rebuilds community trust.",
-        "monitoring_indicators": ["Establishment or reinstatement of gender-conscious or equity-oriented protection programs", "Restoration of reproductive and gender-affirming services following institutional pause"],
-        "implications": ["Implications coming soon"]
+        "summary": "This forecast envisions the establishment or reinstatement of comprehensive healthcare and social support programs serving women and marginalized communities. Restoration of federal support for preventive health, maternal care, reproductive services, and gender-affirming healthcare strengthens institutional commitment to equity. Continuity of social safety net programs and protection systems rebuilds community trust and reverses discrimination trends.",
+        "monitoring_indicators": ["Establishment or reinstatement of equity-oriented healthcare and social protection programs", "Restoration of federal support for preventive health, contraception, maternal care, and related services", "Continuity or expansion of social safety net programs (healthcare, housing support, family services)"],
+        "implications": ["Restored access to comprehensive healthcare for women and marginalized communities", "Strengthened federal program continuity supporting social equity", "Reversal of discrimination trends and restored community trust"]
     },
           {
         "name": "Security", 
         "direction": "Improving",
         "probability": "Low (5-25%)",
-        "summary": "This forecast reflects rollback of national security laws targeting gender identity and increased inclusion of diverse voices in security policymaking. Institutional recognition of intersectional security vulnerabilities strengthens national resilience and protects marginalized communities.",
-        "monitoring_indicators": ["Rollback of national laws targeting gender identity and based on sex", "Inclusion of diverse voices in national security policymaking spaces"],
-        "implications": ["Implications coming soon"]
+        "summary": "This forecast reflects rollback of national security laws targeting gender identity or based on sex and increased inclusion of women and diverse voices in security policymaking. Institutional recognition of intersectional security vulnerabilities—including impacts on women's organizations, marginalized communities, and civil liberties—strengthens national resilience and democratic protection.",
+        "monitoring_indicators": ["Rollback of national laws targeting gender identity and based on sex", "Inclusion of women and diverse voices in national security policymaking spaces", "Elimination of surveillance targeting civil rights and women's organizations"],
+        "implications": ["Protection of civil liberties for women and marginalized communities", "Stronger national security through inclusive policymaking", "Rollback of surveillance targeting civil rights organizations"]
     },
         {
         "name": "Security", 
         "direction": "Deteriorating",
         "probability": "Medium (40-60%)",
-        "summary": "This forecast illustrates how national security laws that target gender identity and that expand surveillance on women's and LGBTQ+ rights organizations criminalize vulnerable populations and limit civic participation.",
-        "monitoring_indicators": ["National security laws targeting gender identity", "Expansion of state surveillance on women's and LGBTQ+ rights organizations"],
-        "implications": ["Implications coming soon"]
+        "summary": "This forecast illustrates how national security laws targeting gender identity and expanded surveillance of civil rights, women's, and marginalized advocacy organizations criminalize vulnerable populations and curtail democratic participation. Surveillance of healthcare providers, social service organizations, and community groups weakens institutional support systems and expands control over marginalized communities.",
+        "monitoring_indicators": ["National security laws targeting gender identity or based on sex", "Expansion of state surveillance on women's rights, civil rights, and marginalized advocacy organizations", "Surveillance or criminalization of healthcare providers and social service organizations"],
+        "implications": ["Curtailment of civil liberties and democratic participation", "Weakened institutional support systems for marginalized communities", "Chilling effects on civic engagement and advocacy"]
     },
      {
         "name": "Hybrid Political/Security", 
         "direction": "Deteriorating",
         "probability": "Medium (40-60%)",
-        "summary": "This forecast illustrates how political decisions drive removal of qualified personnel from defense and security sectors based on sexual orientation or gender identity while expanding surveillance of healthcare providers and advocacy organizations. The intersection of political purges and security-based criminalization creates cascading vulnerabilities for LGBTQ+ populations.",
-        "monitoring_indicators": ["Removal of qualified civil servants and service members in national security sectors due to sexual orientation or gender identity", "Increased state surveillance and criminalization of healthcare providers offering gender-affirming services"],
-        "implications": ["Implications coming soon"]
+        "summary": "This forecast illustrates how political decisions drive removal of qualified personnel from defense and security sectors based on sexual orientation or gender identity, including the systematic exclusion of women from security roles. Expanded surveillance and criminalization of healthcare providers and advocacy organizations serving women, trans, and marginalized populations creates cascading institutional vulnerabilities. Political purges coupled with security-based constraints undermine both institutional capacity and civil liberties.",
+        "monitoring_indicators": ["Removal of qualified personnel from national security sectors due to sexual orientation, gender identity, or sex", "Systematic restriction of women's participation in security or defense roles", "Increased surveillance and criminalization of healthcare providers and advocacy organizations"],
+        "implications": ["Weakened national security through loss of qualified personnel", "Cascading vulnerabilities for women, LGBTQ+, and marginalized communities", "Undermined civil liberties and institutional capacity for humanitarian services"]
     },
       {
         "name": "Hybrid Political/Social", 
