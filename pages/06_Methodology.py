@@ -249,7 +249,7 @@ The cumulative intensity is converted to a letter grade (A through F) to provide
 These aggregations are computed at multiple levels:
 - By individual **Forecast** (showing trajectory within a specific policy scenario)
 - By **Domain of Assessment** (showing directional trends across institutional types)
-- By **Sector** (showing which industries or institutions are experiencing the most activity)
+- By **Institutions** (showing which industries or sectors are experiencing the most activity)
 
 """)
 
