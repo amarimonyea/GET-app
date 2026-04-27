@@ -432,6 +432,21 @@ df_initial["Absolute Intensity"] = df_initial["Slider Score"].abs()
 # CRITICAL RULE: The Population Group Impact chart ONLY shows Main Population Groups
 # Subgroups are for filtering and detail tables, never for the main chart
 
+# === DEBUG: Inspect the data structure ===
+with st.expander("🐛 Debug: Data Structure", expanded=False):
+    st.write(f"**Rows in df_initial:** {len(df_initial)}")
+    st.write(f"**Unique Main_Population_Group values:**")
+    main_groups_unique = df_initial[MAIN_GROUP_COL].unique()
+    st.write(sorted([x for x in main_groups_unique if pd.notna(x)]))
+    
+    st.write(f"**Unique Specific_Subgroup values:**")
+    subgroups_unique = df_initial[IMPACT_COL].unique()
+    st.write(sorted([x for x in subgroups_unique if pd.notna(x)]))
+    
+    st.write(f"**Sample rows (first 5):**")
+    if len(df_initial) > 0:
+        st.dataframe(df_initial[[MAIN_GROUP_COL, IMPACT_COL, "Development", "Slider Score"]].head(5))
+
 # === CHART METRICS: Always aggregate by Main Population Group ===
 impact_metrics_chart = []
 for group_name in df_initial[MAIN_GROUP_COL].unique():
@@ -447,6 +462,11 @@ for group_name in df_initial[MAIN_GROUP_COL].unique():
             })
 
 impact_metrics_initial = pd.DataFrame(impact_metrics_chart) if impact_metrics_chart else pd.DataFrame(columns=["Group", "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"])
+
+# Debug chart metrics
+with st.expander("🐛 Debug: Chart Metrics", expanded=False):
+    st.write(f"**Groups in chart metrics:** {len(impact_metrics_initial)}")
+    st.write(impact_metrics_initial[["Group", "Event_Count"]].to_dict(orient="records"))
 
 # === DETAIL METRICS: For drill-down views, show subgroups only (not for chart) ===
 detail_metrics = []
