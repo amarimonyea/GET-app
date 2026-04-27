@@ -198,6 +198,31 @@ st.markdown(
 
 # Population Group Filters (Cascading)
 st.sidebar.divider()
+
+# Load data early to calculate top institutions
+df = pd.read_csv("data/Monitor - Gender Equality - GET 2025 (1).csv", skiprows=1)
+df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
+df = df.dropna(subset=["Date", "Slider Score"])
+
+# Calculate all and top 5 institutions (excluding NaN)
+all_institutions = sorted([x for x in df["Sector Impacted"].unique() if pd.notna(x)])
+institution_counts = df["Sector Impacted"].value_counts()
+top_5_institutions = institution_counts.head(5).index.tolist()
+
+# Institution filter dropdown
+st.sidebar.subheader("Institutions")
+institution_option = st.sidebar.selectbox(
+    "Display",
+    options=["Top 5", "All"],
+    label_visibility="collapsed"
+)
+
+if institution_option == "Top 5":
+    selected_institutions = top_5_institutions
+else:
+    selected_institutions = all_institutions
+
 st.sidebar.subheader("Filter by Population Group")
 
 # Reset button
@@ -261,30 +286,6 @@ st.sidebar.markdown("""
   </div>
 </div>
 """, unsafe_allow_html=True)
-
-# Load data early to calculate top institutions
-df = pd.read_csv("data/Monitor - Gender Equality - GET 2025 (1).csv", skiprows=1)
-df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
-df = df.dropna(subset=["Date", "Slider Score"])
-
-# Calculate all and top 5 institutions (excluding NaN)
-all_institutions = sorted([x for x in df["Sector Impacted"].unique() if pd.notna(x)])
-institution_counts = df["Sector Impacted"].value_counts()
-top_5_institutions = institution_counts.head(5).index.tolist()
-
-# Institution filter widget
-st.sidebar.subheader("Filter by Institution")
-selected_institutions = st.sidebar.multiselect(
-    "Sector Impacted",
-    options=all_institutions,
-    default=top_5_institutions,
-    label_visibility="collapsed"
-)
-
-# If no institutions selected, use top 5 as default
-if not selected_institutions:
-    selected_institutions = top_5_institutions
 
 # Logo at bottom of sidebar
 st.sidebar.divider()
