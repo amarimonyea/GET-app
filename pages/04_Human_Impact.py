@@ -215,7 +215,8 @@ st.sidebar.subheader("Institutions")
 institution_option = st.sidebar.selectbox(
     "Display",
     options=["Top 5", "All"],
-    label_visibility="collapsed"
+    label_visibility="collapsed",
+    key="institution_display_option"
 )
 
 if institution_option == "Top 5":
