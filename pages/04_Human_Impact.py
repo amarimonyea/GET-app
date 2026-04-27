@@ -14,6 +14,7 @@ POPULATION_STRUCTURE = {
         "Pregnant Women": ["pregnant women"],
         "Women Servicemembers": ["women servicemembers", "female servicemembers", "women veterans", "female veterans"],
         "Women in Workforce": ["women in workforce"],
+        "Reproductive Healthcare": ["reproductive healthcare patients", "reproductive healthcare patients and providers", "abortion patients", "planned parenthood"],
     },
     "LGBTQ+ and Gender-Diverse Populations": {
         "LGBTQ+ Individuals": ["LGBTQ+ individuals", "LGBTQ+ youth"],
