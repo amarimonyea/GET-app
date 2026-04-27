@@ -212,17 +212,27 @@ top_5_institutions = institution_counts.head(5).index.tolist()
 
 # Institution filter dropdown
 st.sidebar.subheader("Institutions")
+
+def on_institution_change():
+    """Callback to trigger rerun when institution selection changes"""
+    pass
+
 institution_option = st.sidebar.selectbox(
     "Display",
     options=["Top 5", "All"],
+    index=0,
     label_visibility="collapsed",
-    key="institution_display_option"
+    key="institution_display_option",
+    on_change=on_institution_change
 )
 
 if institution_option == "Top 5":
     selected_institutions = top_5_institutions
 else:
     selected_institutions = all_institutions
+
+# Display selected institutions
+st.sidebar.caption(f"Viewing: {', '.join(selected_institutions[:3])}{'...' if len(selected_institutions) > 3 else ''}")
 
 st.sidebar.subheader("Filter by Population Group")
 
