@@ -429,52 +429,43 @@ df_initial["Weighted Improvement"] = np.where(df_initial["Slider Score"] < 0, -d
 df_initial["Absolute Intensity"] = df_initial["Slider Score"].abs()
 
 # Determine what level to display metrics at
-# RULE: Charts always aggregate by Main_Population_Group ONLY
-# Subgroups are only for filtering and drill-down detail views
+# CRITICAL RULE: The Population Group Impact chart ONLY shows Main Population Groups
+# Subgroups are for filtering and detail tables, never for the main chart
 
-impact_metrics_initial = []
+# === CHART METRICS: Always aggregate by Main Population Group ===
+impact_metrics_chart = []
+for group_name in df_initial[MAIN_GROUP_COL].unique():
+    if pd.notna(group_name):
+        group_df = df_initial[df_initial[MAIN_GROUP_COL] == group_name]
+        if len(group_df) > 0:
+            impact_metrics_chart.append({
+                "Group": group_name,
+                "Weighted Deterioration": group_df["Weighted Deterioration"].sum(),
+                "Weighted Improvement": group_df["Weighted Improvement"].sum(),
+                "Absolute Intensity": group_df["Absolute Intensity"].sum(),
+                "Event_Count": len(group_df)
+            })
 
-if main_group == "All Population Groups":
-    # Top-level view: Show metrics per MAIN group only
-    for group_name in df_initial[MAIN_GROUP_COL].unique():
-        if pd.notna(group_name):
-            group_df = df_initial[df_initial[MAIN_GROUP_COL] == group_name]
-            if len(group_df) > 0:
-                impact_metrics_initial.append({
-                    "Group": group_name,
-                    "Weighted Deterioration": group_df["Weighted Deterioration"].sum(),
-                    "Weighted Improvement": group_df["Weighted Improvement"].sum(),
-                    "Absolute Intensity": group_df["Absolute Intensity"].sum(),
-                    "Event_Count": len(group_df)
-                })
+impact_metrics_initial = pd.DataFrame(impact_metrics_chart) if impact_metrics_chart else pd.DataFrame(columns=["Group", "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"])
 
-elif sub_group == "All Subgroups":
-    # Drill-down view: Show metrics per SUBGROUP within selected main group
-    # This is a detailed breakdown of a specific parent group
+# === DETAIL METRICS: For drill-down views, show subgroups only (not for chart) ===
+detail_metrics = []
+
+if main_group != "All Population Groups" and sub_group == "All Subgroups":
+    # Drill-down: Show per-subgroup breakdown in a detail table
     for subgroup_name in df_initial[IMPACT_COL].unique():
         if pd.notna(subgroup_name):
             subgroup_df = df_initial[df_initial[IMPACT_COL] == subgroup_name]
             if len(subgroup_df) > 0:
-                impact_metrics_initial.append({
-                    "Group": subgroup_name,
+                detail_metrics.append({
+                    "Subgroup": subgroup_name,
                     "Weighted Deterioration": subgroup_df["Weighted Deterioration"].sum(),
                     "Weighted Improvement": subgroup_df["Weighted Improvement"].sum(),
                     "Absolute Intensity": subgroup_df["Absolute Intensity"].sum(),
                     "Event_Count": len(subgroup_df)
                 })
 
-else:
-    # Specific subgroup selected: Show aggregate for that subgroup only
-    if len(df_initial) > 0:
-        impact_metrics_initial.append({
-            "Group": sub_group,
-            "Weighted Deterioration": df_initial["Weighted Deterioration"].sum(),
-            "Weighted Improvement": df_initial["Weighted Improvement"].sum(),
-            "Absolute Intensity": df_initial["Absolute Intensity"].sum(),
-            "Event_Count": len(df_initial)
-        })
-
-impact_metrics_initial = pd.DataFrame(impact_metrics_initial) if impact_metrics_initial else pd.DataFrame(columns=["Group", "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"])
+detail_metrics_df = pd.DataFrame(detail_metrics) if detail_metrics else pd.DataFrame()
 
 # Generate Key Insights with development examples
 insights = []
@@ -597,10 +588,30 @@ else:
 # How to Interpret This Chart section
 with st.expander("How to Interpret This Chart", expanded=False):
     st.markdown("""
-**Number of Developments:** The total number of gender policy developments affecting each population group. Higher counts indicate groups experiencing more frequent policy impact when filtered by your selected subgroup.
+**Number of Developments:** The total number of gender policy developments affecting each population group. Higher counts indicate groups experiencing more frequent policy impact.
 
-**How it works:** The chart shows all 7 main population groups, but only counts developments that match your selected subgroup. For example, if you select "Women and Girls" → "Pregnant Women", the chart will show how many developments mentioning pregnant women affect each of the 7 main population groups.
+**Chart Always Shows:** Main Population Groups only (10 categories) to ensure clean, non-overlapping categories aligned with the hierarchical structure.
+
+**Drill-Down:** Select a specific population group from the sidebar to view detailed breakdown by subgroups.
 """)
+
+# Show subgroup detail table if drilling down into a specific main group
+if main_group != "All Population Groups" and sub_group == "All Subgroups" and not detail_metrics_df.empty:
+    st.subheader(f"Breakdown: {main_group} → All Subgroups")
+    st.caption("Detailed metrics for each subgroup within this population group")
+    st.dataframe(
+        detail_metrics_df.sort_values("Event_Count", ascending=False),
+        column_config={
+            "Subgroup": st.column_config.TextColumn(label="Subgroup"),
+            "Weighted Deterioration": st.column_config.NumberColumn(label="Deterioration", format="%d"),
+            "Weighted Improvement": st.column_config.NumberColumn(label="Improvement", format="%d"),
+            "Absolute Intensity": st.column_config.NumberColumn(label="Total Intensity", format="%d"),
+            "Event_Count": st.column_config.NumberColumn(label="# Developments", format="%d"),
+        },
+        use_container_width=True,
+        hide_index=True,
+    )
+    st.divider()
 
 # Key Insights section
 insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in insights])
