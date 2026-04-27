@@ -331,7 +331,7 @@ Each entry is categorized by:
     - U.S. withdrawal from or defunding of international organizations advancing gender, LGBTQ+, or reproductive rights
     - Medical and ethical crises emerging from restrictive abortion policies
 
-- **Sector Impacted**: Institutional domain affected
+- **Institution Impacted**: Institutional domain affected
   - Federal Executive, Healthcare Systems, Education, International/Multilateral, etc.
 
 - **Who is Impacted**: Target population groups
