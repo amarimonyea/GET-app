@@ -232,7 +232,10 @@ else:
     selected_institutions = all_institutions
 
 # Display selected institutions
-st.sidebar.caption(f"Viewing: {', '.join(selected_institutions[:3])}{'...' if len(selected_institutions) > 3 else ''}")
+if institution_option == "Top 5":
+    st.sidebar.caption(f"Displaying: {', '.join(top_5_institutions)}")
+else:
+    st.sidebar.caption(f"Displaying all {len(all_institutions)} institutions")
 
 st.sidebar.subheader("Filter by Population Group")
 
@@ -350,7 +353,12 @@ df_filtered = filter_by_terms(df, selected_terms)
 # Apply institution filter
 df_filtered = df_filtered[df_filtered["Sector Impacted"].isin(selected_institutions)]
 
-st.markdown(f"**Filtering by:** {main_group} → {sub_group} | **Institutions:** {', '.join(selected_institutions) if selected_institutions else 'All'}")
+# Debug info
+st.sidebar.write(f"DEBUG: Institution option = {institution_option}")
+st.sidebar.write(f"DEBUG: Selected institutions count = {len(selected_institutions)}")
+st.sidebar.write(f"DEBUG: Filtered rows = {len(df_filtered)}")
+
+st.markdown(f"**Filtering by:** {main_group} → {sub_group} | **Institutions:** {len(selected_institutions)} selected")
 
 if df_filtered.empty:
     st.warning(f"No data available for: {main_group} → {sub_group}")
