@@ -268,8 +268,8 @@ df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
 df = df.dropna(subset=["Date", "Slider Score"])
 
-# Calculate all and top 5 institutions
-all_institutions = sorted(df["Sector Impacted"].unique())
+# Calculate all and top 5 institutions (excluding NaN)
+all_institutions = sorted([x for x in df["Sector Impacted"].unique() if pd.notna(x)])
 institution_counts = df["Sector Impacted"].value_counts()
 top_5_institutions = institution_counts.head(5).index.tolist()
 
