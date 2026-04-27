@@ -322,7 +322,8 @@ with st.expander("**Development Classifications**", expanded=False):
 Each entry is categorized by:
 
 - **Forecast Type**: Describes the nature of the development
-  - Political Disruption, Diplomatic Progression, Social Disruption, etc.
+  - Political Deteriorating, Diplomatic Improving, Social Deteriorating, etc.
+  - **Conditions**: Deteriorating scenarios reflect policy rollbacks or institutional decline; Improving scenarios reflect protective expansions or strengthened safeguards
 
 - **Monitoring Indicator**: Observable signals that characterize the nature of developments and help identify broader policy trends
   - Example indicators include:
