@@ -323,7 +323,6 @@ Each entry is categorized by:
 
 - **Forecast Type**: Describes the nature of the development
   - Political Deteriorating, Diplomatic Improving, Social Deteriorating, etc.
-  - **Conditions**: Deteriorating scenarios reflect policy rollbacks or institutional decline; Improving scenarios reflect protective expansions or strengthened safeguards
 
 - **Monitoring Indicator**: Observable signals that characterize the nature of developments and help identify broader policy trends
   - Example indicators include:
@@ -334,7 +333,7 @@ Each entry is categorized by:
 - **Institution Impacted**: Institutional domain affected
   - Federal Executive, Healthcare Systems, Education, International/Multilateral, etc.
 
-- **Who is Impacted**: Target population groups
+- **Who is Impacted**: Targeted population groups
   - Transgender individuals, women and girls, LGBTQ+ communities, marginalized groups
 
 - **Domain of Assessment**: Categorization framework
