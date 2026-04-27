@@ -429,12 +429,13 @@ df_initial["Weighted Improvement"] = np.where(df_initial["Slider Score"] < 0, -d
 df_initial["Absolute Intensity"] = df_initial["Slider Score"].abs()
 
 # Determine what level to display metrics at
-# Since data is pre-parsed into Main_Population_Group and Specific_Subgroup, just group by those
+# RULE: Charts always aggregate by Main_Population_Group ONLY
+# Subgroups are only for filtering and drill-down detail views
+
 impact_metrics_initial = []
 
-# Group the data appropriately
 if main_group == "All Population Groups":
-    # Show metrics per main group
+    # Top-level view: Show metrics per MAIN group only
     for group_name in df_initial[MAIN_GROUP_COL].unique():
         if pd.notna(group_name):
             group_df = df_initial[df_initial[MAIN_GROUP_COL] == group_name]
@@ -448,7 +449,8 @@ if main_group == "All Population Groups":
                 })
 
 elif sub_group == "All Subgroups":
-    # Show metrics per subgroup within the selected main group
+    # Drill-down view: Show metrics per SUBGROUP within selected main group
+    # This is a detailed breakdown of a specific parent group
     for subgroup_name in df_initial[IMPACT_COL].unique():
         if pd.notna(subgroup_name):
             subgroup_df = df_initial[df_initial[IMPACT_COL] == subgroup_name]
@@ -462,7 +464,7 @@ elif sub_group == "All Subgroups":
                 })
 
 else:
-    # Show metrics for the specific subgroup - summarize the filtered data
+    # Specific subgroup selected: Show aggregate for that subgroup only
     if len(df_initial) > 0:
         impact_metrics_initial.append({
             "Group": sub_group,
@@ -552,6 +554,14 @@ if not impact_metrics.empty:
     impact_metrics = impact_metrics.sort_values(sort_col, ascending=False).head(top_n_viz)
 
 st.subheader("Population Group Impact Rankings")
+
+# Add subtitle explaining which level is being displayed
+if main_group == "All Population Groups":
+    st.caption("**View Level:** All Main Population Groups (10 categories)")
+elif sub_group != "All Subgroups":
+    st.caption(f"**View Level:** Detailed - {sub_group} only")
+else:
+    st.caption(f"**View Level:** Subgroups of {main_group}")
 
 # Dynamic chart height based on number of groups
 # Ensure minimum spacing between bars for readability
