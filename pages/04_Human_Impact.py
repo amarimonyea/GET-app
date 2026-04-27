@@ -10,64 +10,46 @@ st.set_page_config(page_title="Human Impact")
 # ---------------------------
 POPULATION_STRUCTURE = {
     "Women and Girls": {
-        "All Women": ["women and girls", "women"],
+        "Women and Girls": ["women", "women and girls"],
         "Pregnant Women": ["pregnant women"],
-        "Texas Women": ["texas women", "women in TX"],
-        "Women Servicemembers or Veterans": ["women servicemembers", "women veterans", "female servicemembers", "female veterans"],
+        "Women Servicemembers": ["women servicemembers", "female servicemembers", "women veterans", "female veterans"],
+        "Women in Workforce": ["women in workforce"],
     },
-    "Transgender & Gender-Diverse Individuals": {
-        "Transgender Individuals and Nonbinary People": ["transgender individuals", "transgender and gender-diverse individuals", "nonbinary people"],
-        "Trans and Gender-Diverse Community": ["trans and gender-diverse community", "trans and gender diverse community"],
-        "UK Trans and Gender Diverse Community": ["UK trans", "trans and gender diverse community"],
-        "People with Gender Dysphoria": ["gender dysphoria"],
-    },
-    "Transgender & Gender-Diverse Youth": {
-        "Transgender and Gender-Diverse Youth": ["transgender and gender-diverse youth", "trans and non-binary youth"],
-        "Trans Youth": ["trans youth", "transgender youth"],
-        "Trans Youth in Public Schools": ["trans youth in public schools", "transgender youth in public schools"],
-        "Transgender Youth in Arkansas": ["transgender youth in arkansas"],
-        "LGBTQ+ Youth": ["LGBTQ+ youth"],
-    },
-    "LGBTQ+ Individuals": {
-        "LGBTQ+ Individuals": ["LGBTQ+ individuals"],
-        "Women and LGBTQ+ Beneficiaries": ["women and LGBTQ+ beneficiaries"],
-        "LGBTQ+ Individuals and Advocates": ["LGBTQ+ individuals", "human rights advocates", "activists"],
+    "LGBTQ+ and Gender-Diverse Populations": {
+        "LGBTQ+ Individuals": ["LGBTQ+ individuals", "LGBTQ+ youth"],
+        "Transgender Individuals": ["trans and gender-diverse community", "transgender individuals", "nonbinary people"],
+        "Transgender Youth": ["trans youth", "transgender youth", "trans athletes", "transgender athletes"],
+        "Gender Dysphoria": ["gender dysphoria"],
     },
     "Patients & Beneficiaries": {
-        "Reproductive Healthcare Patients": ["reproductive healthcare patients", "abortion patients", "planned parenthood"],
-        "Beneficiaries of Federal Programs": ["beneficiaries of federal programs", "SNAP recipients", "WIC recipients", "medicaid recipients"],
-        "International Aid Recipients": ["international aid recipients", "international gender rights organizations"],
-        "US-Funded Civil Society Organizations": ["US-funded civil society organizations"],
+        "Reproductive Health": ["reproductive healthcare patients", "abortion patients", "planned parenthood"],
+        "Federal Benefits": ["SNAP recipients", "WIC recipients", "medicaid recipients", "beneficiaries of federal programs"],
+        "International Aid": ["international aid recipients", "international gender rights organizations"],
     },
     "Practitioners & Researchers": {
-        "Healthcare Practitioners": ["healthcare practitioners", "healthcare providers", "pediatric healthcare providers", "healthcare agencies"],
-        "Legal Practitioners": ["legal practitioners"],
-        "Education Practitioners": ["education practitioners", "educators", "educator workforce", "public school districts"],
-        "California and Oklahoma Educators": ["california public school districts", "oklahoma public education system"],
-        "Academic and Public Health Researchers": ["academic researchers", "public health researchers", "researchers"],
+        "Healthcare": ["healthcare providers", "healthcare practitioners", "pediatric healthcare providers", "healthcare agencies"],
+        "Legal": ["legal practitioners"],
+        "Education": ["educators", "public school districts", "education practitioners"],
+        "Research": ["academic researchers", "public health researchers"],
     },
     "Workforce & Institutional Personnel": {
-        "Federal Workforce": ["federal workforce", "trans and non-binary federal workforce", "trans federal workforce"],
-        "Trans and Gender-Diverse Workforce": ["trans and gender-diverse workforce"],
-        "Trans Military Personnel": ["trans military personnel", "trans service members", "experienced U.S. Navy personnel"],
-        "Women Servicemembers or Veterans": ["women servicemembers", "women veterans"],
-        "Elected Officials and State Governments": ["elected officials", "state governments"],
+        "Federal Workforce": ["federal workforce", "trans federal workforce"],
+        "Military & Service": ["trans military personnel", "trans service members", "experienced U.S. Navy personnel"],
+        "Government": ["elected officials", "state governments"],
     },
     "Justice & Detention Populations": {
-        "Trans and Non-Binary Inmates": ["trans and non-binary inmates", "incarcerated trans community"],
-        "Kentucky Incarcerated Trans Community": ["kentucky incarcerated trans community"],
-        "Survivors of Violence": ["survivors of sexual violence", "victims of GBV"],
+        "Incarcerated Populations": ["trans inmates", "incarcerated trans community"],
+        "Gender-Based Violence": ["survivors of sexual violence", "victims of GBV", "gender-based violence survivors"],
     },
-    "General / Community Populations": {
-        "Local Residents": ["local residents", "chicago residents", "FL residents", "florida residents", "indiana residents"],
-        "State Residents": ["DMV residents", "IL residents", "TN residents", "CA residents"],
-        "International Populations": ["foreign nationals", "international travelers"],
+    "Community & Place-Based Populations": {
+        "Local Residents": ["local residents", "residents", "students"],
+        "Geographic": ["chicago residents", "FL residents", "indiana residents"],
     },
-    "Marginalized & Intersectional Groups": {
-        "Marginalized Ethnicity Groups": ["marginalized ethnicity groups"],
-        "Low Income Minority Communities": ["low income minority communities"],
-        "Women and Marginalized Groups": ["women and girls", "marginalized ethnicity groups"],
-        "Intersectional Trans Populations": ["transgender and gender-diverse individuals", "marginalized ethnicity groups"],
+    "Marginalized Communities": {
+        "Marginalized Communities": ["marginalized ethnicity groups", "low-income minority communities"],
+    },
+    "Advocacy & Civil Society / Cultural": {
+        "Advocacy & Civil Society": ["foreign nationals", "international travelers", "arts institutions", "human rights advocates", "activists"],
     },
 }
 
@@ -258,7 +240,7 @@ else:
 
 # Display selected focus
 st.sidebar.info(
-    f"📊 Showing data for **{main_group}** → **{sub_group}**"
+    f"Showing data for **{main_group}** → **{sub_group}**"
 )
 
 # Forecast Direction
@@ -293,7 +275,7 @@ st.write(
 )
 
 # Display all available groups and subgroups
-with st.expander("📋 View all Population Groups & Subgroups", expanded=False):
+with st.expander("View all Population Groups & Subgroups", expanded=False):
     for main_group_name, subgroups_dict in POPULATION_STRUCTURE.items():
         st.subheader(main_group_name)
         for subgroup_name, keywords in subgroups_dict.items():
