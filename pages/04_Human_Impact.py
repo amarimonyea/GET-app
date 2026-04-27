@@ -199,33 +199,11 @@ st.markdown(
 # Population Group Filters (Cascading)
 st.sidebar.divider()
 
-# Load data early to calculate top institutions
+# Load data
 df = pd.read_csv("data/Monitor - Gender Equality - GET 2025 (1).csv", skiprows=1)
 df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
 df = df.dropna(subset=["Date", "Slider Score"])
-
-# Calculate all and top 5 institutions (excluding NaN)
-all_institutions = sorted([x for x in df["Sector Impacted"].unique() if pd.notna(x)])
-institution_counts = df["Sector Impacted"].value_counts()
-top_5_institutions = institution_counts.head(5).index.tolist()
-
-# Institution filter dropdown
-st.sidebar.subheader("Institutions")
-
-institution_option = st.sidebar.selectbox(
-    "Display",
-    options=["Top 5", "All"],
-    index=0,
-    label_visibility="collapsed",
-    key="institution_display_option"
-)
-
-# Display selected institutions for reference
-if institution_option == "Top 5":
-    st.sidebar.caption(f"Reference: {', '.join(top_5_institutions)}")
-else:
-    st.sidebar.caption(f"Reference: All {len(all_institutions)} institutions")
 
 st.sidebar.subheader("Filter by Population Group")
 
@@ -511,7 +489,7 @@ if not impact_metrics_initial.empty and main_group == "All Population Groups":
         insights.append(f"<strong>{most_disrupted[IMPACT_COL]}</strong> is most affected by deterioration (weighted deterioration score: {most_disrupted['Weighted Deterioration']:.1f})")
         insights_devs["disruption"] = {
             "group": most_disrupted[IMPACT_COL],
-            "devs": get_top_developments_for_group(df_initial, most_disrupted[IMPACT_COL], top_n=1, score_filter="disruption")
+            "devs": get_top_developments_for_group(df_initial, most_disrupted[IMPACT_COL], top_n=1, score_filter="deterioration")
         }
     
     # Insight 3: Most Progressed (different group from impact and disruption if possible)
@@ -532,18 +510,37 @@ if not impact_metrics_initial.empty and main_group == "All Population Groups":
         insights.append(f"<strong>{most_progressed[IMPACT_COL]}</strong> shows the most improvement (weighted improvement score: {most_progressed['Weighted Improvement']:.1f})")
         insights_devs["progression"] = {
             "group": most_progressed[IMPACT_COL],
-            "devs": get_top_developments_for_group(df_initial, most_progressed[IMPACT_COL], top_n=1, score_filter="progression")
+            "devs": get_top_developments_for_group(df_initial, most_progressed[IMPACT_COL], top_n=1, score_filter="improvement")
         }
 
 # Determine number of unique groups
 num_groups = impact_metrics_initial.shape[0] if not impact_metrics_initial.empty else 0
 
-# Set default display settings
-top_n_rank = num_groups  # Show all groups by default
-sort_col = "Event_Count"  # Sort by number of developments
-top_n_viz = min(10, num_groups)  # Show top 10 in chart visualization
+# Display selector for top N groups
+st.divider()
 
-# Use pre-computed metrics
+col1, col2 = st.columns([3, 1])
+with col2:
+    display_option = st.selectbox(
+        "Show",
+        options=["Top 5", "Top 10", "All"],
+        index=0,
+        label_visibility="collapsed",
+        key="top_groups_display_option"
+    )
+
+# Determine how many groups to display based on selection
+if display_option == "Top 5":
+    top_n_viz = min(5, num_groups)
+elif display_option == "Top 10":
+    top_n_viz = min(10, num_groups)
+else:  # All
+    top_n_viz = num_groups
+
+# Set sort column for ranking
+sort_col = "Event_Count"  # Sort by number of developments
+
+# Use pre-computed metrics and filter to top N
 impact_metrics = impact_metrics_initial.copy()
 if not impact_metrics.empty:
     impact_metrics = impact_metrics.sort_values(sort_col, ascending=False).head(top_n_viz)
@@ -767,7 +764,10 @@ top_3_groups = (
 # Build trend data for top 3 groups
 trend_data_list = []
 for group in top_3_groups:
-    group_df_monthly = df_trends[[group in str(row) for row in df_trends[IMPACT_COL]]].groupby("Month", as_index=False).agg({
+    # Use word boundary matching to filter for this group's developments
+    pattern = r'\b' + re.escape(group.lower()) + r'\b'
+    group_mask = df_trends[IMPACT_COL].fillna('').str.lower().apply(lambda x: bool(re.search(pattern, x)))
+    group_df_monthly = df_trends[group_mask].groupby("Month", as_index=False).agg({
         "Absolute Intensity": "sum",
         "Slider Score": "count"
     }).rename(columns={"Slider Score": "Event_Count"})
