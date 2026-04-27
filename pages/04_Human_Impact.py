@@ -268,18 +268,23 @@ df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
 df = df.dropna(subset=["Date", "Slider Score"])
 
-# Calculate top 5 institutions
+# Calculate all and top 5 institutions
+all_institutions = sorted(df["Sector Impacted"].unique())
 institution_counts = df["Sector Impacted"].value_counts()
-top_5_institutions = institution_counts.head(5)
+top_5_institutions = institution_counts.head(5).index.tolist()
 
-# Display Top Institutions widget
-st.sidebar.subheader("Top 5 Institutions Impacted")
-for idx, (institution, count) in enumerate(top_5_institutions.items(), 1):
-    st.sidebar.metric(
-        label=f"{idx}. {institution}",
-        value=int(count),
-        label_visibility="visible"
-    )
+# Institution filter widget
+st.sidebar.subheader("Filter by Institution")
+selected_institutions = st.sidebar.multiselect(
+    "Sector Impacted",
+    options=all_institutions,
+    default=top_5_institutions,
+    label_visibility="collapsed"
+)
+
+# If no institutions selected, use top 5 as default
+if not selected_institutions:
+    selected_institutions = top_5_institutions
 
 # Logo at bottom of sidebar
 st.sidebar.divider()
@@ -330,7 +335,10 @@ def filter_by_terms(df, terms):
 
 df_filtered = filter_by_terms(df, selected_terms)
 
-st.markdown(f"**Filtering by:** {main_group} → {sub_group}")
+# Apply institution filter
+df_filtered = df_filtered[df_filtered["Sector Impacted"].isin(selected_institutions)]
+
+st.markdown(f"**Filtering by:** {main_group} → {sub_group} | **Institutions:** {', '.join(selected_institutions) if selected_institutions else 'All'}")
 
 if df_filtered.empty:
     st.warning(f"No data available for: {main_group} → {sub_group}")
