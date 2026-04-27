@@ -210,34 +210,22 @@ all_institutions = sorted([x for x in df["Sector Impacted"].unique() if pd.notna
 institution_counts = df["Sector Impacted"].value_counts()
 top_5_institutions = institution_counts.head(5).index.tolist()
 
-st.sidebar.write(f"DEBUG Top 5: {top_5_institutions}")
-
 # Institution filter dropdown
 st.sidebar.subheader("Institutions")
-
-def on_institution_change():
-    """Callback to trigger rerun when institution selection changes"""
-    pass
 
 institution_option = st.sidebar.selectbox(
     "Display",
     options=["Top 5", "All"],
     index=0,
     label_visibility="collapsed",
-    key="institution_display_option",
-    on_change=on_institution_change
+    key="institution_display_option"
 )
 
+# Display selected institutions for reference
 if institution_option == "Top 5":
-    selected_institutions = top_5_institutions
+    st.sidebar.caption(f"Reference: {', '.join(top_5_institutions)}")
 else:
-    selected_institutions = all_institutions
-
-# Display selected institutions
-if institution_option == "Top 5":
-    st.sidebar.caption(f"Displaying: {', '.join(top_5_institutions)}")
-else:
-    st.sidebar.caption(f"Displaying all {len(all_institutions)} institutions")
+    st.sidebar.caption(f"Reference: All {len(all_institutions)} institutions")
 
 st.sidebar.subheader("Filter by Population Group")
 
@@ -352,15 +340,7 @@ def filter_by_terms(df, terms):
 
 df_filtered = filter_by_terms(df, selected_terms)
 
-# Apply institution filter
-df_filtered = df_filtered[df_filtered["Sector Impacted"].isin(selected_institutions)]
-
-# Debug info
-st.sidebar.write(f"DEBUG: Institution option = {institution_option}")
-st.sidebar.write(f"DEBUG: Selected institutions count = {len(selected_institutions)}")
-st.sidebar.write(f"DEBUG: Filtered rows = {len(df_filtered)}")
-
-st.markdown(f"**Filtering by:** {main_group} → {sub_group} | **Institutions:** {len(selected_institutions)} selected")
+st.markdown(f"**Filtering by:** {main_group} → {sub_group}")
 
 if df_filtered.empty:
     st.warning(f"No data available for: {main_group} → {sub_group}")
