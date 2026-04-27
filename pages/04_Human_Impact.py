@@ -16,12 +16,12 @@ POPULATION_STRUCTURE = {
         "Women in Workforce": ["women in workforce"],
         "Reproductive Healthcare": ["reproductive healthcare patients", "reproductive healthcare patients and providers", "abortion patients", "planned parenthood"],
     },
-    "LGBTQ+ and Gender-Diverse Populations": {
+    "LGBTQ+ Individuals": {
         "LGBTQ+ Individuals": ["LGBTQ+ individuals", "LGBTQ+ youth"],
-        "Transgender Individuals": ["trans and gender-diverse community", "transgender individuals", "nonbinary people"],
-        "Transgender and Gender-Diverse Youth": ["trans youth", "transgender youth", "transgender and gender-diverse youth"],
-        "Trans and Non Binary Athletes": ["trans athletes", "transgender athletes", "trans and non binary athletes"],
         "Gender Dysphoria": ["gender dysphoria"],
+    },
+    "Transgender and Gender-Diverse Individuals": {
+        "Transgender and Gender-Diverse Individuals": ["transgender and gender-diverse individuals", "trans and gender-diverse community", "transgender individuals", "nonbinary people"],
     },
     "Patients & Beneficiaries": {
         "Reproductive Health": ["reproductive healthcare patients", "abortion patients", "planned parenthood"],
@@ -42,6 +42,10 @@ POPULATION_STRUCTURE = {
     "Justice & Detention Populations": {
         "Incarcerated Populations": ["trans inmates", "incarcerated trans community"],
         "Gender-Based Violence": ["survivors of sexual violence", "victims of GBV", "gender-based violence survivors"],
+    },
+    "Transgender and Gender-Diverse Youth": {
+        "Transgender and Gender-Diverse Youth": ["trans youth", "transgender youth", "transgender and gender-diverse youth"],
+        "Trans and Non Binary Athletes": ["trans athletes", "transgender athletes", "trans and non binary athletes"],
     },
     "Community & Place-Based Populations": {
         "Local Residents": ["local residents", "residents", "students"],
