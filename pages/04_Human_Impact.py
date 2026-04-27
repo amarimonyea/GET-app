@@ -210,6 +210,8 @@ all_institutions = sorted([x for x in df["Sector Impacted"].unique() if pd.notna
 institution_counts = df["Sector Impacted"].value_counts()
 top_5_institutions = institution_counts.head(5).index.tolist()
 
+st.sidebar.write(f"DEBUG Top 5: {top_5_institutions}")
+
 # Institution filter dropdown
 st.sidebar.subheader("Institutions")
 
