@@ -16,12 +16,10 @@ POPULATION_STRUCTURE = {
         "Women in Workforce": ["women in workforce"],
         "Reproductive Healthcare": ["reproductive healthcare patients", "reproductive healthcare patients and providers", "abortion patients", "planned parenthood"],
     },
-    "LGBTQ+ Individuals": {
+    "LGBTQ+ and Gender-Diverse Populations": {
         "LGBTQ+ Individuals": ["LGBTQ+ individuals", "LGBTQ+ youth"],
-        "Gender Dysphoria": ["gender dysphoria"],
-    },
-    "Transgender and Gender-Diverse Individuals": {
         "Transgender and Gender-Diverse Individuals": ["transgender and gender-diverse individuals", "trans and gender-diverse community", "transgender individuals", "nonbinary people"],
+        "Gender Dysphoria": ["gender dysphoria"],
     },
     "Patients & Beneficiaries": {
         "Reproductive Health": ["reproductive healthcare patients", "abortion patients", "planned parenthood"],
@@ -264,17 +262,30 @@ st.sidebar.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# Load data early to calculate top institutions
+df = pd.read_csv("data/Monitor - Gender Equality - GET 2025 (1).csv", skiprows=1)
+df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
+df = df.dropna(subset=["Date", "Slider Score"])
+
+# Calculate top 5 institutions
+institution_counts = df["Sector Impacted"].value_counts()
+top_5_institutions = institution_counts.head(5)
+
+# Display Top Institutions widget
+st.sidebar.subheader("Top 5 Institutions Impacted")
+for idx, (institution, count) in enumerate(top_5_institutions.items(), 1):
+    st.sidebar.metric(
+        label=f"{idx}. {institution}",
+        value=int(count),
+        label_visibility="visible"
+    )
+
 # Logo at bottom of sidebar
 st.sidebar.divider()
 st.sidebar.image("assets/footer_logo.svg", use_container_width=True)
 
 st.title("Population Group Impact Analysis")
-
-# Load and prepare data
-df = pd.read_csv("data/Monitor - Gender Equality - GET 2025 (1).csv", skiprows=1)
-df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
-df = df.dropna(subset=["Date", "Slider Score"])
 
 st.write(
     "Explore which population groups are most targeted by gender policy developments in the U.S."
