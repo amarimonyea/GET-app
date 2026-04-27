@@ -19,7 +19,8 @@ POPULATION_STRUCTURE = {
     "LGBTQ+ and Gender-Diverse Populations": {
         "LGBTQ+ Individuals": ["LGBTQ+ individuals", "LGBTQ+ youth"],
         "Transgender Individuals": ["trans and gender-diverse community", "transgender individuals", "nonbinary people"],
-        "Transgender Youth": ["trans youth", "transgender youth", "trans athletes", "transgender athletes"],
+        "Transgender and Gender-Diverse Youth": ["trans youth", "transgender youth", "transgender and gender-diverse youth"],
+        "Trans and Non Binary Athletes": ["trans athletes", "transgender athletes", "trans and non binary athletes"],
         "Gender Dysphoria": ["gender dysphoria"],
     },
     "Patients & Beneficiaries": {
