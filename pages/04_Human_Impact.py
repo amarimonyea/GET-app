@@ -6,7 +6,7 @@ import altair as alt
 st.set_page_config(page_title="Human Impact")
 
 # ---------------------------
-# POPULATION GROUP HIERARCHY
+# POPULATION GROUP HIERARCHY (CANONICAL)
 # ---------------------------
 POPULATION_STRUCTURE = {
     "Women and Girls": {
@@ -14,7 +14,6 @@ POPULATION_STRUCTURE = {
         "Pregnant Women": ["pregnant women"],
         "Women Servicemembers": ["women servicemembers", "female servicemembers", "women veterans", "female veterans"],
         "Women in Workforce": ["women in workforce"],
-        "Reproductive Healthcare": ["reproductive healthcare patients", "reproductive healthcare patients and providers", "abortion patients", "planned parenthood"],
     },
     "LGBTQ+ and Gender-Diverse Populations": {
         "LGBTQ+ Individuals": ["LGBTQ+ individuals", "LGBTQ+ youth"],
@@ -22,7 +21,7 @@ POPULATION_STRUCTURE = {
         "Gender Dysphoria": ["gender dysphoria"],
     },
     "Patients & Beneficiaries": {
-        "Reproductive Health": ["reproductive healthcare patients", "abortion patients", "planned parenthood"],
+        "Reproductive Health": ["reproductive healthcare patients", "reproductive healthcare patients and providers", "abortion patients", "planned parenthood"],
         "Federal Benefits": ["SNAP recipients", "WIC recipients", "medicaid recipients", "beneficiaries of federal programs"],
         "International Aid": ["international aid recipients", "international gender rights organizations"],
     },
@@ -56,6 +55,35 @@ POPULATION_STRUCTURE = {
         "Advocacy & Civil Society": ["foreign nationals", "international travelers", "arts institutions", "human rights advocates", "activists"],
     },
 }
+
+# Build canonical alias-to-group mapping
+ALIAS_TO_GROUP = {}
+for main_group, subgroups in POPULATION_STRUCTURE.items():
+    for subgroup, aliases in subgroups.items():
+        for alias in aliases:
+            alias_lower = alias.lower().strip()
+            ALIAS_TO_GROUP[alias_lower] = (main_group, subgroup)
+
+def parse_population_groups(impacted_text):
+    """
+    Parse comma-separated population groups from raw text.
+    Returns a list of (Main Group, Subgroup) tuples.
+    
+    Example:
+        parse_population_groups("women and girls, LGBTQ+ individuals")
+        → [("Women and Girls", "Women and Girls"), ("LGBTQ+ and Gender-Diverse Populations", "LGBTQ+ Individuals")]
+    """
+    if not isinstance(impacted_text, str) or pd.isna(impacted_text):
+        return []
+    
+    results = []
+    items = [item.strip().lower() for item in impacted_text.split(',')]
+    
+    for item in items:
+        if item in ALIAS_TO_GROUP:
+            results.append(ALIAS_TO_GROUP[item])
+    
+    return results
 
 # ---------------------------
 # 1) THEME / CSS (inject once)
@@ -205,6 +233,25 @@ df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 df["Slider Score"] = pd.to_numeric(df["Slider Score"], errors="coerce")
 df = df.dropna(subset=["Date", "Slider Score"])
 
+# Parse and explode population groups
+# Each development can impact multiple groups - create a row for each
+df["Parsed_Groups"] = df["Who is impacted?"].apply(parse_population_groups)
+
+# Filter to rows that have at least one parsed group
+df = df[df["Parsed_Groups"].apply(len) > 0].copy()
+
+# Now explode the list into separate rows
+df = df.explode("Parsed_Groups", ignore_index=True)
+
+# Extract the tuple into separate columns
+df[["Main_Population_Group", "Specific_Subgroup"]] = pd.DataFrame(
+    df["Parsed_Groups"].apply(list).tolist(), 
+    index=df.index
+)
+
+# Drop the intermediate column
+df = df.drop(columns=["Parsed_Groups"])
+
 st.sidebar.subheader("Filter by Population Group")
 
 # Reset button
@@ -291,32 +338,25 @@ with st.expander("View all Population Groups & Subgroups", expanded=False):
 
 st.divider()
 
-IMPACT_COL = "Who is impacted?"
+IMPACT_COL = "Specific_Subgroup"  # Use the mapped subgroup column instead of raw text
+MAIN_GROUP_COL = "Main_Population_Group"  # Use the mapped main group column
 
-# Filter data by selected main population group category
-# Create a filter that checks if any of the selected terms appear in the IMPACT_COL
-import re
-
-def filter_by_terms(df, terms):
-    """Filter dataframe rows where any of the provided terms appear in IMPACT_COL using word boundary matching"""
-    # Sort terms by length (longest first) to match more specific terms first
-    sorted_terms = sorted(terms, key=len, reverse=True)
+# Filter data by selected main population group
+# Since data is now pre-parsed, filtering is direct column matching
+if main_group == "All Population Groups":
+    # Show all groups
+    if sub_group == "All Subgroups":
+        df_filtered = df.copy()
+    else:
+        # This shouldn't happen with cascade logic, but handle it
+        df_filtered = df.copy()
+else:
+    # Filter to selected main group
+    df_filtered = df[df[MAIN_GROUP_COL] == main_group].copy()
     
-    def matches_any_term(text):
-        if not isinstance(text, str):
-            return False
-        text_lower = text.lower()
-        for term in sorted_terms:
-            # Use word boundary regex for accurate matching
-            pattern = r'\b' + re.escape(term.lower()) + r'\b'
-            if re.search(pattern, text_lower):
-                return True
-        return False
-    
-    mask = df[IMPACT_COL].fillna('').apply(matches_any_term)
-    return df[mask].copy()
-
-df_filtered = filter_by_terms(df, selected_terms)
+    # Further filter by subgroup if specified
+    if sub_group != "All Subgroups":
+        df_filtered = df_filtered[df_filtered[IMPACT_COL] == sub_group].copy()
 
 st.markdown(f"**Filtering by:** {main_group} → {sub_group}")
 
@@ -326,7 +366,7 @@ if df_filtered.empty:
 
 df = df_filtered  # Use filtered data for all subsequent analysis
 
-def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=None):
+def get_top_developments_for_group(data_df, main_group_name, subgroup_name, top_n=1, score_filter=None):
     """Extract top N contributing developments for a given population group.
     
     score_filter: None (all), 'deterioration' (positive scores), or 'improvement' (negative scores)
@@ -334,10 +374,10 @@ def get_top_developments_for_group(data_df, group_name, top_n=1, score_filter=No
     if data_df.empty:
         return []
     
-    # Use word boundary matching for group_name to avoid false positives
-    pattern = r'\b' + re.escape(group_name.lower()) + r'\b'
+    # Filter by main group and subgroup 
     filtered = data_df[
-        (data_df[IMPACT_COL].fillna('').str.lower().apply(lambda x: bool(re.search(pattern, x)))) & 
+        (data_df[MAIN_GROUP_COL] == main_group_name) & 
+        (data_df[IMPACT_COL] == subgroup_name) &
         (data_df["Development"].notna())
     ]
     
@@ -389,81 +429,50 @@ df_initial["Weighted Improvement"] = np.where(df_initial["Slider Score"] < 0, -d
 df_initial["Absolute Intensity"] = df_initial["Slider Score"].abs()
 
 # Determine what level to display metrics at
+# Since data is pre-parsed into Main_Population_Group and Specific_Subgroup, just group by those
 impact_metrics_initial = []
 
+# Group the data appropriately
 if main_group == "All Population Groups":
     # Show metrics per main group
-    all_main_groups = list(POPULATION_STRUCTURE.keys())
-    
-    for main_group_name in all_main_groups:
-        # Get all keywords for this main group
-        main_group_keywords = []
-        for subgroup_terms in POPULATION_STRUCTURE[main_group_name].values():
-            main_group_keywords.extend(subgroup_terms)
-        
-        sorted_keywords = sorted(main_group_keywords, key=len, reverse=True)
-        
-        def group_matches(text):
-            if not isinstance(text, str):
-                return False
-            text_lower = text.lower()
-            for keyword in sorted_keywords:
-                pattern = r'\b' + re.escape(keyword.lower()) + r'\b'
-                if re.search(pattern, text_lower):
-                    return True
-            return False
-        
-        group_df = df_initial[df_initial[IMPACT_COL].fillna('').apply(group_matches)]
-        
-        if len(group_df) > 0:
-            impact_metrics_initial.append({
-                IMPACT_COL: main_group_name,
-                "Weighted Deterioration": group_df["Weighted Deterioration"].sum(),
-                "Weighted Improvement": group_df["Weighted Improvement"].sum(),
-                "Absolute Intensity": group_df["Absolute Intensity"].sum(),
-                "Event_Count": len(group_df)
-            })
+    for group_name in df_initial[MAIN_GROUP_COL].unique():
+        if pd.notna(group_name):
+            group_df = df_initial[df_initial[MAIN_GROUP_COL] == group_name]
+            if len(group_df) > 0:
+                impact_metrics_initial.append({
+                    "Group": group_name,
+                    "Weighted Deterioration": group_df["Weighted Deterioration"].sum(),
+                    "Weighted Improvement": group_df["Weighted Improvement"].sum(),
+                    "Absolute Intensity": group_df["Absolute Intensity"].sum(),
+                    "Event_Count": len(group_df)
+                })
 
 elif sub_group == "All Subgroups":
     # Show metrics per subgroup within the selected main group
-    subgroups_in_group = POPULATION_STRUCTURE[main_group]
-    
-    for subgroup_name, keywords in subgroups_in_group.items():
-        sorted_keywords = sorted(keywords, key=len, reverse=True)
-        
-        def subgroup_matches(text):
-            if not isinstance(text, str):
-                return False
-            text_lower = text.lower()
-            for keyword in sorted_keywords:
-                pattern = r'\b' + re.escape(keyword.lower()) + r'\b'
-                if re.search(pattern, text_lower):
-                    return True
-            return False
-        
-        subgroup_df = df_initial[df_initial[IMPACT_COL].fillna('').apply(subgroup_matches)]
-        
-        if len(subgroup_df) > 0:
-            impact_metrics_initial.append({
-                IMPACT_COL: subgroup_name,
-                "Weighted Deterioration": subgroup_df["Weighted Deterioration"].sum(),
-                "Weighted Improvement": subgroup_df["Weighted Improvement"].sum(),
-                "Absolute Intensity": subgroup_df["Absolute Intensity"].sum(),
-                "Event_Count": len(subgroup_df)
-            })
+    for subgroup_name in df_initial[IMPACT_COL].unique():
+        if pd.notna(subgroup_name):
+            subgroup_df = df_initial[df_initial[IMPACT_COL] == subgroup_name]
+            if len(subgroup_df) > 0:
+                impact_metrics_initial.append({
+                    "Group": subgroup_name,
+                    "Weighted Deterioration": subgroup_df["Weighted Deterioration"].sum(),
+                    "Weighted Improvement": subgroup_df["Weighted Improvement"].sum(),
+                    "Absolute Intensity": subgroup_df["Absolute Intensity"].sum(),
+                    "Event_Count": len(subgroup_df)
+                })
 
 else:
     # Show metrics for the specific subgroup - summarize the filtered data
     if len(df_initial) > 0:
         impact_metrics_initial.append({
-            IMPACT_COL: sub_group,
+            "Group": sub_group,
             "Weighted Deterioration": df_initial["Weighted Deterioration"].sum(),
             "Weighted Improvement": df_initial["Weighted Improvement"].sum(),
             "Absolute Intensity": df_initial["Absolute Intensity"].sum(),
             "Event_Count": len(df_initial)
         })
 
-impact_metrics_initial = pd.DataFrame(impact_metrics_initial) if impact_metrics_initial else pd.DataFrame(columns=[IMPACT_COL, "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"])
+impact_metrics_initial = pd.DataFrame(impact_metrics_initial) if impact_metrics_initial else pd.DataFrame(columns=["Group", "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"])
 
 # Generate Key Insights with development examples
 insights = []
@@ -473,45 +482,42 @@ insights_devs = {}
 if not impact_metrics_initial.empty and main_group == "All Population Groups":
     # Insight 1: Highest Absolute Intensity
     most_impacted = impact_metrics_initial.loc[impact_metrics_initial["Absolute Intensity"].idxmax()]
-    insights.append(f"<strong>{most_impacted[IMPACT_COL]}</strong> experiences the highest total intensity of impact ({most_impacted['Absolute Intensity']:.1f})")
-    insights_devs["impact"] = {
-        "group": most_impacted[IMPACT_COL],
-        "devs": get_top_developments_for_group(df_initial, most_impacted[IMPACT_COL], top_n=1)
-    }
+    group_name = most_impacted["Group"]
+    insights.append(f"<strong>{group_name}</strong> experiences the highest total intensity of impact ({most_impacted['Absolute Intensity']:.1f})")
+    # For all population groups view, get top dev from that main group
+    group_devs = df_initial[df_initial[MAIN_GROUP_COL] == group_name]
+    example_devs = group_devs.nlargest(1, "Absolute Intensity") if len(group_devs) > 0 else pd.DataFrame()
+    if len(example_devs) > 0:
+        row = example_devs.iloc[0]
+        short_text = row["Development"][:100] if isinstance(row["Development"], str) else ""
+        insights_devs["impact"] = {"group": group_name, "example": short_text}
     
-    # Insight 2: Most Disrupted (different group if possible)
+    # Insight 2: Most Disrupted
     most_disrupted = impact_metrics_initial.loc[impact_metrics_initial["Weighted Deterioration"].idxmax()]
     if most_disrupted["Weighted Deterioration"] > 0:
-        # If same as most_impacted, try to get the 2nd most disrupted
-        if most_disrupted[IMPACT_COL] == most_impacted[IMPACT_COL] and len(impact_metrics_initial) > 1:
+        if most_disrupted["Group"] == most_impacted["Group"] and len(impact_metrics_initial) > 1:
             most_disrupted = impact_metrics_initial.nlargest(2, "Weighted Deterioration").iloc[1]
         
-        insights.append(f"<strong>{most_disrupted[IMPACT_COL]}</strong> is most affected by deterioration (weighted deterioration score: {most_disrupted['Weighted Deterioration']:.1f})")
-        insights_devs["disruption"] = {
-            "group": most_disrupted[IMPACT_COL],
-            "devs": get_top_developments_for_group(df_initial, most_disrupted[IMPACT_COL], top_n=1, score_filter="deterioration")
-        }
+        group_name = most_disrupted["Group"]
+        insights.append(f"<strong>{group_name}</strong> is most affected by deterioration (weighted deterioration score: {most_disrupted['Weighted Deterioration']:.1f})")
+        insights_devs["disruption"] = {"group": group_name}
     
-    # Insight 3: Most Progressed (different group from impact and disruption if possible)
+    # Insight 3: Most Progressed
     most_progressed = impact_metrics_initial.loc[impact_metrics_initial["Weighted Improvement"].idxmax()]
     if most_progressed["Weighted Improvement"] > 0:
-        # Try to get a different group
-        used_groups = {most_impacted[IMPACT_COL]}
+        used_groups = {most_impacted["Group"]}
         if "disruption" in insights_devs:
             used_groups.add(insights_devs["disruption"]["group"])
         
-        # Find first improvement entry not in used_groups
         improvement_sorted = impact_metrics_initial.nlargest(len(impact_metrics_initial), "Weighted Improvement")
         for idx, row in improvement_sorted.iterrows():
-            if row[IMPACT_COL] not in used_groups:
+            if row["Group"] not in used_groups:
                 most_progressed = row
                 break
         
-        insights.append(f"<strong>{most_progressed[IMPACT_COL]}</strong> shows the most improvement (weighted improvement score: {most_progressed['Weighted Improvement']:.1f})")
-        insights_devs["progression"] = {
-            "group": most_progressed[IMPACT_COL],
-            "devs": get_top_developments_for_group(df_initial, most_progressed[IMPACT_COL], top_n=1, score_filter="improvement")
-        }
+        group_name = most_progressed["Group"]
+        insights.append(f"<strong>{group_name}</strong> shows the most improvement (weighted improvement score: {most_progressed['Weighted Improvement']:.1f})")
+        insights_devs["progression"] = {"group": group_name}
 
 # Determine number of unique groups
 num_groups = impact_metrics_initial.shape[0] if not impact_metrics_initial.empty else 0
@@ -564,9 +570,9 @@ if not impact_metrics.empty:
         .mark_bar(opacity=1)
         .encode(
             x=alt.X(x_field, title=x_title, axis=alt.Axis(tickCount=10)),
-            y=alt.Y(IMPACT_COL + ":N", title="Population Group", sort="-x", axis=alt.Axis(labelLimit=120, labelPadding=10, labelOffset=30)),
+            y=alt.Y("Group:N", title="Population Group", sort="-x", axis=alt.Axis(labelLimit=120, labelPadding=10, labelOffset=30)),
             color=alt.value(COLOR_DISRUPTION),
-            tooltip=[alt.Tooltip(IMPACT_COL, title="Population Group"), 
+            tooltip=[alt.Tooltip("Group", title="Population Group"), 
                     alt.Tooltip(x_field, title=x_title)],
         )
         .properties(height=chart_height, width=1500, title="Gender Policy Activity by Population Group")
@@ -642,11 +648,11 @@ st.divider()
 with st.expander("View Detailed Population Group Metrics", expanded=False):
     if not impact_metrics_initial.empty:
         # Reorder columns for display
-        display_columns = [IMPACT_COL, "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"]
+        display_columns = ["Group", "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"]
         st.dataframe(
             impact_metrics_initial[display_columns].sort_values(sort_col, ascending=False),
             column_config={
-                IMPACT_COL: st.column_config.TextColumn(label="Population Group"),
+                "Group": st.column_config.TextColumn(label="Population Group"),
                 "Weighted Deterioration": st.column_config.NumberColumn(label="Deterioration Intensity", format="%d"),
                 "Weighted Improvement": st.column_config.NumberColumn(label="Improvement Intensity", format="%d"),
                 "Absolute Intensity": st.column_config.NumberColumn(label="Overall Policy Activity", format="%d"),
@@ -757,23 +763,23 @@ df_trends["Month"] = df_trends["Date"].dt.to_period("M").astype(str)
 df_trends["Absolute Intensity"] = df_trends["Slider Score"].abs()
 
 top_3_groups = (
-    impact_metrics_initial.nlargest(3, "Absolute Intensity")[IMPACT_COL].tolist()
+    impact_metrics_initial.nlargest(3, "Absolute Intensity")["Group"].tolist()
     if not impact_metrics_initial.empty else []
 )
 
 # Build trend data for top 3 groups
 trend_data_list = []
 for group in top_3_groups:
-    # Use word boundary matching to filter for this group's developments
-    pattern = r'\b' + re.escape(group.lower()) + r'\b'
-    group_mask = df_trends[IMPACT_COL].fillna('').str.lower().apply(lambda x: bool(re.search(pattern, x)))
-    group_df_monthly = df_trends[group_mask].groupby("Month", as_index=False).agg({
-        "Absolute Intensity": "sum",
-        "Slider Score": "count"
-    }).rename(columns={"Slider Score": "Event_Count"})
-    
-    group_df_monthly[IMPACT_COL] = group
-    trend_data_list.append(group_df_monthly)
+    # Filter by the mapped group column (no regex needed - exact match)
+    group_df = df_trends[df_trends["Group"] == group]
+    if len(group_df) > 0:
+        group_df_monthly = group_df.groupby("Month", as_index=False).agg({
+            "Absolute Intensity": "sum",
+            "Slider Score": "count"
+        }).rename(columns={"Slider Score": "Event_Count"})
+        
+        group_df_monthly["Group"] = group
+        trend_data_list.append(group_df_monthly)
 
 if trend_data_list:
     trend_data = pd.concat(trend_data_list, ignore_index=True)
@@ -802,7 +808,7 @@ if trend_data_list:
                     scale=alt.Scale(nice=False)
                 ),
                 y=alt.Y("Absolute Intensity:Q", title="Cumulative Policy Activity"),
-                color=alt.Color(IMPACT_COL + ":N", 
+                color=alt.Color("Group:N", 
                                scale=alt.Scale(range=group_colors),
                                title="Population Group",
                                legend=alt.Legend(orient="bottom", symbolType="square", titleAnchor="start", labelLimit=300, labelPadding=15))
@@ -811,7 +817,7 @@ if trend_data_list:
             .encode(
                 tooltip=[
                     alt.Tooltip("Month_Display:N", title="Month"),
-                    alt.Tooltip(IMPACT_COL + ":N", title="Population Group"),
+                    alt.Tooltip("Group:N", title="Population Group"),
                     alt.Tooltip("Absolute Intensity:Q", title="Policy Activity", format=".1f"),
                     alt.Tooltip("Event_Count:Q", title="Count")
                 ]
