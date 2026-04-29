@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GET-app Streamlit Test (No Sandbox)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f1f0ec;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #1b1725;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .info-box {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b668c;
+            color: #1b1725;
+        }
+        
+        .info-box p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+        
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .warning {
+            border-left: 4px solid #ffc107;
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .success {
+            border-left: 4px solid #4caf50;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .iframe-wrapper {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 85vh;
+            margin-top: 20px;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 GET-app Streamlit Test (No Sandbox)</h1>
+        
+        <div class="info-box success">
+            <p><strong>✅ Note on CSP Warnings:</strong></p>
+            <p>Streamlit uses JavaScript (eval) for interactive widgets. The CSP warnings you see are normal and expected. They don't prevent the app from functioning.</p>
+            <p>These warnings are from Streamlit's internal code, not from security vulnerabilities.</p>
+        </div>
+        
+        <div class="info-box warning">
+            <p><strong>⚠️ Security Notice:</strong></p>
+            <p>This test removes sandbox restrictions for testing purposes only. For production deployment, use proper sandbox attributes and configure CORS headers appropriately.</p>
+        </div>
+        
+        <div class="info-box">
+            <p><strong>Streamlit URL:</strong> <code>http://localhost:8502</code></p>
+            <p><strong>Configuration:</strong> CORS enabled, XSRF protection disabled</p>
+        </div>
+    </div>
+    
+    <div class="iframe-wrapper">
+        <iframe
+            id="streamlit-iframe"
+            src="http://localhost:8501" 
+            title="GET-app Streamlit Application"
+            style="width: 100%; height: 100%; border: none;">
+        </iframe>
+    </div>
+    
+    <script>
+        console.log('✅ Test page loaded');
+        console.log('ℹ️ Streamlit CSP warnings are expected and harmless');
+        console.log('🔗 Connecting to: http://localhost:8502');
+        
+        const iframe = document.getElementById('streamlit-iframe');
+        
+        iframe.addEventListener('load', () => {
+            console.log('✅ Iframe loaded successfully');
+        });
+        
+        iframe.addEventListener('error', () => {
+            console.error('❌ Iframe error');
+        });
+    </script>
+</body>
+</html>

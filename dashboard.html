@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GET-app Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+        }
+        #debug-info {
+            position: fixed;
+            top: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            color: #0f0;
+            padding: 15px;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 10000;
+            max-width: 400px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 2px solid #0f0;
+            border-radius: 4px;
+        }
+        iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="debug-info">
+        🔍 DEBUG INFO:<br>
+        <span id="status">Initializing...</span>
+    </div>
+    
+    <iframe 
+        id="app-iframe"
+        src="http://localhost:8502" 
+        title="GET-app Dashboard"
+        crossorigin="anonymous"
+        allow="same-origin *">
+    </iframe>
+    
+    <script>
+        const debugEl = document.getElementById('status');
+        const iframe = document.getElementById('app-iframe');
+        
+        function log(msg) {
+            console.log('🔍 ' + msg);
+            debugEl.innerHTML += '<br>' + msg;
+            debugEl.parentElement.style.maxHeight = '400px';
+        }
+        
+        log('Frame initialized');
+        log('Window location: ' + window.location.href);
+        log('Iframe src: ' + iframe.src);
+        
+        // Check iframe accessibility
+        iframe.addEventListener('load', () => {
+            log('✅ Iframe loaded');
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                if (iframeDoc) {
+                    log('✅ Can access iframe document');
+                } else {
+                    log('❌ No access to iframe document (CORS)');
+                }
+            } catch (e) {
+                log('❌ Error accessing iframe: ' + e.message);
+            }
+        });
+        
+        iframe.addEventListener('error', (e) => {
+            log('❌ Iframe error: ' + e.message);
+        });
+        
+        // Check for frame restrictions
+        if (window.self !== window.top) {
+            log('ℹ️ Window is embedded in frame');
+        } else {
+            log('ℹ️ Window is not framed');
+        }
+        
+        // Timeout warning
+        setTimeout(() => {
+            if (!iframe.src) {
+                log('⚠️ Iframe src not set');
+            }
+        }, 1000);
+        
+        log('Listening for iframe load event...');
+    </script>
+</body>
+</html>

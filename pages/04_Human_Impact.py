@@ -250,6 +250,9 @@ df[["Main_Population_Group", "Specific_Subgroup"]] = pd.DataFrame(
 # Drop the intermediate column
 df = df.drop(columns=["Parsed_Groups"])
 
+# Save original unfiltered data for use in trends and cross-group analysis
+df_original = df.copy()
+
 st.sidebar.subheader("Filter by Population Group")
 
 # Reset button
@@ -426,49 +429,124 @@ df_initial["Weighted Deterioration"] = np.where(df_initial["Slider Score"] > 0, 
 df_initial["Weighted Improvement"] = np.where(df_initial["Slider Score"] < 0, -df_initial["Slider Score"], 0)
 df_initial["Absolute Intensity"] = df_initial["Slider Score"].abs()
 
-# Determine what level to display metrics at
-# CRITICAL RULE: The Population Group Impact chart ONLY shows Main Population Groups
-# Subgroups are for filtering and detail tables, never for the main chart
+# Determine what level to display metrics at and build appropriate aggregations
+# DRILL-DOWN LOGIC:
+# 1. Default (All Population Groups): Show Top 5 Main Population Groups
+# 2. Main group selected, All Subgroups: Show all Specific Subgroups within that main group
+# 3. Specific subgroup selected: Show only that subgroup
 
+# ==============================================================================
+# CHART METRICS: Build based on current filter state
+# ==============================================================================
 
-# === CHART METRICS: Always aggregate by Main Population Group ===
-impact_metrics_chart = []
-for group_name in df_initial[MAIN_GROUP_COL].unique():
-    if pd.notna(group_name):
-        group_df = df_initial[df_initial[MAIN_GROUP_COL] == group_name]
-        if len(group_df) > 0:
-            impact_metrics_chart.append({
-                "Group": group_name,
-                "Weighted Deterioration": group_df["Weighted Deterioration"].sum(),
-                "Weighted Improvement": group_df["Weighted Improvement"].sum(),
-                "Absolute Intensity": group_df["Absolute Intensity"].sum(),
-                "Event_Count": len(group_df)
-            })
+chart_view_state = {}  # Track what we're viewing for dynamic titles
 
-impact_metrics_initial = pd.DataFrame(impact_metrics_chart) if impact_metrics_chart else pd.DataFrame(columns=["Group", "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"])
+if main_group == "All Population Groups":
+    # DEFAULT VIEW: Aggregate by Main Population Group
+    chart_view_state["level"] = "main_groups"
+    chart_view_state["title"] = "Gender Policy Activity by Population Group"
+    
+    impact_metrics_chart = []
+    for group_name in df_initial[MAIN_GROUP_COL].unique():
+        if pd.notna(group_name):
+            group_df = df_initial[df_initial[MAIN_GROUP_COL] == group_name]
+            if len(group_df) > 0:
+                impact_metrics_chart.append({
+                    "Group": group_name,
+                    "Weighted Deterioration": group_df["Weighted Deterioration"].sum(),
+                    "Weighted Improvement": group_df["Weighted Improvement"].sum(),
+                    "Absolute Intensity": group_df["Absolute Intensity"].sum(),
+                    "Event_Count": len(group_df)
+                })
+    
+    impact_metrics_initial = pd.DataFrame(impact_metrics_chart) if impact_metrics_chart else pd.DataFrame(columns=["Group", "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"])
 
-# === DETAIL METRICS: For drill-down views, show subgroups only (not for chart) ===
-detail_metrics = []
-
-if main_group != "All Population Groups" and sub_group == "All Subgroups":
-    # Drill-down: Show per-subgroup breakdown in a detail table
+elif sub_group == "All Subgroups":
+    # DRILL-DOWN: Main group selected + All Subgroups
+    # Show all Specific Subgroups within the selected main group
+    chart_view_state["level"] = "subgroups"
+    chart_view_state["title"] = f"Gender Policy Activity by Subgroup — {main_group}"
+    
+    impact_metrics_chart = []
     for subgroup_name in df_initial[IMPACT_COL].unique():
         if pd.notna(subgroup_name):
             subgroup_df = df_initial[df_initial[IMPACT_COL] == subgroup_name]
             if len(subgroup_df) > 0:
-                detail_metrics.append({
-                    "Subgroup": subgroup_name,
+                impact_metrics_chart.append({
+                    "Group": subgroup_name,
                     "Weighted Deterioration": subgroup_df["Weighted Deterioration"].sum(),
                     "Weighted Improvement": subgroup_df["Weighted Improvement"].sum(),
                     "Absolute Intensity": subgroup_df["Absolute Intensity"].sum(),
                     "Event_Count": len(subgroup_df)
                 })
+    
+    impact_metrics_initial = pd.DataFrame(impact_metrics_chart) if impact_metrics_chart else pd.DataFrame(columns=["Group", "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"])
 
-detail_metrics_df = pd.DataFrame(detail_metrics) if detail_metrics else pd.DataFrame()
+else:
+    # DRILL-DOWN: Specific subgroup selected
+    # Show only that subgroup (single row, but still build as a dataframe for consistency)
+    chart_view_state["level"] = "single_subgroup"
+    chart_view_state["title"] = f"Gender Policy Activity — {sub_group}"
+    
+    impact_metrics_chart = []
+    if len(df_initial) > 0:
+        impact_metrics_chart.append({
+            "Group": sub_group,
+            "Weighted Deterioration": df_initial["Weighted Deterioration"].sum(),
+            "Weighted Improvement": df_initial["Weighted Improvement"].sum(),
+            "Absolute Intensity": df_initial["Absolute Intensity"].sum(),
+            "Event_Count": len(df_initial)
+        })
+    
+    impact_metrics_initial = pd.DataFrame(impact_metrics_chart) if impact_metrics_chart else pd.DataFrame(columns=["Group", "Weighted Deterioration", "Weighted Improvement", "Absolute Intensity", "Event_Count"])
 
 # Generate Key Insights with development examples
 insights = []
 insights_devs = {}
+
+# Helper function to get top developments for a main population group
+def get_top_developments_for_main_group(data_df, main_group_name, top_n=3, score_filter=None):
+    """Get top N developments for a main population group (across all subgroups)"""
+    if data_df.empty:
+        return []
+    
+    filtered = data_df[
+        (data_df[MAIN_GROUP_COL] == main_group_name) &
+        (data_df["Development"].notna())
+    ]
+    
+    if score_filter == "deterioration":
+        filtered = filtered[filtered["Slider Score"] > 0]
+    elif score_filter == "improvement":
+        filtered = filtered[filtered["Slider Score"] < 0]
+    
+    if filtered.empty:
+        return []
+    
+    filtered = filtered.copy()
+    filtered["Abs Score"] = filtered["Slider Score"].abs()
+    filtered = filtered.sort_values(by=["Abs Score", "Date"], ascending=[False, False])
+    
+    top_developments = []
+    for idx, row in filtered.head(top_n).iterrows():
+        full_text = row["Development"]
+        if isinstance(full_text, str):
+            sentences = full_text.split('. ')
+            short_text = sentences[0]
+            if len(short_text) < 20 and len(sentences) > 1:
+                short_text = sentences[0] + '. ' + sentences[1]
+            short_text = short_text.strip()
+            if not short_text.endswith('.'):
+                short_text += '.'
+        else:
+            short_text = full_text
+        if len(short_text) > 100:
+            short_text = short_text[:97] + "..."
+        source_url = row.get("Link", "")
+        score = row["Slider Score"]
+        top_developments.append((short_text, full_text, source_url, score))
+    
+    return top_developments
 
 # Only generate detailed insights when showing all Population Groups
 if not impact_metrics_initial.empty and main_group == "All Population Groups":
@@ -476,13 +554,9 @@ if not impact_metrics_initial.empty and main_group == "All Population Groups":
     most_impacted = impact_metrics_initial.loc[impact_metrics_initial["Absolute Intensity"].idxmax()]
     group_name = most_impacted["Group"]
     insights.append(f"<strong>{group_name}</strong> experiences the highest total intensity of impact ({most_impacted['Absolute Intensity']:.1f})")
-    # For all population groups view, get top dev from that main group
-    group_devs = df_initial[df_initial[MAIN_GROUP_COL] == group_name]
-    example_devs = group_devs.nlargest(1, "Absolute Intensity") if len(group_devs) > 0 else pd.DataFrame()
-    if len(example_devs) > 0:
-        row = example_devs.iloc[0]
-        short_text = row["Development"][:100] if isinstance(row["Development"], str) else ""
-        insights_devs["impact"] = {"group": group_name, "example": short_text}
+    # Get top development examples for this insight
+    top_devs = get_top_developments_for_main_group(df_initial, group_name, top_n=3)
+    insights_devs["impact"] = {"group": group_name, "devs": top_devs}
     
     # Insight 2: Most Disrupted
     most_disrupted = impact_metrics_initial.loc[impact_metrics_initial["Weighted Deterioration"].idxmax()]
@@ -492,7 +566,9 @@ if not impact_metrics_initial.empty and main_group == "All Population Groups":
         
         group_name = most_disrupted["Group"]
         insights.append(f"<strong>{group_name}</strong> is most affected by deterioration (weighted deterioration score: {most_disrupted['Weighted Deterioration']:.1f})")
-        insights_devs["disruption"] = {"group": group_name}
+        # Get top deterioration examples for this group
+        top_devs = get_top_developments_for_main_group(df_initial, group_name, top_n=3, score_filter="deterioration")
+        insights_devs["disruption"] = {"group": group_name, "devs": top_devs}
     
     # Insight 3: Most Progressed
     most_progressed = impact_metrics_initial.loc[impact_metrics_initial["Weighted Improvement"].idxmax()]
@@ -509,31 +585,39 @@ if not impact_metrics_initial.empty and main_group == "All Population Groups":
         
         group_name = most_progressed["Group"]
         insights.append(f"<strong>{group_name}</strong> shows the most improvement (weighted improvement score: {most_progressed['Weighted Improvement']:.1f})")
-        insights_devs["progression"] = {"group": group_name}
+        # Get top improvement examples for this group
+        top_devs = get_top_developments_for_main_group(df_initial, group_name, top_n=3, score_filter="improvement")
+        insights_devs["progression"] = {"group": group_name, "devs": top_devs}
 
 # Determine number of unique groups
 num_groups = impact_metrics_initial.shape[0] if not impact_metrics_initial.empty else 0
 
-# Display selector for top N groups
+# Display selector for top N groups (only for default view)
 st.divider()
 
 col1, col2 = st.columns([3, 1])
 with col2:
-    display_option = st.selectbox(
-        "Show",
-        options=["Top 5", "Top 10", "All"],
-        index=0,
-        label_visibility="collapsed",
-        key="top_groups_display_option"
-    )
-
-# Determine how many groups to display based on selection
-if display_option == "Top 5":
-    top_n_viz = min(5, num_groups)
-elif display_option == "Top 10":
-    top_n_viz = min(10, num_groups)
-else:  # All
-    top_n_viz = num_groups
+    # Only show "Top N" selector for default view
+    if chart_view_state["level"] == "main_groups":
+        display_option = st.selectbox(
+            "Show",
+            options=["Top 5", "Top 10", "All"],
+            index=0,
+            label_visibility="collapsed",
+            key="top_groups_display_option"
+        )
+        
+        # Determine how many groups to display based on selection
+        if display_option == "Top 5":
+            top_n_viz = min(5, num_groups)
+        elif display_option == "Top 10":
+            top_n_viz = min(10, num_groups)
+        else:  # All
+            top_n_viz = num_groups
+    else:
+        # For drill-down views, show all results (no selector)
+        top_n_viz = num_groups
+        display_option = "All"
 
 # Set sort column for ranking
 sort_col = "Event_Count"  # Sort by number of developments
@@ -546,12 +630,12 @@ if not impact_metrics.empty:
 st.subheader("Population Group Impact Rankings")
 
 # Add subtitle explaining which level is being displayed
-if main_group == "All Population Groups":
-    st.caption("**View Level:** All Main Population Groups (10 categories)")
-elif sub_group != "All Subgroups":
-    st.caption(f"**View Level:** Detailed - {sub_group} only")
-else:
+if chart_view_state["level"] == "main_groups":
+    st.caption("**View Level:** All Main Population Groups (showing top 5 by default)")
+elif chart_view_state["level"] == "subgroups":
     st.caption(f"**View Level:** Subgroups of {main_group}")
+elif chart_view_state["level"] == "single_subgroup":
+    st.caption(f"**View Level:** Individual Subgroup")
 
 # Dynamic chart height based on number of groups
 # Ensure minimum spacing between bars for readability
@@ -559,9 +643,12 @@ min_height_per_group = 80  # pixels per group minimum (increased for wrapped lab
 base_height = 100  # base padding
 chart_height = max(400, len(impact_metrics) * min_height_per_group + base_height) if not impact_metrics.empty else 250
 
-# Chart shows main groups ranked by development count
+# Chart shows appropriate level ranked by development count
 x_field = "Event_Count:Q"
 x_title = "Number of Developments"
+
+# Get dynamic title from chart_view_state
+chart_title = chart_view_state.get("title", "Gender Policy Activity by Population Group")
 
 # Enhanced chart
 if not impact_metrics.empty:
@@ -570,47 +657,66 @@ if not impact_metrics.empty:
         .mark_bar(opacity=1)
         .encode(
             x=alt.X(x_field, title=x_title, axis=alt.Axis(tickCount=10)),
-            y=alt.Y("Group:N", title="Population Group", sort="-x", axis=alt.Axis(labelLimit=120, labelPadding=10, labelOffset=30)),
+            y=alt.Y("Group:N", title="Population Group", sort="-x", axis=alt.Axis(labelLimit=200, labelPadding=10, labelOffset=30)),
             color=alt.value(COLOR_DISRUPTION),
             tooltip=[alt.Tooltip("Group", title="Population Group"), 
                     alt.Tooltip(x_field, title=x_title)],
         )
-        .properties(height=chart_height, width=1500, title="Gender Policy Activity by Population Group")
+        .properties(height=chart_height, width=1500, title=chart_title)
         .configure_mark(opacity=1)
         .configure_title(anchor="middle")
     )
 
     st.altair_chart(impact_chart, use_container_width=True)
+    
+    # Explanatory note about cumulative impact
+    st.info(
+        "**Note on Methodology:** Counts reflect cumulative impact across all mapped subgroups. "
+        "A single development may contribute to multiple population groups when it affects different demographic categories. "
+        "This means totals represent *policy activity affecting these populations*, not unique individuals impacted."
+    )
 else:
     st.info("No population groups data available for visualization.")
 
 # How to Interpret This Chart section
 with st.expander("How to Interpret This Chart", expanded=False):
-    st.markdown("""
-**Number of Developments:** The total number of gender policy developments affecting each population group. Higher counts indicate groups experiencing more frequent policy impact.
+    if chart_view_state["level"] == "main_groups":
+        st.markdown("""
+**Default View - Main Population Groups:**
 
-**Chart Always Shows:** Main Population Groups only (10 categories) to ensure clean, non-overlapping categories aligned with the hierarchical structure.
+**What This Chart Shows:** Concentration of policy activity across the 10 main population group categories. Groups with higher counts have been affected by more gender policy developments.
 
-**Drill-Down:** Select a specific population group from the sidebar to view detailed breakdown by subgroups.
+**Important:** This measures *policy activity* affecting these populations, not unique individuals. Higher counts may reflect either:
+- Broader policy scope (affecting multiple demographic categories)
+- Repeated focus on the same group across different developments
+- A combination of both
+
+**How to Drill Down:** Select a main population group from the sidebar to see a breakdown of all subgroups within that category.
 """)
+    
+    elif chart_view_state["level"] == "subgroups":
+        st.markdown(f"""
+**Subgroup View - {main_group}:**
 
-# Show subgroup detail table if drilling down into a specific main group
-if main_group != "All Population Groups" and sub_group == "All Subgroups" and not detail_metrics_df.empty:
-    st.subheader(f"Breakdown: {main_group} → All Subgroups")
-    st.caption("Detailed metrics for each subgroup within this population group")
-    st.dataframe(
-        detail_metrics_df.sort_values("Event_Count", ascending=False),
-        column_config={
-            "Subgroup": st.column_config.TextColumn(label="Subgroup"),
-            "Weighted Deterioration": st.column_config.NumberColumn(label="Deterioration", format="%d"),
-            "Weighted Improvement": st.column_config.NumberColumn(label="Improvement", format="%d"),
-            "Absolute Intensity": st.column_config.NumberColumn(label="Total Intensity", format="%d"),
-            "Event_Count": st.column_config.NumberColumn(label="# Developments", format="%d"),
-        },
-        use_container_width=True,
-        hide_index=True,
-    )
-    st.divider()
+**What This Chart Shows:** Policy activity across all specific subgroups within *{main_group}*. Each bar represents a demographic segment that can be affected by policies targeting this population.
+
+**Important:** Just as with main groups, counts reflect policy activity, not unique individuals. A single development may affect multiple subgroups.
+
+**Example:** A policy on "Women in Federal Government" could count toward multiple subgroups like "Women and Girls" (main) and "Women in Workforce" (subgroup).
+
+**How to Drill Down Further:** Select a specific subgroup from the sidebar to see data for just that demographic segment.
+""")
+    
+    elif chart_view_state["level"] == "single_subgroup":
+        st.markdown(f"""
+**Individual Subgroup View - {sub_group}:**
+
+**What This Chart Shows:** Policy activity specifically affecting *{sub_group}* (a subset of *{main_group}*). This represents the most granular view of policy attention to this demographic.
+
+**Count Meaning:** The number shown represents developments that have been mapped to impact this specific subgroup, based on the keywords and criteria associated with it.
+
+**Go Back:** Use the sidebar filters to select "All Subgroups" to see the full breakdown of {main_group}, or "All Population Groups" to see the top-level view.
+""")
 
 # Key Insights section
 insights_html = "\n".join([f"<li style='margin-bottom: 0.5rem; color: #1b1725; font-size: 1rem;'>{insight}</li>" for insight in insights])
@@ -778,7 +884,8 @@ st.divider()
 st.subheader("Policy Activity Trends Over Time")
 
 # Prepare monthly trend data for top 3 most impacted groups
-df_trends = df.copy()
+# Use original unfiltered data to show trends for all top groups
+df_trends = df_original.copy()
 df_trends["Month"] = df_trends["Date"].dt.to_period("M").astype(str)
 df_trends["Absolute Intensity"] = df_trends["Slider Score"].abs()
 
@@ -790,8 +897,8 @@ top_3_groups = (
 # Build trend data for top 3 groups
 trend_data_list = []
 for group in top_3_groups:
-    # Filter by the mapped group column (no regex needed - exact match)
-    group_df = df_trends[df_trends["Group"] == group]
+    # Filter by the mapped group column using the correct column name
+    group_df = df_trends[df_trends[MAIN_GROUP_COL] == group]
     if len(group_df) > 0:
         group_df_monthly = group_df.groupby("Month", as_index=False).agg({
             "Absolute Intensity": "sum",

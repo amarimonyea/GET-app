@@ -515,7 +515,7 @@ def get_best_development_for_forecast(data_df, forecast_name, used_indices=None)
         used_indices: Set of already-used index values to avoid repetition
     
     Returns:
-        Tuple of (short_text, score) or None if no qualifying development found
+        Tuple of (full_sentence, score, idx) or None if no qualifying development found
     """
     if data_df is None or data_df.empty:
         return None
@@ -543,23 +543,25 @@ def get_best_development_for_forecast(data_df, forecast_name, used_indices=None)
     
     # Get the top development
     best_row = forecast_data.iloc[0]
-    short_text = best_row["Development Short"]
+    full_text = best_row["Development"]
     score = best_row["Slider Score"]
     idx = best_row.name
     
-    # Remove ellipsis and truncation artifacts, then extract only the first sentence
+    # Extract only the first sentence from the full development text
     import re
-    short_text = short_text.replace("…", "").strip()  # Remove ellipsis character
-    first_sentence = re.split(r'[.!?]', short_text)[0].strip()
+    full_text = str(full_text).strip() if pd.notna(full_text) else ""
+    # Split on sentence-ending punctuation
+    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
     if first_sentence:
         # Only add period if it doesn't already end with punctuation
         if not first_sentence.endswith(('.', '!', '?')):
             first_sentence += "."
-        short_text = first_sentence
+    else:
+        first_sentence = full_text[:100] + "." if len(full_text) > 100 else full_text
     
-    return (short_text, score, idx)
+    return (first_sentence, score, idx)
 
-def get_key_insights(forecast_points_df, forecast_col, data_df=None):
+def get_key_insights(forecast_points_df, forecast_col, data_df=None, used_indices=None):
     """
     Generate clean, dynamic key insights with three distinct analytical takeaways.
     
@@ -579,16 +581,22 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
         forecast_points_df: Aggregated forecast data
         forecast_col: Forecast column name
         data_df: Original detailed data (used for development extraction)
+        used_indices: Set of already-used development indices to avoid repetition (updated in place)
+    
+    Returns:
+        Tuple of (insights_list, updated_used_indices_set)
     """
     if forecast_points_df.empty:
-        return ["No insights available for the selected filters."]
+        return (["No insights available for the selected filters."], used_indices or set())
+    
+    if used_indices is None:
+        used_indices = set()
     
     def transform_forecast_name(name):
         """Transform forecast names from old terminology to new terminology"""
         return str(name).replace("Disruption", "Deteriorating").replace("Progression", "Improving")
     
     insights = []
-    used_development_indices = set()  # Track used examples to avoid repetition
     
     # Insight 1: Highest cumulative deterioration
     if "Disr" in forecast_points_df.columns and forecast_points_df["Disr"].max() > 0:
@@ -602,10 +610,10 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
         
         # Get representative example for this forecast
         if data_df is not None and not data_df.empty:
-            dev_info = get_best_development_for_forecast(data_df, max_disr_name, used_development_indices)
+            dev_info = get_best_development_for_forecast(data_df, max_disr_name, used_indices)
             if dev_info:
                 short_text, score, dev_idx = dev_info
-                used_development_indices.add(dev_idx)
+                used_indices.add(dev_idx)
                 insight_text += f"\nExample: {short_text}"
         
         insights.append(insight_text)
@@ -622,10 +630,10 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
         
         # Get representative example for this forecast
         if data_df is not None and not data_df.empty:
-            dev_info = get_best_development_for_forecast(data_df, max_prog_name, used_development_indices)
+            dev_info = get_best_development_for_forecast(data_df, max_prog_name, used_indices)
             if dev_info:
                 short_text, score, dev_idx = dev_info
-                used_development_indices.add(dev_idx)
+                used_indices.add(dev_idx)
                 insight_text += f"\nExample: {short_text}"
         
         insights.append(insight_text)
@@ -647,20 +655,20 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None):
             if total_disr > total_prog and "Disr" in forecast_points_df.columns:
                 max_disr_idx = forecast_points_df["Disr"].idxmax()
                 max_disr_name = forecast_points_df.loc[max_disr_idx, forecast_col]
-                dev_info = get_best_development_for_forecast(data_df, max_disr_name, used_development_indices)
+                dev_info = get_best_development_for_forecast(data_df, max_disr_name, used_indices)
             else:
                 max_prog_idx = forecast_points_df["Prog"].idxmax()
                 max_prog_name = forecast_points_df.loc[max_prog_idx, forecast_col]
-                dev_info = get_best_development_for_forecast(data_df, max_prog_name, used_development_indices)
+                dev_info = get_best_development_for_forecast(data_df, max_prog_name, used_indices)
             
             if dev_info:
                 short_text, score, dev_idx = dev_info
-                used_development_indices.add(dev_idx)
+                used_indices.add(dev_idx)
                 skew_insight += f"\nExample: {short_text}"
         
         insights.append(skew_insight)
     
-    return insights if insights else ["No significant patterns detected in the selected data."]
+    return (insights if insights else ["No significant patterns detected in the selected data."], used_indices)
 
 def image_to_base64(image_path):
     """Convert image file to base64 data URI."""
@@ -1042,8 +1050,8 @@ The Deteriorating and Improving Momentum graph plots cumulative forecast intensi
 **Data current as of:** {date_str}
 """)
     
-    # Key Insights Strip
-    insights_list = get_key_insights(forecast_points, FORECAST_COL, data_df=df_filtered)
+    # Key Insights Strip - initialize shared used_development_indices
+    insights_list, global_used_indices = get_key_insights(forecast_points, FORECAST_COL, data_df=df_filtered, used_indices=set())
     
     # Format insights with examples as plain text
     insights_html = ""
@@ -1330,9 +1338,8 @@ Net direction indicates whether developments within each domain are trending tow
         most_balanced_domain = dom_balance.loc[dom_balance["Balance"].idxmin(), DOMAIN_COL]
         most_balanced_value = dom_balance.loc[dom_balance["Balance"].idxmin(), "Net Direction"]
         
-        # Build insights using deterministic, clean approach
+        # Build insights using deterministic, clean approach with shared used indices
         domain_insights_list = []
-        used_development_indices = set()
         
         # Insight 1: Domain with highest deterioration
         insight1_text = f"{max_disruption_domain} developments show the highest cumulative deterioration (+{max_disruption_value:.1f})."
@@ -1342,11 +1349,19 @@ Net direction indicates whether developments within each domain are trending tow
             if not domain_data.empty:
                 domain_data["Abs Score"] = domain_data["Slider Score"].abs()
                 domain_data = domain_data.sort_values(by=["Abs Score", "Date"], ascending=[False, False])
-                domain_data = domain_data[~domain_data.index.isin(used_development_indices)]
+                domain_data = domain_data[~domain_data.index.isin(global_used_indices)]
                 if not domain_data.empty:
                     best_row = domain_data.iloc[0]
-                    short_text = best_row["Development Short"]
-                    used_development_indices.add(best_row.name)
+                    import re
+                    full_text = str(best_row["Development"]).strip() if pd.notna(best_row["Development"]) else ""
+                    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
+                    if first_sentence:
+                        if not first_sentence.endswith(('.', '!', '?')):
+                            first_sentence += "."
+                        short_text = first_sentence
+                    else:
+                        short_text = full_text[:100] + "." if len(full_text) > 100 else full_text
+                    global_used_indices.add(best_row.name)
                     insight1_text += f"\nExample: {short_text}"
         domain_insights_list.append(insight1_text)
         
@@ -1357,11 +1372,19 @@ Net direction indicates whether developments within each domain are trending tow
             if not domain_data.empty:
                 domain_data["Abs Score"] = domain_data["Slider Score"].abs()
                 domain_data = domain_data.sort_values(by=["Abs Score", "Date"], ascending=[False, False])
-                domain_data = domain_data[~domain_data.index.isin(used_development_indices)]
+                domain_data = domain_data[~domain_data.index.isin(global_used_indices)]
                 if not domain_data.empty:
                     best_row = domain_data.iloc[0]
-                    short_text = best_row["Development Short"]
-                    used_development_indices.add(best_row.name)
+                    import re
+                    full_text = str(best_row["Development"]).strip() if pd.notna(best_row["Development"]) else ""
+                    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
+                    if first_sentence:
+                        if not first_sentence.endswith(('.', '!', '?')):
+                            first_sentence += "."
+                        short_text = first_sentence
+                    else:
+                        short_text = full_text[:100] + "." if len(full_text) > 100 else full_text
+                    global_used_indices.add(best_row.name)
                     insight2_text += f"\nExample: {short_text}"
         domain_insights_list.append(insight2_text)
         
@@ -1372,11 +1395,19 @@ Net direction indicates whether developments within each domain are trending tow
             if not domain_data.empty:
                 domain_data["Abs Score"] = domain_data["Slider Score"].abs()
                 domain_data = domain_data.sort_values(by=["Abs Score", "Date"], ascending=[False, False])
-                domain_data = domain_data[~domain_data.index.isin(used_development_indices)]
+                domain_data = domain_data[~domain_data.index.isin(global_used_indices)]
                 if not domain_data.empty:
                     best_row = domain_data.iloc[0]
-                    short_text = best_row["Development Short"]
-                    used_development_indices.add(best_row.name)
+                    import re
+                    full_text = str(best_row["Development"]).strip() if pd.notna(best_row["Development"]) else ""
+                    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
+                    if first_sentence:
+                        if not first_sentence.endswith(('.', '!', '?')):
+                            first_sentence += "."
+                        short_text = first_sentence
+                    else:
+                        short_text = full_text[:100] + "." if len(full_text) > 100 else full_text
+                    global_used_indices.add(best_row.name)
                     insight3_text += f"\nExample: {short_text}"
         domain_insights_list.append(insight3_text)
         
@@ -1693,9 +1724,8 @@ These charts show how forecast developments are distributed over time. The top c
         # Calculate total developments
         total_developments = monthly_forecast_counts["Count"].sum()
         
-        # Build insights using deterministic, clean approach
+        # Build insights using deterministic, clean approach with shared used indices
         composition_insights_list = []
-        used_development_indices = set()
         
         # Insight 1: Most represented direction with proportion
         pct_count = (most_represented_count / total_developments * 100) if total_developments > 0 else 0
@@ -1706,11 +1736,19 @@ These charts show how forecast developments are distributed over time. The top c
             if not direction_data.empty:
                 direction_data["Abs Score"] = direction_data["Slider Score"].abs()
                 direction_data = direction_data.sort_values(by=["Abs Score", "Date"], ascending=[False, False])
-                direction_data = direction_data[~direction_data.index.isin(used_development_indices)]
+                direction_data = direction_data[~direction_data.index.isin(global_used_indices)]
                 if not direction_data.empty:
                     best_row = direction_data.iloc[0]
-                    short_text = best_row["Development Short"]
-                    used_development_indices.add(best_row.name)
+                    import re
+                    full_text = str(best_row["Development"]).strip() if pd.notna(best_row["Development"]) else ""
+                    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
+                    if first_sentence:
+                        if not first_sentence.endswith(('.', '!', '?')):
+                            first_sentence += "."
+                        short_text = first_sentence
+                    else:
+                        short_text = full_text[:100] + "." if len(full_text) > 100 else full_text
+                    global_used_indices.add(best_row.name)
                     insight1_text += f"\nExample: {short_text}"
         composition_insights_list.append(insight1_text)
         
@@ -1721,11 +1759,19 @@ These charts show how forecast developments are distributed over time. The top c
             if not forecast_data.empty:
                 forecast_data["Abs Score"] = forecast_data["Slider Score"].abs()
                 forecast_data = forecast_data.sort_values(by=["Abs Score", "Date"], ascending=[False, False])
-                forecast_data = forecast_data[~forecast_data.index.isin(used_development_indices)]
+                forecast_data = forecast_data[~forecast_data.index.isin(global_used_indices)]
                 if not forecast_data.empty:
                     best_row = forecast_data.iloc[0]
-                    short_text = best_row["Development Short"]
-                    used_development_indices.add(best_row.name)
+                    import re
+                    full_text = str(best_row["Development"]).strip() if pd.notna(best_row["Development"]) else ""
+                    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
+                    if first_sentence:
+                        if not first_sentence.endswith(('.', '!', '?')):
+                            first_sentence += "."
+                        short_text = first_sentence
+                    else:
+                        short_text = full_text[:100] + "." if len(full_text) > 100 else full_text
+                    global_used_indices.add(best_row.name)
                     insight2_text += f"\nExample: {short_text}"
         composition_insights_list.append(insight2_text)
         
