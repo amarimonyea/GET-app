@@ -242,10 +242,7 @@ df = df[df["Parsed_Groups"].apply(len) > 0].copy()
 df = df.explode("Parsed_Groups", ignore_index=True)
 
 # Extract the tuple into separate columns
-df[["Main_Population_Group", "Specific_Subgroup"]] = pd.DataFrame(
-    df["Parsed_Groups"].apply(list).tolist(), 
-    index=df.index
-)
+df[["Main_Population_Group", "Specific_Subgroup"]] = df["Parsed_Groups"].apply(pd.Series)
 
 # Drop the intermediate column
 df = df.drop(columns=["Parsed_Groups"])
