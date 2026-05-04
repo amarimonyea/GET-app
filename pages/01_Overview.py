@@ -550,16 +550,33 @@ def get_best_development_for_forecast(data_df, forecast_name, used_indices=None)
     # Extract only the first sentence from the full development text
     import re
     full_text = str(full_text).strip() if pd.notna(full_text) else ""
-    # Split on sentence-ending punctuation
-    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
+    
+    # Split on sentence-ending punctuation followed by space and capital letter (proper sentence boundary)
+    # Negative lookbehind (?<![A-Z]) prevents splitting on abbreviations like "U.S."
+    sentences = re.split(r'(?<![A-Z])[.!?]\s+(?=[A-Z])', full_text)
+    first_sentence = sentences[0].strip() if sentences else ""
+    
     if first_sentence:
         # Only add period if it doesn't already end with punctuation
         if not first_sentence.endswith(('.', '!', '?')):
             first_sentence += "."
+        # Normalize U.S. to US for cleaner display
+        first_sentence = first_sentence.replace("U.S.", "US")
     else:
         first_sentence = full_text[:100] + "." if len(full_text) > 100 else full_text
+        # Normalize U.S. to US for cleaner display
+        first_sentence = first_sentence.replace("U.S.", "US")
     
-    return (first_sentence, score, idx)
+    # Get source name if available
+    source = best_row.get("Source", "") or ""
+    source_link = best_row.get("Link", "") or ""
+    # If no direct source field, try to extract domain from link
+    if not source and source_link:
+        from urllib.parse import urlparse
+        domain = urlparse(source_link).netloc
+        source = domain.replace("www.", "")
+    
+    return (first_sentence, score, idx, source)
 
 def get_key_insights(forecast_points_df, forecast_col, data_df=None, used_indices=None):
     """
@@ -612,9 +629,10 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None, used_indice
         if data_df is not None and not data_df.empty:
             dev_info = get_best_development_for_forecast(data_df, max_disr_name, used_indices)
             if dev_info:
-                short_text, score, dev_idx = dev_info
+                short_text, score, dev_idx, source = dev_info
                 used_indices.add(dev_idx)
-                insight_text += f"\nExample: {short_text}"
+                source_str = f" ({source})" if source else ""
+                insight_text += f"\nExample: {short_text}{source_str}"
         
         insights.append(insight_text)
     
@@ -632,9 +650,10 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None, used_indice
         if data_df is not None and not data_df.empty:
             dev_info = get_best_development_for_forecast(data_df, max_prog_name, used_indices)
             if dev_info:
-                short_text, score, dev_idx = dev_info
+                short_text, score, dev_idx, source = dev_info
                 used_indices.add(dev_idx)
-                insight_text += f"\nExample: {short_text}"
+                source_str = f" ({source})" if source else ""
+                insight_text += f"\nExample: {short_text}{source_str}"
         
         insights.append(insight_text)
     
@@ -662,9 +681,10 @@ def get_key_insights(forecast_points_df, forecast_col, data_df=None, used_indice
                 dev_info = get_best_development_for_forecast(data_df, max_prog_name, used_indices)
             
             if dev_info:
-                short_text, score, dev_idx = dev_info
+                short_text, score, dev_idx, source = dev_info
                 used_indices.add(dev_idx)
-                skew_insight += f"\nExample: {short_text}"
+                source_str = f" ({source})" if source else ""
+                skew_insight += f"\nExample: {short_text}{source_str}"
         
         insights.append(skew_insight)
     
@@ -1354,15 +1374,24 @@ Net direction indicates whether developments within each domain are trending tow
                     best_row = domain_data.iloc[0]
                     import re
                     full_text = str(best_row["Development"]).strip() if pd.notna(best_row["Development"]) else ""
-                    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
+                    sentences = re.split(r'(?<![A-Z])[.!?]\s+(?=[A-Z][a-z])', full_text)
+                    first_sentence = sentences[0].strip() if sentences else ""
                     if first_sentence:
                         if not first_sentence.endswith(('.', '!', '?')):
                             first_sentence += "."
                         short_text = first_sentence
                     else:
                         short_text = full_text[:100] + "." if len(full_text) > 100 else full_text
+                    source = best_row.get("Source", "") or ""
+                    if not source:
+                        from urllib.parse import urlparse
+                        link = best_row.get("Link", "") or ""
+                        if link:
+                            domain = urlparse(link).netloc
+                            source = domain.replace("www.", "")
+                    source_str = f" ({source})" if source else ""
                     global_used_indices.add(best_row.name)
-                    insight1_text += f"\nExample: {short_text}"
+                    insight1_text += f"\nExample: {short_text}{source_str}"
         domain_insights_list.append(insight1_text)
         
         # Insight 2: Domain with highest improvement
@@ -1377,15 +1406,26 @@ Net direction indicates whether developments within each domain are trending tow
                     best_row = domain_data.iloc[0]
                     import re
                     full_text = str(best_row["Development"]).strip() if pd.notna(best_row["Development"]) else ""
-                    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
+                    sentences = re.split(r'(?<![A-Z])[.!?]\s+(?=[A-Z][a-z])', full_text)
+                    first_sentence = sentences[0].strip() if sentences else ""
                     if first_sentence:
                         if not first_sentence.endswith(('.', '!', '?')):
                             first_sentence += "."
+                        first_sentence = first_sentence.replace("U.S.", "US")
                         short_text = first_sentence
                     else:
                         short_text = full_text[:100] + "." if len(full_text) > 100 else full_text
+                        short_text = short_text.replace("U.S.", "US")
+                    source = best_row.get("Source", "") or ""
+                    if not source:
+                        from urllib.parse import urlparse
+                        link = best_row.get("Link", "") or ""
+                        if link:
+                            domain = urlparse(link).netloc
+                            source = domain.replace("www.", "")
+                    source_str = f" ({source})" if source else ""
                     global_used_indices.add(best_row.name)
-                    insight2_text += f"\nExample: {short_text}"
+                    insight2_text += f"\nExample: {short_text}{source_str}"
         domain_insights_list.append(insight2_text)
         
         # Insight 3: Most balanced domain
@@ -1400,15 +1440,26 @@ Net direction indicates whether developments within each domain are trending tow
                     best_row = domain_data.iloc[0]
                     import re
                     full_text = str(best_row["Development"]).strip() if pd.notna(best_row["Development"]) else ""
-                    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
+                    sentences = re.split(r'(?<![A-Z])[.!?]\s+(?=[A-Z][a-z])', full_text)
+                    first_sentence = sentences[0].strip() if sentences else ""
                     if first_sentence:
                         if not first_sentence.endswith(('.', '!', '?')):
                             first_sentence += "."
+                        first_sentence = first_sentence.replace("U.S.", "US")
                         short_text = first_sentence
                     else:
                         short_text = full_text[:100] + "." if len(full_text) > 100 else full_text
+                        short_text = short_text.replace("U.S.", "US")
+                    source = best_row.get("Source", "") or ""
+                    if not source:
+                        from urllib.parse import urlparse
+                        link = best_row.get("Link", "") or ""
+                        if link:
+                            domain = urlparse(link).netloc
+                            source = domain.replace("www.", "")
+                    source_str = f" ({source})" if source else ""
                     global_used_indices.add(best_row.name)
-                    insight3_text += f"\nExample: {short_text}"
+                    insight3_text += f"\nExample: {short_text}{source_str}"
         domain_insights_list.append(insight3_text)
         
         domain_insights_html = ""
@@ -1741,15 +1792,26 @@ These charts show how forecast developments are distributed over time. The top c
                     best_row = direction_data.iloc[0]
                     import re
                     full_text = str(best_row["Development"]).strip() if pd.notna(best_row["Development"]) else ""
-                    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
+                    sentences = re.split(r'(?<![A-Z])[.!?]\s+(?=[A-Z])', full_text)
+                    first_sentence = sentences[0].strip() if sentences else ""
                     if first_sentence:
                         if not first_sentence.endswith(('.', '!', '?')):
                             first_sentence += "."
+                        first_sentence = first_sentence.replace("U.S.", "US")
                         short_text = first_sentence
                     else:
                         short_text = full_text[:100] + "." if len(full_text) > 100 else full_text
+                        short_text = short_text.replace("U.S.", "US")
+                    source = best_row.get("Source", "") or ""
+                    if not source:
+                        from urllib.parse import urlparse
+                        link = best_row.get("Link", "") or ""
+                        if link:
+                            domain = urlparse(link).netloc
+                            source = domain.replace("www.", "")
+                    source_str = f" ({source})" if source else ""
                     global_used_indices.add(best_row.name)
-                    insight1_text += f"\nExample: {short_text}"
+                    insight1_text += f"\nExample: {short_text}{source_str}"
         composition_insights_list.append(insight1_text)
         
         # Insight 2: Most represented forecast type
@@ -1764,15 +1826,26 @@ These charts show how forecast developments are distributed over time. The top c
                     best_row = forecast_data.iloc[0]
                     import re
                     full_text = str(best_row["Development"]).strip() if pd.notna(best_row["Development"]) else ""
-                    first_sentence = re.split(r'[.!?]\s+', full_text)[0].strip()
+                    sentences = re.split(r'(?<![A-Z])[.!?]\s+(?=[A-Z])', full_text)
+                    first_sentence = sentences[0].strip() if sentences else ""
                     if first_sentence:
                         if not first_sentence.endswith(('.', '!', '?')):
                             first_sentence += "."
+                        first_sentence = first_sentence.replace("U.S.", "US")
                         short_text = first_sentence
                     else:
                         short_text = full_text[:100] + "." if len(full_text) > 100 else full_text
+                        short_text = short_text.replace("U.S.", "US")
+                    source = best_row.get("Source", "") or ""
+                    if not source:
+                        from urllib.parse import urlparse
+                        link = best_row.get("Link", "") or ""
+                        if link:
+                            domain = urlparse(link).netloc
+                            source = domain.replace("www.", "")
+                    source_str = f" ({source})" if source else ""
                     global_used_indices.add(best_row.name)
-                    insight2_text += f"\nExample: {short_text}"
+                    insight2_text += f"\nExample: {short_text}{source_str}"
         composition_insights_list.append(insight2_text)
         
         # Insight 3: Overall composition pattern
