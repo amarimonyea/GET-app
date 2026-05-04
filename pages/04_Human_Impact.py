@@ -552,7 +552,7 @@ if not impact_metrics_initial.empty and main_group == "All Population Groups":
     group_name = most_impacted["Group"]
     insights.append(f"<strong>{group_name}</strong> experiences the highest total intensity of impact ({most_impacted['Absolute Intensity']:.1f})")
     # Get top development examples for this insight
-    top_devs = get_top_developments_for_main_group(df_initial, group_name, top_n=3)
+    top_devs = get_top_developments_for_main_group(df_initial, group_name, top_n=1)
     insights_devs["impact"] = {"group": group_name, "devs": top_devs}
     
     # Insight 2: Most Disrupted
@@ -564,7 +564,7 @@ if not impact_metrics_initial.empty and main_group == "All Population Groups":
         group_name = most_disrupted["Group"]
         insights.append(f"<strong>{group_name}</strong> is most affected by deterioration (weighted deterioration score: {most_disrupted['Weighted Deterioration']:.1f})")
         # Get top deterioration examples for this group
-        top_devs = get_top_developments_for_main_group(df_initial, group_name, top_n=3, score_filter="deterioration")
+        top_devs = get_top_developments_for_main_group(df_initial, group_name, top_n=1, score_filter="deterioration")
         insights_devs["disruption"] = {"group": group_name, "devs": top_devs}
     
     # Insight 3: Most Progressed
@@ -583,7 +583,7 @@ if not impact_metrics_initial.empty and main_group == "All Population Groups":
         group_name = most_progressed["Group"]
         insights.append(f"<strong>{group_name}</strong> shows the most improvement (weighted improvement score: {most_progressed['Weighted Improvement']:.1f})")
         # Get top improvement examples for this group
-        top_devs = get_top_developments_for_main_group(df_initial, group_name, top_n=3, score_filter="improvement")
+        top_devs = get_top_developments_for_main_group(df_initial, group_name, top_n=1, score_filter="improvement")
         insights_devs["progression"] = {"group": group_name, "devs": top_devs}
 
 # Determine number of unique groups
