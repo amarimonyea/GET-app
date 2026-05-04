@@ -946,7 +946,7 @@ if trend_data_list:
                     alt.Tooltip("Event_Count:Q", title="Count")
                 ]
             )
-            .properties(height=350, width=1200)
+            .properties(height=400, width=1200)
         )
         
         st.altair_chart(trend_chart, use_container_width=False)
