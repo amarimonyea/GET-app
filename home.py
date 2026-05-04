@@ -7,70 +7,61 @@ import pandas as pd
 st.set_page_config(page_title="U.S. Gender Equality Tracker", layout="wide")
 
 # ---------------------------
-# POPULATION GROUP HIERARCHY (for grouping)
+# POPULATION GROUP HIERARCHY (CANONICAL - Same as Human_Impact.py)
 # ---------------------------
 POPULATION_STRUCTURE = {
     "Women and Girls": {
-        "All Women": ["women and girls", "women"],
+        "Women and Girls": ["women", "women and girls"],
         "Pregnant Women": ["pregnant women"],
-        "Texas Women": ["texas women", "women in TX"],
-        "Women Servicemembers or Veterans": ["women servicemembers", "women veterans", "female servicemembers", "female veterans"],
+        "Women Servicemembers": ["women servicemembers", "female servicemembers", "women veterans", "female veterans"],
+        "Women in Workforce": ["women in workforce"],
     },
-    "Transgender & Gender-Diverse Individuals": {
-        "Transgender Individuals and Nonbinary People": ["transgender individuals", "transgender and gender-diverse individuals", "nonbinary people"],
-        "Trans and Gender-Diverse Community": ["trans and gender-diverse community", "trans and gender diverse community"],
-        "UK Trans and Gender Diverse Community": ["UK trans", "trans and gender diverse community"],
-        "People with Gender Dysphoria": ["gender dysphoria"],
-    },
-    "Transgender & Gender-Diverse Youth": {
-        "Transgender and Gender-Diverse Youth": ["transgender and gender-diverse youth", "trans and non-binary youth"],
-        "Trans Youth": ["trans youth", "transgender youth"],
-        "Trans Youth in Public Schools": ["trans youth in public schools", "transgender youth in public schools"],
-        "Transgender Youth in Arkansas": ["transgender youth in arkansas"],
-        "LGBTQ+ Youth": ["LGBTQ+ youth"],
-    },
-    "LGBTQ+ Individuals": {
-        "LGBTQ+ Individuals": ["LGBTQ+ individuals"],
-        "Women and LGBTQ+ Beneficiaries": ["women and LGBTQ+ beneficiaries"],
-        "LGBTQ+ Individuals and Advocates": ["LGBTQ+ individuals", "human rights advocates", "activists"],
+    "LGBTQ+ and Gender-Diverse Populations": {
+        "LGBTQ+ Individuals": ["LGBTQ+ individuals", "LGBTQ+ youth"],
+        "Transgender and Gender-Diverse Individuals": ["transgender and gender-diverse individuals", "trans and gender-diverse community", "transgender individuals", "nonbinary people"],
+        "Gender Dysphoria": ["gender dysphoria"],
+        "Transgender and Gender-Diverse Youth": ["trans youth", "transgender youth", "transgender and gender-diverse youth", "trans and non-binary youth", "non-binary youth", "trans youth and their families"],
+        "Trans and Non-Binary Athletes": ["trans athletes", "transgender athletes", "trans and non binary athletes", "trans and non-binary athletes", "collegiate and professional trans athletes"],
     },
     "Patients & Beneficiaries": {
-        "Reproductive Healthcare Patients": ["reproductive healthcare patients", "abortion patients", "planned parenthood"],
-        "Beneficiaries of Federal Programs": ["beneficiaries of federal programs", "SNAP recipients", "WIC recipients", "medicaid recipients"],
-        "International Aid Recipients": ["international aid recipients", "international gender rights organizations"],
-        "US-Funded Civil Society Organizations": ["US-funded civil society organizations"],
+        "Reproductive Health": ["reproductive healthcare patients", "reproductive healthcare patients and providers", "abortion patients", "planned parenthood"],
+        "Federal Benefits": ["SNAP recipients", "WIC recipients", "medicaid recipients", "beneficiaries of federal programs"],
+        "International Aid": ["international aid recipients", "international gender rights organizations"],
     },
     "Practitioners & Researchers": {
-        "Healthcare Practitioners": ["healthcare practitioners", "healthcare providers", "pediatric healthcare providers", "healthcare agencies"],
-        "Legal Practitioners": ["legal practitioners"],
-        "Education Practitioners": ["education practitioners", "educators", "educator workforce", "public school districts"],
-        "California and Oklahoma Educators": ["california public school districts", "oklahoma public education system"],
-        "Academic and Public Health Researchers": ["academic researchers", "public health researchers", "researchers"],
+        "Healthcare": ["healthcare providers", "healthcare practitioners", "pediatric healthcare providers", "healthcare agencies"],
+        "Legal": ["legal practitioners"],
+        "Education": ["educators", "public school districts", "education practitioners"],
+        "Research": ["academic researchers", "public health researchers"],
     },
     "Workforce & Institutional Personnel": {
-        "Federal Workforce": ["federal workforce", "trans and non-binary federal workforce", "trans federal workforce"],
-        "Trans and Gender-Diverse Workforce": ["trans and gender-diverse workforce"],
-        "Trans Military Personnel": ["trans military personnel", "trans service members", "experienced U.S. Navy personnel"],
-        "Women Servicemembers or Veterans": ["women servicemembers", "women veterans"],
-        "Elected Officials and State Governments": ["elected officials", "state governments"],
+        "Federal Workforce": ["federal workforce", "trans federal workforce"],
+        "Military & Service": ["trans military personnel", "trans service members", "experienced U.S. Navy personnel"],
+        "Government": ["elected officials", "state governments"],
     },
     "Justice & Detention Populations": {
-        "Trans and Non-Binary Inmates": ["trans and non-binary inmates", "incarcerated trans community"],
-        "Kentucky Incarcerated Trans Community": ["kentucky incarcerated trans community"],
-        "Survivors of Violence": ["survivors of sexual violence", "victims of GBV"],
+        "Incarcerated Populations": ["trans inmates", "incarcerated trans community"],
+        "Gender-Based Violence": ["survivors of sexual violence", "victims of GBV", "gender-based violence survivors"],
     },
-    "General / Community Populations": {
-        "Local Residents": ["local residents", "chicago residents", "FL residents", "florida residents", "indiana residents"],
-        "State Residents": ["DMV residents", "IL residents", "TN residents", "CA residents"],
-        "International Populations": ["foreign nationals", "international travelers"],
+    "Community & Place-Based Populations": {
+        "Local Residents": ["local residents", "residents", "students"],
+        "Geographic": ["chicago residents", "FL residents", "indiana residents"],
     },
-    "Marginalized & Intersectional Groups": {
-        "Marginalized Ethnicity Groups": ["marginalized ethnicity groups"],
-        "Low Income Minority Communities": ["low income minority communities"],
-        "Women and Marginalized Groups": ["women and girls", "marginalized ethnicity groups"],
-        "Intersectional Trans Populations": ["transgender and gender-diverse individuals", "marginalized ethnicity groups"],
+    "Marginalized Communities": {
+        "Marginalized Communities": ["marginalized ethnicity groups", "low-income minority communities"],
+    },
+    "Advocacy & Civil Society / Cultural": {
+        "Advocacy & Civil Society": ["foreign nationals", "international travelers", "arts institutions", "human rights advocates", "activists"],
     },
 }
+
+# Build canonical alias-to-group mapping
+ALIAS_TO_GROUP = {}
+for main_group, subgroups in POPULATION_STRUCTURE.items():
+    for subgroup, aliases in subgroups.items():
+        for alias in aliases:
+            alias_lower = alias.lower().strip()
+            ALIAS_TO_GROUP[alias_lower] = main_group
 
 # ---------------------------
 # 1) THEME / CSS (inject once)
@@ -439,62 +430,26 @@ date_range_str = f"{date_min.strftime('%B %d, %Y')} to {date_max.strftime('%B %d
 st.caption(f"Based on developments tracked from {date_range_str}")
 
 # Function to map specific group values to broader labels
-def map_to_broader_group(specific_group):
-    """Map a specific subgroup to its broader parent category.
+def map_to_broader_group(impacted_text):
+    """Map specific population groups to their broader parent category.
     
     Handles:
     - Case insensitivity
     - Multiple groups in one entry (comma-separated) - returns ALL applicable groups
-    - Substring matching to find best fit
     
     Returns: List of broader groups that apply
     """
-    if pd.isna(specific_group):
+    if not isinstance(impacted_text, str) or pd.isna(impacted_text):
         return []
     
-    specific_group_str = str(specific_group).strip()
-    mapped_groups = set()  # Use set to avoid duplicates
+    results = []
+    items = [item.strip().lower() for item in impacted_text.split(',')]
     
-    # If multiple groups present (comma-separated), map EACH one separately
-    groups_to_check = [g.strip() for g in specific_group_str.split(",")]
+    for item in items:
+        if item in ALIAS_TO_GROUP:
+            results.append(ALIAS_TO_GROUP[item])
     
-    for group_term in groups_to_check:
-        group_lower = group_term.lower()
-        found = False
-        
-        # First, try exact match for all terms
-        for main_group, subgroups_dict in POPULATION_STRUCTURE.items():
-            for subgroup_name, terms_list in subgroups_dict.items():
-                for term in terms_list:
-                    if term.lower() == group_lower:
-                        mapped_groups.add(main_group)
-                        found = True
-                        break
-                if found:
-                    break
-            if found:
-                break
-        
-        # If no exact match, try substring matching (more flexible)
-        if not found:
-            for main_group, subgroups_dict in POPULATION_STRUCTURE.items():
-                for subgroup_name, terms_list in subgroups_dict.items():
-                    for term in terms_list:
-                        # Check if term appears in the group value (substring match)
-                        if term.lower() in group_lower or group_lower in term.lower():
-                            mapped_groups.add(main_group)
-                            found = True
-                            break
-                    if found:
-                        break
-                if found:
-                    break
-        
-        # If still no match, add the original term
-        if not found:
-            mapped_groups.add(group_term)
-    
-    return list(mapped_groups)
+    return results
 
 # Get top 3 sectors and groups (grouped by broader labels)
 top_sectors = df["Sector Impacted"].value_counts().head(3)
