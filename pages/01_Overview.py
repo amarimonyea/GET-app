@@ -777,7 +777,7 @@ st.sidebar.markdown("""
 """, unsafe_allow_html=True)
 
 selected_domain = st.sidebar.multiselect("Domain of Assessment", domain_options, key="domain_filter")
-selected_sector = st.sidebar.multiselect("Sector Impacted", sector_options, key="sector_filter")
+selected_sector = st.sidebar.multiselect("Institution Impacted", sector_options, key="sector_filter")
 
 df_filtered = df.copy()
 if selected_forecast:
