@@ -497,9 +497,7 @@ with targeted_col2:
         st.markdown("""
         **Population groups** are organized hierarchically into main categories and sub-groups to capture the complexity of gender-related policy impacts.
         
-        Examples:
-        - Main group: "Women and Girls" → Sub-groups: "Pregnant Women", "Women Servicemembers", "Women in Workforce"
-        - Main group: "LGBTQ+ and Gender-Diverse Populations" → Sub-groups: "Transgender and Gender-Diverse Individuals", "Trans and Non-Binary Athletes"
+        Example: "Women and Girls" (main group) contains sub-groups like "Pregnant Women", "Women Servicemembers", and "Women in Workforce".
         
         **Important:** A single development can impact multiple population groups across different categories. Counts shown here represent the number of developments tagged with each group, so totals may exceed the overall development count due to cross-cutting impacts.
         """)
