@@ -816,7 +816,7 @@ if sub_group:
         st.markdown(f"""
 **{main_group} → {sub_group}**  
 {total_devs} developments {date_range_str}  
-{disruption_count} Disruption | {neutral_count} Neutral | {progression_count} Progression
+{disruption_count} Deteriorating | {neutral_count} Neutral | {progression_count} Improving
         """)
         
         # Display recent developments (top 5)
