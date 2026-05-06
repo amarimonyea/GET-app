@@ -491,6 +491,18 @@ with targeted_col2:
     """, unsafe_allow_html=True)
     for i, (group, count) in enumerate(top_groups.items(), 1):
         st.markdown(f"<p style='margin: 12px 0; font-size: 16px;'>{group}<br><span style='font-size: 14px; color: #666; font-weight: 500;'>{count} incident{'s' if count > 1 else ''}</span></p>", unsafe_allow_html=True)
+    
+    # About Population Groups Info
+    with st.expander("About Population Groups", expanded=False):
+        st.markdown("""
+        **Population groups** are organized hierarchically into main categories and sub-groups to capture the complexity of gender-related policy impacts.
+        
+        Examples:
+        - Main group: "Women and Girls" → Sub-groups: "Pregnant Women", "Women Servicemembers", "Women in Workforce"
+        - Main group: "LGBTQ+ and Gender-Diverse Populations" → Sub-groups: "Transgender and Gender-Diverse Individuals", "Trans and Non-Binary Athletes"
+        
+        **Important:** A single development can impact multiple population groups across different categories. Counts shown here represent the number of developments tagged with each group, so totals may exceed the overall development count due to cross-cutting impacts.
+        """)
 
 # Display total entries
 with targeted_col3:
